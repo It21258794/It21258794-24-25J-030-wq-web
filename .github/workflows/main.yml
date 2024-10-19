@@ -22,16 +22,16 @@ jobs:
         node-version: '17'
 
     - name: Install dependencies
-      run: |
-        npm install
+      working-directory: ./wq-web
+      run: npm install
 
     - name: Build the application
-      run: |
-        npm run build
+      working-directory: ./wq-web
+      run: npm run build
 
     - name: Build Docker image
       run: |
-        docker build -t 24-25j-030-wq-web .
+        docker build -t 24-25j-030-wq-web ./wq-web  # Point to the correct directory
 
     - name: Log in to Docker Hub
       uses: docker/login-action@v2
