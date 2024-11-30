@@ -8,6 +8,7 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+/dist
 dist
 dist-ssr
 *.local
@@ -22,3 +23,14 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Babel-related files
+.babelrc
+.babelrc.js
+.babelrc.json
+.babelrc.cjs
+.babelrc.mjs
+babel.config.js
+babel.config.json
+babel.config.cjs
+babel.config.mjs
