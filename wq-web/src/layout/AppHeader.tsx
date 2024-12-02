@@ -1,6 +1,10 @@
 import { AppBar, Toolbar, Box, Typography } from "@mui/material";
 
-const AppHeader = (): JSX.Element => {
+interface IProps {
+  currentTab: string;
+}
+
+const AppHeader = ({ currentTab }: IProps): JSX.Element => {
   return (
     <AppBar
       position="static"
@@ -12,7 +16,7 @@ const AppHeader = (): JSX.Element => {
             variant="body2"
             sx={{ marginTop: 1, fontSize: 20, fontWeight: 750 }}
           >
-            Real Time Dashboard
+            {currentTab}
           </Typography>
           <Typography
             variant="body2"
