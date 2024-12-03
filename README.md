@@ -92,7 +92,8 @@ For more details, refer to the [Conventional Commits Specification](https://www.
 
 ## Pull Requests
 
-> [!TIP] >https://github.com/It21258794/It21258794-24-25J-030-wq-web/pull/2
+> [!TIP]
+> https://github.com/It21258794/It21258794-24-25J-030-wq-web/pull/2
 >
 > chore(system): initial setup of the FE with the layout and folder structure - 1 December 2024 at 05:09:23 GMT+5:30
 >
@@ -100,3 +101,11 @@ For more details, refer to the [Conventional Commits Specification](https://www.
 > - Commits are now double checked to ensure conventional commits
 > - Created seperate Modules for each function
 > - Created the common layout
+
+> [!TIP]
+>https://github.com/It21258794/It21258794-24-25J-030-wq-web/pull/3
+> 
+> Feature/impliment dashboards fe
+> 
+>- Implimented dashboard that showcases data in seperated diagrams.
+>- Implimented sensor dashboard in order to shoawcsae sensors with the relevent details
