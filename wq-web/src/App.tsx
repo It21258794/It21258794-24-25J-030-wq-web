@@ -4,7 +4,6 @@ import AppHeader from "./layout/AppHeader";
 import AppSider from "./layout/AppSider";
 import AppContent from "./layout/AppContent";
 import "./App.css";
-import "./app.css";
 import { useState } from "react";
 import { MenuItems } from "./components/System/MenuItems";
 
