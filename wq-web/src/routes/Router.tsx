@@ -7,6 +7,10 @@ import Dashboard from "../pages/Dashboard/Dashboard";
 import Sensors from "../pages/Sensors/Sensors";
 import Settings from "../pages/Settings/Settings";
 import Reports from "../pages/Reports/Reports";
+import AddTest from "../pages/Flow Customization/addTest";
+import AddStep from "../pages/Flow Customization/addStep";
+import AddChemical from "../pages/Flow Customization/addChemical";
+import StepView from "../pages/Flow Customization/stepView";
 
 const router = createBrowserRouter([
   {
@@ -32,6 +36,22 @@ const router = createBrowserRouter([
       {
         path: "/flowCustomization",
         element: <Flow_Customization />,
+      },
+      {
+        path:"/flow/add-test",
+        element:<AddTest />,
+      },
+      {
+        path:"/flow/add-step",
+        element:<AddStep />,
+      },
+      {
+        path:"/flow/add-chemicals",
+        element:<AddChemical />,
+      }, 
+      {
+        path:"/flow/step/:stepId",
+        element:<StepView />,
       },
       {
         path: "/reports",
