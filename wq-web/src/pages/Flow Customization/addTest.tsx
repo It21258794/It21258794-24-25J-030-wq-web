@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, TextField, Button, Typography, Paper, Snackbar, Alert } from "@mui/material";
+import "@fontsource/poppins"; // Import Poppins font
 
-const AddTest: React.FC = () => {
+const AddTest: React.FC = (): JSX.Element => {
   const [testName, setTestName] = useState<string>("");
   const [testValue, setTestValue] = useState<string>("");
   const [testDescription, setTestDescription] = useState<string>("");
@@ -11,9 +12,10 @@ const AddTest: React.FC = () => {
   const [alertSeverity, setAlertSeverity] = useState<"error" | "warning" | "info" | "success">();
   const navigate = useNavigate();
 
-  // Handle form submission
-  const handleConfirmClick = () => {
-    // Validate input fields
+  const API_URL = "http://localhost:8085/api/tests/create";
+  const token = localStorage.getItem("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3MzczMTA2NTZ9.ZyYBPfqydeYIJinJUQhvedYZfCGT7rwC2s1jTMG-35E");
+
+  const handleConfirmClick = async () => {
     if (!testName || !testValue || !testDescription) {
       setAlertSeverity("error");
       setAlertMessage("Please fill in all fields.");
@@ -21,27 +23,44 @@ const AddTest: React.FC = () => {
       return;
     }
 
-    // Add logic to save the test (e.g., send to backend or update state)
-    console.log("Test added:", { testName, testValue, testDescription });
+    const payload = {
+      testName: testName,
+      testValue: testValue,
+      testDescription: testDescription,
+    };
 
-    // Show success message
-    setAlertSeverity("success");
-    setAlertMessage("Test added successfully.");
-    setOpenSnackbar(true);
+    try {
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3MzczMTA2NTZ9.ZyYBPfqydeYIJinJUQhvedYZfCGT7rwC2s1jTMG-35E`, // Use the token stored in localStorage
+        },
+        body: JSON.stringify(payload),
+      });
 
-    // Navigate back to the previous page after confirming
-    setTimeout(() => {
-      navigate(-1); // Goes back to the previous page
-    }, 1500);
+      if (response.ok) {
+        setAlertSeverity("success");
+        setAlertMessage("Test added successfully.");
+        setOpenSnackbar(true);
+        setTimeout(() => navigate(-1), 1500);
+      } else {
+        const errorData = await response.json();
+        setAlertSeverity("error");
+        setAlertMessage(errorData.message || "Failed to add the test.");
+        setOpenSnackbar(true);
+      }
+    } catch (error) {
+      setAlertSeverity("error");
+      setAlertMessage("An unexpected error occurred. Please try again.");
+      setOpenSnackbar(true);
+    }
   };
 
-  // Handle cancel action
   const handleCancelClick = () => {
-    // Navigate back to the previous page without saving
     navigate(-1);
   };
 
-  // Close the snackbar
   const handleSnackbarClose = () => {
     setOpenSnackbar(false);
   };
@@ -57,7 +76,8 @@ const AddTest: React.FC = () => {
         width: "full",
         maxWidth: "full",
         boxSizing: "border-box",
-        marginRight:"150px",
+        marginRight: "150px",
+        fontFamily: "Poppins, sans-serif", // Set font for Box
       }}
     >
       <Paper
@@ -67,34 +87,37 @@ const AddTest: React.FC = () => {
           display: "flex",
           flexDirection: "column",
           gap: 3,
-          boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)", // Added shadow for Paper
-          borderRadius: 2, // Rounded corners
+          boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
+          borderRadius: 2,
+          fontFamily: "Poppins, sans-serif", // Set font for Paper
         }}
       >
-        {/* Title centered */}
-        <Typography variant="h5" gutterBottom sx={{ textAlign: "center" }}>
+        <Typography
+          variant="h5"
+          gutterBottom
+          sx={{ textAlign: "center", fontFamily: "Poppins, sans-serif" }}
+        >
           Add New Test
         </Typography>
 
-        {/* Test Name Input */}
         <TextField
           label="Test Name"
           variant="outlined"
           fullWidth
           value={testName}
           onChange={(e) => setTestName(e.target.value)}
+          sx={{ fontFamily: "Poppins, sans-serif" }}
         />
 
-        {/* Test Value Input */}
         <TextField
           label="Value"
           variant="outlined"
           fullWidth
           value={testValue}
           onChange={(e) => setTestValue(e.target.value)}
+          sx={{ fontFamily: "Poppins, sans-serif" }}
         />
 
-        {/* Test Description Input */}
         <TextField
           label="Description"
           variant="outlined"
@@ -103,18 +126,17 @@ const AddTest: React.FC = () => {
           rows={4}
           value={testDescription}
           onChange={(e) => setTestDescription(e.target.value)}
+          sx={{ fontFamily: "Poppins, sans-serif" }}
         />
 
-        {/* Buttons */}
         <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
           <Button
             variant="contained"
             sx={{
               backgroundColor: "#102D4D",
               color: "white",
-              "&:hover": {
-                backgroundColor: "#154273", // Darker blue on hover
-              },
+              fontFamily: "Poppins, sans-serif",
+              "&:hover": { backgroundColor: "#154273" },
             }}
             onClick={handleConfirmClick}
           >
@@ -126,10 +148,8 @@ const AddTest: React.FC = () => {
               backgroundColor: "#F1F2F7",
               color: "#8F8F8F",
               borderColor: "#8F8F8F",
-              "&:hover": {
-                backgroundColor: "#E0E0E0", // Light gray on hover
-                borderColor: "#6F6F6F", // Darker border on hover
-              },
+              fontFamily: "Poppins, sans-serif",
+              "&:hover": { backgroundColor: "#E0E0E0", borderColor: "#6F6F6F" },
             }}
             onClick={handleCancelClick}
           >
@@ -138,14 +158,17 @@ const AddTest: React.FC = () => {
         </Box>
       </Paper>
 
-      {/* Snackbar for success/error messages */}
       <Snackbar
         open={openSnackbar}
-        autoHideDuration={3000} // Close after 3 seconds
+        autoHideDuration={3000}
         onClose={handleSnackbarClose}
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
-        <Alert onClose={handleSnackbarClose} severity={alertSeverity} sx={{ width: "100%" }}>
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={alertSeverity}
+          sx={{ width: "100%", fontFamily: "Poppins, sans-serif" }}
+        >
           {alertMessage}
         </Alert>
       </Snackbar>
