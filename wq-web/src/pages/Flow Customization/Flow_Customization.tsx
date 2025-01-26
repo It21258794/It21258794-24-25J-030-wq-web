@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { useDrag, useDrop, DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { FaTrash, FaPlus, FaEdit } from "react-icons/fa";
+import { FaTrash, FaPlus } from "react-icons/fa";
 import { Box, Grid, Typography, Paper, IconButton } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { FaEdit } from 'react-icons/fa';
 
 enum ItemType {
   CHEMICAL = "chemical",
@@ -142,17 +144,74 @@ const DraggableItem: React.FC<DraggableItemProps> = ({ name, type }) => {
 const FlowCustomizationDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false); // State for edit mode
-  const [steps, setSteps] = useState<StepItem[]>([
-    { id: 1, title: "Aeration", items: [] },
-    { id: 2, title: "Coagulation", items: [] },
-    { id: 3, title: "Flocculation", items: [] },
-    { id: 4, title: "Sedimentation", items: [] },
-    { id: 5, title: "Filtration", items: [] },
-    { id: 6, title: "Disinfection", items: [] },
-  ]);
+  const [steps, setSteps] = useState<StepItem[]>([]);
+  const  [latestchemicals, setChemicals] = useState<string[]>([]);
+  const [latestTests, setTests] = useState<string[]>([]);
 
-  const chemicals = ["Chlorine", "Lime", "PAC/Alum"];
-  const latestTests = ["Turbidity", "PH", "Conductivity"];
+  // Fetch tests from API
+  useEffect(() => {
+    const fetchTests = async () => {
+      try {
+        const token = localStorage.getItem("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzc3ODMyMjl9.0L6k9FyOvjoTudkKo9n9cs7z5f2bYXut7io9AqRxIAQ"); // Retrieve the token (adjust based on how it's stored)
+        const response = await axios.get("http://localhost:8085/api/tests/get/all-tests", {
+          headers: {
+            Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzc3ODMyMjl9.0L6k9FyOvjoTudkKo9n9cs7z5f2bYXut7io9AqRxIAQ`, // Pass the token in the Authorization header
+          },
+        });
+        const testData = response.data.map((test: any) => test.testName);
+      setTests(testData); 
+      } catch (error) {
+        console.error("Error fetching tests:", error);
+      }
+    };
+  
+    fetchTests();
+  }, []);
+
+  useEffect(() => {
+    const fetchChemicals = async () => {
+      try {
+        const token = localStorage.getItem("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzc3ODMyMjl9.0L6k9FyOvjoTudkKo9n9cs7z5f2bYXut7io9AqRxIAQ"); // Retrieve the token (adjust based on how it's stored)
+        const response = await axios.get("http://localhost:8085/api/chemicals/get/all-chemicals", {
+          headers: {
+            Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzc3ODMyMjl9.0L6k9FyOvjoTudkKo9n9cs7z5f2bYXut7io9AqRxIAQ`, // Pass the token in the Authorization header
+          },
+        });
+        const chemicalData = response.data.map((chemical: any) => chemical.chemicalName);
+      setChemicals(chemicalData); 
+      } catch (error) {
+        console.error("Error fetching Chemicals:", error);
+      }
+    };
+  
+    fetchChemicals();
+  }, []);
+  useEffect(() => {
+    const fetchSteps = async () => {
+      try {
+        const token = localStorage.getItem("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzc3ODMyMjl9.0L6k9FyOvjoTudkKo9n9cs7z5f2bYXut7io9AqRxIAQ"); // Retrieve the token (adjust as necessary)
+        const response = await axios.get("http://localhost:8085/api/steps/get/all-steps", {
+          headers: {
+            Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzc3ODMyMjl9.0L6k9FyOvjoTudkKo9n9cs7z5f2bYXut7io9AqRxIAQ`,
+          },
+        });
+        
+        // Assuming the response contains a list of steps
+        const stepData = response.data.map((step: any) => ({
+          id: step.id,
+          title: step.stepName,  // Use stepName as the title
+          items: [], // Initialize with an empty array for items
+        }))
+        .sort((a: { stepOrder: number; }, b: { stepOrder: number; }) => a.stepOrder - b.stepOrder);  // Sort by stepOrder to maintain correct order
+        setSteps(stepData);
+      } catch (error) {
+        console.error("Error fetching steps:", error);
+      }
+    };
+  
+    fetchSteps();
+  }, []);
+  
 
   const handleDropItem = (stepId: number, itemName: string, itemType: ItemType) => {
     setSteps((prevSteps) =>
@@ -206,49 +265,62 @@ const FlowCustomizationDashboard: React.FC = () => {
           minHeight: "100vh",
         }}
       >
-        <Typography variant="h4" color="black" gutterBottom>
-          Flow Customization
-        </Typography>
+     <Typography
+  variant="h4"
+  gutterBottom
+  sx={{
+    fontFamily: 'Barlow, sans-serif',
+    fontWeight: 600, // Semi-bold
+    fontSize: '32px',
+    color: 'black',
+  }}
+>
+  Flow Customization
+</Typography>
+
 
         <Grid container spacing={2}>
           {/* Left Section */}
           <Grid item xs={12} md={4}>
-  <Paper sx={{ padding: 2, marginBottom: 2, maxHeight: "300px", overflowY: "auto" }}>
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-      <Typography variant="h6" gutterBottom>
-        Tests
-      </Typography>
-      <IconButton
-        size="small"
-        onClick={handleAddTestClick}
-        style={{
-          backgroundColor: "#102D4D",
-          color: "white",
-          width: "40px",
-          height: "40px",
-          borderRadius: "8px",
-        }}
-      >
-        <FaPlus />
-      </IconButton>
-    </div>
-    <ul style={{ listStyleType: "none", padding: 0 }}>
-      {latestTests.map((test, index) => (
-        <li
-          key={index}
-          style={{
-            backgroundColor: "#F3FAFD", // Light gray background
-            padding: "7px",
-            borderRadius: "5px",
-            marginBottom: "8px",
-            boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)", // Subtle shadow for better visibility
-          }}
-        >
-          <DraggableItem name={test} type={ItemType.TEST} />
-        </li>
-      ))}
-    </ul>
-  </Paper>
+            <Paper sx={{ padding: 2, marginBottom: 2, maxHeight: "300px", overflowY: "auto" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <Typography variant="h6" gutterBottom>
+                  Tests
+                </Typography>
+                <IconButton
+                  size="small"
+                  onClick={handleAddTestClick}
+                  style={{
+                    backgroundColor: "#102D4D",
+                    color: "white",
+                    width: "40px",
+                    height: "40px",
+                    borderRadius: "8px",
+                  }}
+                >
+                  <FaPlus />
+                </IconButton>
+              </div>
+              <ul style={{ listStyleType: "none", padding: 0 }}>
+                {latestTests.map((test, index) => (
+                  <li
+                    key={index}
+                    style={{
+                      backgroundColor: "#F3FAFD",
+                      padding: "7px",
+                      borderRadius: "5px",
+                      marginBottom: "8px",
+                      color:"black",
+                      boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
+                    }}
+                  >
+                    <DraggableItem name={test} type={ItemType.TEST} />
+                  </li>
+                ))}
+              </ul>
+            </Paper>
+
+       
 
   <Paper sx={{ padding: 2, maxHeight: "300px", overflowY: "auto" }}>
     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -270,7 +342,7 @@ const FlowCustomizationDashboard: React.FC = () => {
       </IconButton>
     </div>
     <ul style={{ listStyleType: "none", padding: 0 }}>
-      {chemicals.map((chemical, index) => (
+    {latestchemicals.map((chemical, index) => (
         <li
           key={index}
           style={{
@@ -328,7 +400,7 @@ const FlowCustomizationDashboard: React.FC = () => {
 
               <Grid container spacing={2} sx={{ marginTop: 2 }}>
                 {steps.map((step, index) => (
-                  <Grid item sm={6} md={4} key={step.id}>
+                  <Grid item sm={6} md={4} key={index}>
                     <DraggableStep
                       step={step}
                       index={index}

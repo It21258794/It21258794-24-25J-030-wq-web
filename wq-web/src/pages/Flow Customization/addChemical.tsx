@@ -100,7 +100,7 @@ const AddChemical: React.FC = (): JSX.Element => {
         />
 
         <TextField
-          label="Value"
+          label="Measure Type"
           variant="outlined"
           fullWidth
           value={chemicalType}

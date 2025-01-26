@@ -13,7 +13,7 @@ const AddTest: React.FC = (): JSX.Element => {
   const navigate = useNavigate();
 
   const API_URL = "http://localhost:8085/api/tests/create";
-  const token = localStorage.getItem("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3MzczMTA2NTZ9.ZyYBPfqydeYIJinJUQhvedYZfCGT7rwC2s1jTMG-35E");
+  const token = localStorage.getItem("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzc3MzY5MDN9.gMyImHZkdBzXbkTSGe_pKdDfN0nXK6m9ArXTLUwCvEo");
 
   const handleConfirmClick = async () => {
     if (!testName || !testValue || !testDescription) {
@@ -34,7 +34,7 @@ const AddTest: React.FC = (): JSX.Element => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3MzczMTA2NTZ9.ZyYBPfqydeYIJinJUQhvedYZfCGT7rwC2s1jTMG-35E`, // Use the token stored in localStorage
+          "Authorization": `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzc3MzY5MDN9.gMyImHZkdBzXbkTSGe_pKdDfN0nXK6m9ArXTLUwCvEo`, // Use the token stored in localStorage
         },
         body: JSON.stringify(payload),
       });
