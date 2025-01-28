@@ -1,7 +1,9 @@
+// src/components/AddTest.tsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, TextField, Button, Typography, Paper, Snackbar, Alert } from "@mui/material";
 import "@fontsource/poppins"; // Import Poppins font
+import { addTest } from "../../server/flow-customisation/flow-customisationAPI"; // Import the addTest function
 
 const AddTest: React.FC = (): JSX.Element => {
   const [testName, setTestName] = useState<string>("");
@@ -12,8 +14,7 @@ const AddTest: React.FC = (): JSX.Element => {
   const [alertSeverity, setAlertSeverity] = useState<"error" | "warning" | "info" | "success">();
   const navigate = useNavigate();
 
-  const API_URL = "http://localhost:8085/api/tests/create";
-  const token = localStorage.getItem("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzc3MzY5MDN9.gMyImHZkdBzXbkTSGe_pKdDfN0nXK6m9ArXTLUwCvEo");
+  const token = localStorage.getItem("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzc5OTQzNjN9.-jQ6lp1Z4MJhWcY8t6OqZQQGylf_ISkCSYHlvafjrRM") || ""; // Get token from localStorage
 
   const handleConfirmClick = async () => {
     if (!testName || !testValue || !testDescription) {
@@ -23,36 +24,17 @@ const AddTest: React.FC = (): JSX.Element => {
       return;
     }
 
-    const payload = {
-      testName: testName,
-      testValue: testValue,
-      testDescription: testDescription,
-    };
-
     try {
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzc3MzY5MDN9.gMyImHZkdBzXbkTSGe_pKdDfN0nXK6m9ArXTLUwCvEo`, // Use the token stored in localStorage
-        },
-        body: JSON.stringify(payload),
-      });
+      const response = await addTest(testName, testValue, testDescription, token);
 
-      if (response.ok) {
-        setAlertSeverity("success");
-        setAlertMessage("Test added successfully.");
-        setOpenSnackbar(true);
-        setTimeout(() => navigate(-1), 1500);
-      } else {
-        const errorData = await response.json();
-        setAlertSeverity("error");
-        setAlertMessage(errorData.message || "Failed to add the test.");
-        setOpenSnackbar(true);
-      }
+      setAlertSeverity("success");
+      setAlertMessage("Test added successfully.");
+      setOpenSnackbar(true);
+
+      setTimeout(() => navigate(-1), 1500);
     } catch (error) {
       setAlertSeverity("error");
-      setAlertMessage("An unexpected error occurred. Please try again.");
+      setAlertMessage(error instanceof Error ? error.message : "An unexpected error occurred. Please try again.");
       setOpenSnackbar(true);
     }
   };

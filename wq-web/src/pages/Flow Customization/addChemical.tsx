@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, TextField, Button, Paper, Snackbar, Alert } from "@mui/material";
+import { createChemical } from "../../server/flow-customisation/flow-customisationAPI"; // Import the addChemical API function
 import "@fontsource/poppins"; // Import Poppins font
 
 const AddChemical: React.FC = (): JSX.Element => {
@@ -11,8 +12,7 @@ const AddChemical: React.FC = (): JSX.Element => {
   const [alertSeverity, setAlertSeverity] = useState<"error" | "warning" | "info" | "success">();
   const navigate = useNavigate();
 
-  const API_URL = "http://localhost:8085/api/chemicals/create";
-  const token = localStorage.getItem("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3MzczMTA2NTZ9.ZyYBPfqydeYIJinJUQhvedYZfCGT7rwC2s1jTMG-35E");
+  const token = localStorage.getItem("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzc5OTQzNjN9.-jQ6lp1Z4MJhWcY8t6OqZQQGylf_ISkCSYHlvafjrRM"); // Get the token from localStorage
 
   const handleConfirmClick = async () => {
     if (!chemicalName || !chemicalType) {
@@ -22,35 +22,15 @@ const AddChemical: React.FC = (): JSX.Element => {
       return;
     }
 
-    const payload = {
-      chemicalName: chemicalName,
-      chemicalType: chemicalType,
-    };
-
     try {
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3MzczOTUzNzZ9.VuCUB36rHx2PrTo1I908CLK5yvjd3D9SsURhBFV9VPo`, // Use the token stored in localStorage
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (response.ok) {
-        setAlertSeverity("success");
-        setAlertMessage("Chemical added successfully.");
-        setOpenSnackbar(true);
-        setTimeout(() => navigate(-1), 1500);
-      } else {
-        const errorData = await response.json();
-        setAlertSeverity("error");
-        setAlertMessage(errorData.message || "Failed to add the chemical.");
-        setOpenSnackbar(true);
-      }
-    } catch (error) {
+      const response = await createChemical(chemicalName, chemicalType, token || "");
+      setAlertSeverity("success");
+      setAlertMessage("Chemical added successfully.");
+      setOpenSnackbar(true);
+      setTimeout(() => navigate(-1), 1500); // Redirect after successful addition
+    } catch (error: any) {
       setAlertSeverity("error");
-      setAlertMessage("An unexpected error occurred. Please try again.");
+      setAlertMessage(error.message || "An unexpected error occurred. Please try again.");
       setOpenSnackbar(true);
     }
   };

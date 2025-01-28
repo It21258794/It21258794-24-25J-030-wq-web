@@ -1,7 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, TextField, Button, Typography, Paper, Snackbar, Alert } from "@mui/material";
+import { createStep } from "../../server/flow-customisation/flow-customisationAPI"; // Adjust the path as needed
 import "@fontsource/poppins";
+import { AxiosError } from 'axios'; // Import AxiosError if you're using Axios
+
 
 const AddStep: React.FC = (): JSX.Element => {
   const [stepName, setStepName] = useState<string>("");
@@ -12,8 +15,7 @@ const AddStep: React.FC = (): JSX.Element => {
   const [alertSeverity, setAlertSeverity] = useState<"error" | "warning" | "info" | "success">();
   const navigate = useNavigate();
 
-  const API_URL = "http://localhost:8085/api/steps/create";
-  const token = localStorage.getItem("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzc3ODMyMjl9.0L6k9FyOvjoTudkKo9n9cs7z5f2bYXut7io9AqRxIAQ");
+  const token = localStorage.getItem("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzc5OTQzNjN9.-jQ6lp1Z4MJhWcY8t6OqZQQGylf_ISkCSYHlvafjrRM"); // Retrieve token from localStorage
 
   const handleConfirmClick = async () => {
     if (!stepName || !stepOrder || !stepDescription) {
@@ -23,40 +25,46 @@ const AddStep: React.FC = (): JSX.Element => {
       return;
     }
 
+
     const payload = {
       stepName,
       stepOrder: parseInt(stepOrder), // Ensure stepOrder is stored as a number
       stepDescription,
     };
-
+    
     try {
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzc3ODMyMjl9.0L6k9FyOvjoTudkKo9n9cs7z5f2bYXut7io9AqRxIAQ`, // Use the token stored in localStorage
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (response.ok) {
-        setAlertSeverity("success");
-        setAlertMessage("Step added successfully.");
-        setOpenSnackbar(true);
-        setTimeout(() => navigate(-1), 1500);
+      // Call the API to create the step
+      await createStep(token || "", payload);
+      setAlertSeverity("success");
+      setAlertMessage("Step added successfully.");
+      setOpenSnackbar(true);
+      setTimeout(() => navigate(-1), 1500);
+    } catch (error: unknown) {
+      // Type assertion to AxiosError
+      const axiosError = error as AxiosError;
+    
+      // Check if the error has a response and message
+      if (axiosError.response && axiosError.response.data && axiosError.response.data.message) {
+        const backendErrorMessage = axiosError.response.data.message;
+    
+        // Check if the backend error message indicates step order conflict
+        if (backendErrorMessage.includes("Step order already exists")) {
+          setAlertSeverity("error");
+          setAlertMessage("Step order already exists.");
+        } else {
+          setAlertSeverity("error");
+          setAlertMessage("Step order already exists.");
+        }
       } else {
-        const errorData = await response.json();
+        // Handle unexpected errors
         setAlertSeverity("error");
-        setAlertMessage(errorData.message || "Failed to add the step.");
-        setOpenSnackbar(true);
+        setAlertMessage("An unexpected error occurred.");
       }
-    } catch (error) {
-      setAlertSeverity("error");
-      setAlertMessage("An unexpected error occurred. Please try again.");
+    
       setOpenSnackbar(true);
     }
+    
   };
-
   const handleCancelClick = () => {
     navigate(-1);
   };
