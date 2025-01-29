@@ -16,7 +16,7 @@ export const createStep = async (
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3MzgwOTQ0NzZ9.msCIuWMtkAPvFqyXqmNWfpHM7EOXsf7NwJ41cqpwh2o`,
+          Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3MzgxNzEyNDB9.cGG59C6oipjGW8GBN_3wFaCVh_TkpO1ahqkKtdGv78c`,
         },
       }
     );
@@ -43,7 +43,7 @@ export const addTest = async (
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3MzgwOTM0MTR9.7rV7sGhZFfHFw6ftpSJscZhjk5V7fqfCiYOLyDL6zhU`,
+          Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3MzgxNzEyNDB9.cGG59C6oipjGW8GBN_3wFaCVh_TkpO1ahqkKtdGv78c`,
         },
       }
     );
@@ -70,7 +70,7 @@ export const createChemical = async (
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3MzgwOTM0MTR9.7rV7sGhZFfHFw6ftpSJscZhjk5V7fqfCiYOLyDL6zhU`,
+          Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3MzgxNzEyNDB9.cGG59C6oipjGW8GBN_3wFaCVh_TkpO1ahqkKtdGv78c`,
         },
       }
     );
@@ -88,7 +88,7 @@ export const getChemicals = async () => {
     const response = await axios.get(`${BASE_URL}/chemicals/get/all-chemicals`, {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3MzgwOTM0MTR9.7rV7sGhZFfHFw6ftpSJscZhjk5V7fqfCiYOLyDL6zhU`,
+        Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3MzgxNzEyNDB9.cGG59C6oipjGW8GBN_3wFaCVh_TkpO1ahqkKtdGv78c`,
       },
     });
     return response.data;
@@ -104,7 +104,7 @@ export const getTests = async () => {
     const response = await axios.get(`${BASE_URL}/tests/get/all-tests`, {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3MzgwOTM0MTR9.7rV7sGhZFfHFw6ftpSJscZhjk5V7fqfCiYOLyDL6zhU`,
+        Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3MzgxNzEyNDB9.cGG59C6oipjGW8GBN_3wFaCVh_TkpO1ahqkKtdGv78c`,
       },
     });
     return response.data;
@@ -120,12 +120,34 @@ export const getSteps = async () => {
     const response = await axios.get(`${BASE_URL}/steps/get/all-steps`, {
       headers: {
         "Content-Type": "application/json",
-          Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3MzgwOTQzMjJ9.wE6M5zRTjgKwhm6ZRn1sIi4JW5JpiSNhpbLltbwP8Mk`,
-           },
+        Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3MzgxNzEyNDB9.cGG59C6oipjGW8GBN_3wFaCVh_TkpO1ahqkKtdGv78c`,
+      },
     });
     return response.data;
   } catch (error) {
     console.error("Error fetching steps:", error);
     throw error;
+  }
+};
+
+export const updateStepOrder = async (steps: { id: number; stepOrder: number }[]) => {
+  try {
+    const response = await fetch(`${BASE_URL}/steps/update/step-order`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3MzgxNzEyNDB9.cGG59C6oipjGW8GBN_3wFaCVh_TkpO1ahqkKtdGv78c`,
+
+      },
+      body: JSON.stringify(steps),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to update step order");
+    }
+
+    console.log("Step order updated successfully!");
+  } catch (error) {
+    console.error("Error updating step order:", error);
   }
 };

@@ -4,7 +4,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { FaTrash, FaPlus, FaEdit } from "react-icons/fa";
 import { Box, Grid, Typography, Paper, IconButton } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { getTests ,getChemicals, getSteps} from "../../server/flow-customisation/flow-customisationAPI"; // Import the API function
+import { getTests, getChemicals, getSteps, updateStepOrder } from "../../server/flow-customisation/flow-customisationAPI"; // Import the API function
 
 enum ItemType {
   CHEMICAL = "chemical",
@@ -143,8 +143,8 @@ const DraggableItem: React.FC<DraggableItemProps> = ({ name, type }) => {
 const FlowCustomizationDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false); // State for edit mode
-  const [steps, setSteps] = useState<StepItem[]>([]); 
-  
+  const [steps, setSteps] = useState<StepItem[]>([]);
+
   const [tests, setTests] = useState<string[]>([]); // State for backend tests
   const [chemicals, setChemicals] = useState<string[]>([]); // State for backend tests
 
@@ -161,7 +161,7 @@ const FlowCustomizationDashboard: React.FC = () => {
 
     fetchTests();
   }, []);
-  
+
   useEffect(() => {
     const fetchChemicals = async () => {
       try {
@@ -190,10 +190,10 @@ const FlowCustomizationDashboard: React.FC = () => {
         console.error("Error fetching steps:", error);
       }
     };
-  
+
     fetchSteps();
   }, []);
-  
+
   const handleDropItem = (stepId: number, itemName: string, itemType: ItemType) => {
     setSteps((prevSteps) =>
       prevSteps.map((step) =>
@@ -221,19 +221,35 @@ const FlowCustomizationDashboard: React.FC = () => {
   const handleAddStep = () => {
     navigate("/flow/add-step");
   };
-  const handleAddTestClick =() => {
+  const handleAddTestClick = () => {
     navigate("/flow/add-test");
   };
   const handleEditStep = () => {
     setIsEditing((prev) => !prev); // Toggle edit mode
   };
 
-  const moveStep = (fromIndex: number, toIndex: number) => {
+  const moveStep = async (fromIndex: number, toIndex: number) => {
     const updatedSteps = [...steps];
     const [removedStep] = updatedSteps.splice(fromIndex, 1);
     updatedSteps.splice(toIndex, 0, removedStep);
+
+    // Update local state
     setSteps(updatedSteps);
+
+    // Prepare the steps data
+    const stepsToUpdate = updatedSteps.map((step, index) => ({
+      id: step.id,
+      stepOrder: index + 1,
+    }));
+
+    try {
+      await updateStepOrder(stepsToUpdate);
+      console.log("Step order updated successfully!");
+    } catch (error) {
+      console.error("Error updating step order:", error);
+    }
   };
+
 
   return (
     <DndProvider backend={HTML5Backend}>
@@ -379,6 +395,7 @@ const FlowCustomizationDashboard: React.FC = () => {
                 {steps.map((step, index) => (
                   <Grid item sm={6} md={4} key={index}>
                     <DraggableStep
+                      key={step.id}
                       step={step}
                       index={index}
                       moveStep={moveStep}
@@ -386,6 +403,7 @@ const FlowCustomizationDashboard: React.FC = () => {
                       onRemoveItem={handleRemoveItem}
                       isEditing={isEditing}
                     />
+
                   </Grid>
                 ))}
               </Grid>
