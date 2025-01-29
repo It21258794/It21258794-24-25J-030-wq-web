@@ -1,21 +1,35 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, TextField, Button, Typography, Paper, Snackbar, Alert } from "@mui/material";
-import { createStep } from "../../server/flow-customisation/flow-customisationAPI"; // Adjust the path as needed
+import { createStep, getSteps } from "../../server/flow-customisation/flow-customisationAPI"; // Adjust the path as needed
 import "@fontsource/poppins";
 import { AxiosError } from 'axios'; // Import AxiosError if you're using Axios
 
-
 const AddStep: React.FC = (): JSX.Element => {
   const [stepName, setStepName] = useState<string>("");
-  const [stepOrder, setStepOrder] = useState<string>("");
+  const [stepOrder, setStepOrder] = useState<number>(0); // Initialize stepOrder as number
   const [stepDescription, setStepDescription] = useState<string>("");
   const [openSnackbar, setOpenSnackbar] = useState<boolean>(false);
   const [alertMessage, setAlertMessage] = useState<string>("");
   const [alertSeverity, setAlertSeverity] = useState<"error" | "warning" | "info" | "success">();
   const navigate = useNavigate();
 
-  const token = localStorage.getItem("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzc5OTQzNjN9.-jQ6lp1Z4MJhWcY8t6OqZQQGylf_ISkCSYHlvafjrRM"); // Retrieve token from localStorage
+  const token = localStorage.getItem("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3MzgxNzUzOTl9.QbPRSxgRlQh5T4AIWZ_c5CV5i_6DqxyFC85JbJGo070");
+
+  useEffect(() => {
+    const fetchSteps = async () => {
+      try {
+        const steps = await getSteps();
+        const maxOrder = steps.reduce((max: number, step: { stepOrder: number }) => 
+          step.stepOrder > max ? step.stepOrder : max, 0);
+        setStepOrder(maxOrder + 1); 
+      } catch (error) {
+        console.error("Error fetching steps:", error);
+      }
+    };
+
+    fetchSteps();
+  }, []);
 
   const handleConfirmClick = async () => {
     if (!stepName || !stepOrder || !stepDescription) {
@@ -25,10 +39,9 @@ const AddStep: React.FC = (): JSX.Element => {
       return;
     }
 
-
     const payload = {
       stepName,
-      stepOrder: parseInt(stepOrder), // Ensure stepOrder is stored as a number
+      stepOrder, 
       stepDescription,
     };
     
@@ -40,31 +53,25 @@ const AddStep: React.FC = (): JSX.Element => {
       setOpenSnackbar(true);
       setTimeout(() => navigate(-1), 1500);
     } catch (error: unknown) {
-      // Type assertion to AxiosError
       const axiosError = error as AxiosError;
     
-      // Check if the error has a response and message
       if (axiosError.response && axiosError.response.data && axiosError.response.data.message) {
         const backendErrorMessage = axiosError.response.data.message;
-    
-        // Check if the backend error message indicates step order conflict
         if (backendErrorMessage.includes("Step order already exists")) {
           setAlertSeverity("error");
           setAlertMessage("Step order already exists.");
         } else {
           setAlertSeverity("error");
-          setAlertMessage("Step order already exists.");
+          setAlertMessage("An unexpected error occurred.");
         }
       } else {
-        // Handle unexpected errors
         setAlertSeverity("error");
         setAlertMessage("An unexpected error occurred.");
       }
-    
       setOpenSnackbar(true);
     }
-    
   };
+
   const handleCancelClick = () => {
     navigate(-1);
   };
@@ -122,8 +129,9 @@ const AddStep: React.FC = (): JSX.Element => {
           fullWidth
           type="number"
           value={stepOrder}
-          onChange={(e) => setStepOrder(e.target.value)}
+          onChange={(e) => setStepOrder(parseInt(e.target.value))}
           sx={{ fontFamily: "Poppins, sans-serif" }}
+          disabled // Disable this field as it is auto-calculated
         />
 
         <TextField
