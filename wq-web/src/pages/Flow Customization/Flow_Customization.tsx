@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useDrag, useDrop, DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { FaTrash, FaPlus, FaEdit } from "react-icons/fa";
+import { FaTrash, FaPlus, FaEdit,FaCheck } from "react-icons/fa";
 import { Box, Grid, Typography, Paper, IconButton } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { getTests, getChemicals, getSteps, updateStepOrder } from "../../server/flow-customisation/flow-customisationAPI"; // Import the API function
@@ -16,6 +16,8 @@ interface StepItem {
   id: number;
   title: string;
   items: string[];
+  confirmed: boolean; // Added to track if items are confirmed
+
 }
 
 interface DraggableStepProps {
@@ -60,6 +62,7 @@ const DraggableStep: React.FC<DraggableStepProps> = ({
     <div ref={(node) => dragRef(dropRef(node))}>
       <Step step={step} onDropItem={onDropItem} onRemoveItem={onRemoveItem} />
     </div>
+    
   );
 };
 
@@ -68,11 +71,13 @@ interface StepProps {
   onDropItem: (stepId: number, itemName: string, itemType: ItemType) => void;
   onRemoveItem: (stepId: number, itemName: string) => void;
 }
+
 const Step: React.FC<StepProps> = ({ step, onDropItem, onRemoveItem }) => {
   const [{ isOver }, dropRef] = useDrop({
     accept: [ItemType.CHEMICAL, ItemType.TEST],
-    drop: (item: { name: string; type: ItemType }) =>
-      onDropItem(step.id, item.name, item.type),
+    drop: (item: { name: string; type: ItemType }) => {
+      onDropItem(step.id, item.name, item.type);
+    },
     collect: (monitor) => ({
       isOver: !!monitor.isOver(),
     }),
@@ -83,6 +88,17 @@ const Step: React.FC<StepProps> = ({ step, onDropItem, onRemoveItem }) => {
   const handleStepClick = () => {
     navigate(`/flow/step/${step.id}`);
   };
+
+  const handleConfirmClick = () => {
+    setSteps((prevSteps) =>
+      prevSteps.map((s) =>
+        s.id === step.id ? { ...s, confirmed: true } : s
+      )
+    );
+  };
+
+  // Check if the step has any items (i.e., if any values were dropped)
+  const hasItems = (step.items || []).length > 0;
 
   return (
     <Paper
@@ -97,34 +113,70 @@ const Step: React.FC<StepProps> = ({ step, onDropItem, onRemoveItem }) => {
         transition: "background-color 0.2s",
       }}
     >
-      <Typography variant="h6" onClick={handleStepClick} style={{ cursor: "pointer" }}>
-        {step.title}
-      </Typography>
-      <ul style={{ listStyleType: "none", padding: 0 }}>
-        {(step.items || []).map((item, index) => (
-          <li
-            key={index}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              margin: "5px 0",
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between", 
+          alignItems: "center",
+        }}
+      >
+        <Typography variant="h6" onClick={handleStepClick} style={{ cursor: "pointer" }}>
+          {step.title}
+        </Typography>
+        {hasItems && !step.confirmed && (
+          <IconButton
+            onClick={handleConfirmClick}
+            sx={{
+              backgroundColor: "#102D4D",
+              color: "white",
+              width: "30px",
+              height: "30px",
+              borderRadius: "8px",
+              "&:hover": {
+                backgroundColor: "#4072AF", 
+                color: "white",
+              },
             }}
           >
-            {item}
-            <IconButton
-              size="small"
-              onClick={() => onRemoveItem(step.id, item)}
-              style={{ color: "#4072AF" }}
+            <FaPlus /> 
+          </IconButton>
+        )}
+      </div>
+
+      <div
+        style={{
+          maxHeight: "100px", // Maximum height for the items list
+          overflowY: "auto", // Adds vertical scrollbar when content overflows
+          marginBottom: "10px", // Optional: adds some space between list and the button
+        }}
+      >
+        <ul style={{ listStyleType: "none", padding: 0 }}>
+          {(step.items || []).map((item, index) => (
+            <li
+              key={index}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                margin: "5px 0",
+              }}
             >
-              <FaTrash />
-            </IconButton>
-          </li>
-        ))}
-      </ul>
+              {item}
+              <IconButton
+                size="small"
+                onClick={() => onRemoveItem(step.id, item)}
+                style={{ color: "#4072AF" }}
+              >
+                <FaTrash />
+              </IconButton>
+            </li>
+          ))}
+        </ul>
+      </div>
     </Paper>
   );
 };
+
 
 
 const DraggableItem: React.FC<DraggableItemProps> = ({ name, type }) => {
@@ -203,6 +255,7 @@ const FlowCustomizationDashboard: React.FC = () => {
       )
     );
   };
+  
 
   const handleRemoveItem = (stepId: number, itemName: string) => {
     setSteps((prevSteps) =>
@@ -213,6 +266,7 @@ const FlowCustomizationDashboard: React.FC = () => {
       )
     );
   };
+  
 
   const handleAddChemicalClick = () => {
     navigate("/flow/add-chemicals");
@@ -401,7 +455,7 @@ const FlowCustomizationDashboard: React.FC = () => {
                       moveStep={moveStep}
                       onDropItem={handleDropItem}
                       onRemoveItem={handleRemoveItem}
-                      isEditing={isEditing}
+                      isEditing={isEditing} // Pass the editing state
                     />
 
                   </Grid>
