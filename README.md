@@ -109,3 +109,20 @@ For more details, refer to the [Conventional Commits Specification](https://www.
 > 
 >- Implimented dashboard that showcases data in seperated diagrams.
 >- Implimented sensor dashboard in order to shoawcsae sensors with the relevent details
+
+> [!TIP]
+>https://github.com/It21258794/It21258794-24-25J-030-wq-web/pull/4
+> 
+> feat(waterqualityprediction): implemented water quality prediction
+> 
+>- Frontend implementation for the water quality prediction 
+>- only for turbidity prediction with initial graphs
+
+> [!TIP]
+>https://github.com/It21258794/It21258794-24-25J-030-wq-web/pull/5
+> 
+> Sensor Dashboard implimentation
+> 
+>- feat(sensor): created compare user interfaces
+>- fix(dashboard): added new logo
+>- fix(waterquality): water quality predictions enhancements
