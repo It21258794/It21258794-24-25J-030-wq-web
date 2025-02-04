@@ -2,7 +2,7 @@ import App from "../App";
 import { createBrowserRouter } from "react-router-dom";
 import Chemical_Consumption from "../pages/Chemical Consumption/Chemical_Consumption";
 import Flow_Customization from "../pages/Flow Customization/Flow_Customization";
-import Water_Quality_Prediction from "../pages/Water Quality Prediction/Water_Quality_Prediction";
+import Water_Quality_Prediction from "../pages/Water Quality Prediction/WaterQualityPrediction";
 import Dashboard from "../pages/Dashboard/Dashboard";
 import Sensors from "../pages/Sensors/Sensors";
 import Settings from "../pages/Settings/Settings";
