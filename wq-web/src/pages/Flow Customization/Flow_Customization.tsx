@@ -3,8 +3,9 @@ import { useDrag, useDrop, DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { FaTrash, FaPlus, FaEdit,FaCheck } from "react-icons/fa";
 import { Box, Grid, Typography, Paper, IconButton } from "@mui/material";
+import { Snackbar, Alert } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { getTests, getChemicals, getSteps, updateStepOrder } from "../../server/flow-customisation/flow-customisationAPI"; // Import the API function
+import { getTests, getChemicals, getSteps, updateStepOrder,createStepValue } from "../../server/flow-customisation/flow-customisationAPI"; // Import the API function
 
 enum ItemType {
   CHEMICAL = "chemical",
@@ -12,12 +13,16 @@ enum ItemType {
   STEP = "step",
 }
 
+
 interface StepItem {
   id: number;
   title: string;
-  items: string[];
-  confirmed: boolean; // Added to track if items are confirmed
-
+  items: Array<{
+    name: string;
+    type: ItemType;
+    id?: number;
+  }>;
+  confirmed: boolean;
 }
 
 interface DraggableStepProps {
@@ -82,25 +87,74 @@ const Step: React.FC<StepProps> = ({ step, onDropItem, onRemoveItem }) => {
       isOver: !!monitor.isOver(),
     }),
   });
+  const [steps, setSteps] = useState<StepItem[]>([]);
+
+  const [tests, setTests] = useState<string[]>([]); // State for backend tests
+  const [chemicals, setChemicals] = useState<string[]>([]); // State for backend tests
 
   const navigate = useNavigate();
 
   const handleStepClick = () => {
     navigate(`/flow/step/${step.id}`);
   };
-
-  const handleConfirmClick = () => {
+  const [openSnackbar, setOpenSnackbar] = useState<boolean>(false);
+   const [alertMessage, setAlertMessage] = useState<string>("");
+    const [alertSeverity, setAlertSeverity] = useState<"error" | "warning" | "info" | "success">();
+  const handleSnackbarClose = () => {
+    setOpenSnackbar(false);
+  };
+  const handleConfirmClick = async () => {
     setSteps((prevSteps) =>
       prevSteps.map((s) =>
         s.id === step.id ? { ...s, confirmed: true } : s
       )
     );
-  };
+  
+    try {
+      for (const item of step.items) {
+        const payload = {
+          stepId: step.id,
+          testId: item.type === ItemType.TEST ? item.id : undefined,
+          chemicalId: item.type === ItemType.CHEMICAL ? item.id : undefined,
+        };
 
+        const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzg2NzIzMjF9.vjnLnEfbo9XVPcVCl65HnexuLF8BoN37Himc34wAEGo";
+        await createStepValue(token, payload);
+      }
+  
+      // ✅ Reset the items after successful update
+      setSteps((prevSteps) =>
+        prevSteps.map((s) =>
+          s.id === step.id ? { ...s, confirmed: true } : s
+        )
+      );
+      step.items = []; // ✅ Clear step items
+  
+      setAlertSeverity("success");
+      setAlertMessage("Step confirmed and values updated!");
+      setOpenSnackbar(true);
+      console.log("Step confirmed and values updated!");
+    } catch (error) {
+      setAlertSeverity("error");
+      setAlertMessage(
+        error instanceof Error
+          ? error.message
+          : "An unexpected error occurred. Please try again."
+      );
+      setOpenSnackbar(true);
+      console.error("Error confirming step:", error);
+    }
+  };
+  
+  
+  
+  
+  
   // Check if the step has any items (i.e., if any values were dropped)
   const hasItems = (step.items || []).length > 0;
 
   return (
+    
     <Paper
       ref={dropRef}
       sx={{
@@ -113,6 +167,20 @@ const Step: React.FC<StepProps> = ({ step, onDropItem, onRemoveItem }) => {
         transition: "background-color 0.2s",
       }}
     >
+        <Snackbar
+              open={openSnackbar}
+              autoHideDuration={3000}
+              onClose={handleSnackbarClose}
+              anchorOrigin={{ vertical: "top", horizontal: "right" }}
+            >
+              <Alert
+                onClose={handleSnackbarClose}
+                severity={alertSeverity}
+                sx={{ width: "100%", fontFamily: "Poppins, sans-serif" }}
+              >
+                {alertMessage}
+              </Alert>
+            </Snackbar>
       <div
         style={{
           display: "flex",
@@ -138,7 +206,7 @@ const Step: React.FC<StepProps> = ({ step, onDropItem, onRemoveItem }) => {
               },
             }}
           >
-            <FaPlus /> 
+            <FaCheck /> 
           </IconButton>
         )}
       </div>
@@ -150,8 +218,8 @@ const Step: React.FC<StepProps> = ({ step, onDropItem, onRemoveItem }) => {
           marginBottom: "10px", // Optional: adds some space between list and the button
         }}
       >
-        <ul style={{ listStyleType: "none", padding: 0 }}>
-          {(step.items || []).map((item, index) => (
+      <ul style={{ listStyleType: "none", padding: 0 }}>
+          {step.items.map((item, index) => (
             <li
               key={index}
               style={{
@@ -161,10 +229,15 @@ const Step: React.FC<StepProps> = ({ step, onDropItem, onRemoveItem }) => {
                 margin: "5px 0",
               }}
             >
-              {item}
+              {item.name}
+              {/* {item.id && (
+                <span>
+                  ({item.type === ItemType.TEST ? 'Test' : 'Chemical'} ID: {item.id})
+                </span>
+              )} */}
               <IconButton
                 size="small"
-                onClick={() => onRemoveItem(step.id, item)}
+                onClick={() => onRemoveItem(step.id, item.name)}
                 style={{ color: "#4072AF" }}
               >
                 <FaTrash />
@@ -172,6 +245,7 @@ const Step: React.FC<StepProps> = ({ step, onDropItem, onRemoveItem }) => {
             </li>
           ))}
         </ul>
+
       </div>
     </Paper>
   );
@@ -248,20 +322,41 @@ const FlowCustomizationDashboard: React.FC = () => {
 
   const handleDropItem = (stepId: number, itemName: string, itemType: ItemType) => {
     setSteps((prevSteps) =>
-      prevSteps.map((step) =>
-        step.id === stepId
-          ? { ...step, items: [...new Set([...step.items, itemName])] }
-          : step
-      )
+      prevSteps.map((step) => {
+        if (step.id === stepId) {
+          // Find the ID based on the item type and name
+          let itemId: number | undefined;
+          if (itemType === ItemType.TEST) {
+            const testIndex = tests.findIndex(test => test === itemName);
+            itemId = testIndex !== -1 ? testIndex + 1 : undefined;
+          } else if (itemType === ItemType.CHEMICAL) {
+            const chemicalIndex = chemicals.findIndex(chemical => chemical === itemName);
+            itemId = chemicalIndex !== -1 ? chemicalIndex + 1 : undefined;
+          }
+  
+          // Check if item already exists
+          const itemExists = step.items.some(item => 
+            item.name === itemName && item.type === itemType
+          );
+  
+          if (!itemExists) {
+            return {
+              ...step,
+              items: [...step.items, { name: itemName, type: itemType, id: itemId }]
+            };
+          }
+        }
+        return step;
+      })
     );
-  };
+  };;
   
 
   const handleRemoveItem = (stepId: number, itemName: string) => {
     setSteps((prevSteps) =>
       prevSteps.map((step) =>
         step.id === stepId
-          ? { ...step, items: step.items.filter((item) => item !== itemName) }
+          ? { ...step, items: step.items.filter((item) => item.name !== itemName) }
           : step
       )
     );
