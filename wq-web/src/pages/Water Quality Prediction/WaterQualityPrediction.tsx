@@ -11,21 +11,15 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableFooter,
   TableHead,
-  TablePagination,
   TableRow,
   Typography,
 } from "@mui/material";
-import TablePaginationActions from "@mui/material/TablePagination/TablePaginationActions";
 import { LineChart } from "@mui/x-charts";
-import { useState } from "react";
 import "./WaterQualityPrediction.css";
 import React from "react";
 
 const WaterQualityPrediction = (): JSX.Element => {
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
   const [Turbidity, setTurbidity] = React.useState("");
   const [Week, setWeek] = React.useState("");
 
@@ -241,19 +235,6 @@ const WaterQualityPrediction = (): JSX.Element => {
                 </TableRow>
               ))}
             </TableBody>
-            <TableFooter>
-              <TableRow>
-                <TablePagination
-                  className="pagination"
-                  rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
-                  colSpan={5}
-                  count={rows.length}
-                  rowsPerPage={rowsPerPage}
-                  page={page}
-                  ActionsComponent={TablePaginationActions}
-                />
-              </TableRow>
-            </TableFooter>
           </Table>
         </Card>
       </Grid2>
