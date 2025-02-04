@@ -1,7 +1,6 @@
 import {
   Drawer,
   Box,
-  Typography,
   List,
   Divider,
   ListItemButton,
@@ -11,6 +10,7 @@ import {
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { MenuItems } from "../components/System/MenuItems";
+import mainIcon from "../images/common/main-icon.png";
 
 interface IProps {
   isCollapsed: boolean;
@@ -42,25 +42,7 @@ const AppSider = ({ isCollapsed, onTabSelect }: IProps): JSX.Element => {
       }}
     >
       <Box sx={{ display: "flex", flexDirection: "column", padding: 2 }}>
-        <Typography
-          sx={{
-            marginTop: 1,
-            fontSize: 30,
-            paddingLeft: "20px",
-            fontWeight: 1000,
-            color: "#4072AF",
-          }}
-        >
-          JRDC.
-        </Typography>
-        {!isCollapsed && (
-          <Typography
-            variant="body2"
-            sx={{ marginTop: 1, fontSize: 10, paddingLeft: "20px" }}
-          >
-            Joint Research & Development Center
-          </Typography>
-        )}
+        <img src={mainIcon} alt="Main Icon" />
       </Box>
       <List>
         {MenuItems.map((item) => (

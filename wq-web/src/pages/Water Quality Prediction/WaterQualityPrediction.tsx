@@ -260,11 +260,20 @@ const WaterQualityPrediction = (): JSX.Element => {
                   <TableCell className="table-cell">
                     <Chip
                       label={row.status}
-                      className={`status-badge ${
-                        row.status === "Active"
-                          ? "status-active"
-                          : "status-inactive"
-                      }`}
+                      sx={{
+                        fontSize: "0.6rem",
+                        height: "20px",
+                        width: "80px",
+                        backgroundColor:
+                          row.status === "Active" ? "#a8f1d4" : "#fdd5d5",
+                        color: row.status === "Active" ? "#008000" : "#ff0000",
+                        border: `1px solid ${
+                          row.status === "Active" ? "#008000" : "#ff0000"
+                        }`,
+                        borderRadius: "5px",
+                        textAlign: "center",
+                        fontWeight: "bold",
+                      }}
                     />
                   </TableCell>
                 </TableRow>

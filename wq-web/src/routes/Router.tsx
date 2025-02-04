@@ -7,6 +7,7 @@ import Dashboard from "../pages/Dashboard/Dashboard";
 import Sensors from "../pages/Sensors/Sensors";
 import Settings from "../pages/Settings/Settings";
 import Reports from "../pages/Reports/Reports";
+import CompareSensors from "../pages/CompareSensors/CompareSensors";
 
 const router = createBrowserRouter([
   {
@@ -40,6 +41,10 @@ const router = createBrowserRouter([
       {
         path: "/settings",
         element: <Settings />,
+      },
+      {
+        path: "/sensorsDashboard/compare",
+        element: <CompareSensors />,
       },
     ],
   },
