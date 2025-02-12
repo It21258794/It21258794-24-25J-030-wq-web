@@ -16,7 +16,7 @@ export const createStep = async (
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzg2NzIzMjF9.vjnLnEfbo9XVPcVCl65HnexuLF8BoN37Himc34wAEGo`,
+          Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3MzkzMjM5Njl9.9CDEkqzgb1kAergh_iSLel6LLpABb6alMvZ9PcO7rz4`,
         },
       }
     );
@@ -43,7 +43,7 @@ export const addTest = async (
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzg2NzIzMjF9.vjnLnEfbo9XVPcVCl65HnexuLF8BoN37Himc34wAEGo`,
+          Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3MzkzMjM5Njl9.9CDEkqzgb1kAergh_iSLel6LLpABb6alMvZ9PcO7rz4`,
         },
       }
     );
@@ -70,7 +70,7 @@ export const createChemical = async (
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzg2NzIzMjF9.vjnLnEfbo9XVPcVCl65HnexuLF8BoN37Himc34wAEGo`,
+          Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3MzkzMjM5Njl9.9CDEkqzgb1kAergh_iSLel6LLpABb6alMvZ9PcO7rz4`,
         },
       }
     );
@@ -88,7 +88,7 @@ export const getChemicals = async () => {
     const response = await axios.get(`${BASE_URL}/chemicals/get/all-chemicals`, {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzg2NzIzMjF9.vjnLnEfbo9XVPcVCl65HnexuLF8BoN37Himc34wAEGo`,
+        Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3MzkzMjM5Njl9.9CDEkqzgb1kAergh_iSLel6LLpABb6alMvZ9PcO7rz4`,
       },
     });
     return response.data;
@@ -104,7 +104,7 @@ export const getTests = async () => {
     const response = await axios.get(`${BASE_URL}/tests/get/all-tests`, {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzg2NzIzMjF9.vjnLnEfbo9XVPcVCl65HnexuLF8BoN37Himc34wAEGo`,
+        Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3MzkzMjM5Njl9.9CDEkqzgb1kAergh_iSLel6LLpABb6alMvZ9PcO7rz4`,
       },
     });
     return response.data;
@@ -120,7 +120,7 @@ export const getSteps = async () => {
     const response = await axios.get(`${BASE_URL}/steps/get/all-steps`, {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzg2NzIzMjF9.vjnLnEfbo9XVPcVCl65HnexuLF8BoN37Himc34wAEGo`,
+        Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3MzkzMjM5Njl9.9CDEkqzgb1kAergh_iSLel6LLpABb6alMvZ9PcO7rz4`,
       },
     });
     return response.data;
@@ -136,7 +136,7 @@ export const updateStepOrder = async (steps: { id: number; stepOrder: number }[]
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzg2NzIzMjF9.vjnLnEfbo9XVPcVCl65HnexuLF8BoN37Himc34wAEGo`,
+        Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3MzkzMjM5Njl9.9CDEkqzgb1kAergh_iSLel6LLpABb6alMvZ9PcO7rz4`,
 
       },
       body: JSON.stringify(steps),
@@ -172,13 +172,60 @@ export const createStepValue = async (
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzg2NzIzMjF9.vjnLnEfbo9XVPcVCl65HnexuLF8BoN37Himc34wAEGo`,
+          Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3MzkzMjM5Njl9.9CDEkqzgb1kAergh_iSLel6LLpABb6alMvZ9PcO7rz4`,
         },
       }
     );
 
     return response.data;
   } catch (error) {
+    throw error;
+  }
+};
+
+
+
+export const getStepValuesByStepId = async (stepId: number, token: string) => {
+  try {
+    const response = await axios.get(`${BASE_URL}/step-values/get-by-step/${stepId}`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3MzkzMjM5Njl9.9CDEkqzgb1kAergh_iSLel6LLpABb6alMvZ9PcO7rz4`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching step values:", error);
+    throw error;
+  }
+};
+
+
+// Function to update test and chemical values
+export const updateStepValue = async (
+  id: number,
+  stepId: number,
+  testValue: number | null,
+  chemicalValue: number | null,
+  token: string
+) => {
+  try {
+    const response = await axios.put(
+      `${BASE_URL}step-values/update-test-or-chemical-values/${id}/${stepId}`,
+      {
+        testValue,
+        chemicalValue,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3MzkzMjM5Njl9.9CDEkqzgb1kAergh_iSLel6LLpABb6alMvZ9PcO7rz4`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error updating step value:", error);
     throw error;
   }
 };
