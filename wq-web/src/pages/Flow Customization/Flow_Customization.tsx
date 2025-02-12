@@ -1,18 +1,23 @@
 import React, { useState, useEffect } from "react";
 import { useDrag, useDrop, DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { FaTrash, FaPlus, FaEdit,FaCheck } from "react-icons/fa";
+import { FaTrash, FaPlus, FaEdit, FaCheck } from "react-icons/fa";
 import { Box, Grid, Typography, Paper, IconButton } from "@mui/material";
 import { Snackbar, Alert } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { getTests, getChemicals, getSteps, updateStepOrder,createStepValue } from "../../server/flow-customisation/flow-customisationAPI"; // Import the API function
+import {
+  getTests,
+  getChemicals,
+  getSteps,
+  updateStepOrder,
+  createStepValue,
+} from "../../server/flow-customisation/flow-customisationAPI"; // Import the API function
 
 enum ItemType {
   CHEMICAL = "chemical",
   TEST = "test",
   STEP = "step",
 }
-
 
 interface StepItem {
   id: number;
@@ -25,11 +30,21 @@ interface StepItem {
   confirmed: boolean;
 }
 
+interface Test {
+  id: number;
+  name: string;
+}
+
+interface Chemical {
+  id: number;
+  name: string;
+}
+
 interface DraggableStepProps {
   step: StepItem;
   index: number;
   moveStep: (fromIndex: number, toIndex: number) => void;
-  onDropItem: (stepId: number, itemName: string, itemType: ItemType) => void;
+  onDropItem: (stepId: number, itemName: string, itemType: ItemType, itemId: number) => void;
   onRemoveItem: (stepId: number, itemName: string) => void;
   isEditing: boolean;
 }
@@ -37,6 +52,7 @@ interface DraggableStepProps {
 interface DraggableItemProps {
   name: string;
   type: ItemType;
+  id: number;
 }
 
 const DraggableStep: React.FC<DraggableStepProps> = ({
@@ -67,49 +83,40 @@ const DraggableStep: React.FC<DraggableStepProps> = ({
     <div ref={(node) => dragRef(dropRef(node))}>
       <Step step={step} onDropItem={onDropItem} onRemoveItem={onRemoveItem} />
     </div>
-    
   );
 };
 
 interface StepProps {
   step: StepItem;
-  onDropItem: (stepId: number, itemName: string, itemType: ItemType) => void;
+  onDropItem: (stepId: number, itemName: string, itemType: ItemType, itemId: number) => void;
   onRemoveItem: (stepId: number, itemName: string) => void;
 }
 
 const Step: React.FC<StepProps> = ({ step, onDropItem, onRemoveItem }) => {
   const [{ isOver }, dropRef] = useDrop({
     accept: [ItemType.CHEMICAL, ItemType.TEST],
-    drop: (item: { name: string; type: ItemType }) => {
-      onDropItem(step.id, item.name, item.type);
+    drop: (item: DraggableItemProps) => {
+      onDropItem(step.id, item.name, item.type, item.id); // Pass the item.id
     },
     collect: (monitor) => ({
       isOver: !!monitor.isOver(),
     }),
   });
-  const [steps, setSteps] = useState<StepItem[]>([]);
-
-  const [tests, setTests] = useState<string[]>([]); // State for backend tests
-  const [chemicals, setChemicals] = useState<string[]>([]); // State for backend tests
 
   const navigate = useNavigate();
 
   const handleStepClick = () => {
     navigate(`/flow/step/${step.id}`);
   };
+
   const [openSnackbar, setOpenSnackbar] = useState<boolean>(false);
-   const [alertMessage, setAlertMessage] = useState<string>("");
-    const [alertSeverity, setAlertSeverity] = useState<"error" | "warning" | "info" | "success">();
+  const [alertMessage, setAlertMessage] = useState<string>("");
+  const [alertSeverity, setAlertSeverity] = useState<"error" | "warning" | "info" | "success">();
   const handleSnackbarClose = () => {
     setOpenSnackbar(false);
   };
+
   const handleConfirmClick = async () => {
-    setSteps((prevSteps) =>
-      prevSteps.map((s) =>
-        s.id === step.id ? { ...s, confirmed: true } : s
-      )
-    );
-  
     try {
       for (const item of step.items) {
         const payload = {
@@ -118,18 +125,10 @@ const Step: React.FC<StepProps> = ({ step, onDropItem, onRemoveItem }) => {
           chemicalId: item.type === ItemType.CHEMICAL ? item.id : undefined,
         };
 
-        const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzg2NzIzMjF9.vjnLnEfbo9XVPcVCl65HnexuLF8BoN37Himc34wAEGo";
+        const token = "your-token-here";
         await createStepValue(token, payload);
       }
-  
-      // ✅ Reset the items after successful update
-      setSteps((prevSteps) =>
-        prevSteps.map((s) =>
-          s.id === step.id ? { ...s, confirmed: true } : s
-        )
-      );
-      step.items = []; // ✅ Clear step items
-  
+
       setAlertSeverity("success");
       setAlertMessage("Step confirmed and values updated!");
       setOpenSnackbar(true);
@@ -145,16 +144,10 @@ const Step: React.FC<StepProps> = ({ step, onDropItem, onRemoveItem }) => {
       console.error("Error confirming step:", error);
     }
   };
-  
-  
-  
-  
-  
-  // Check if the step has any items (i.e., if any values were dropped)
+
   const hasItems = (step.items || []).length > 0;
 
   return (
-    
     <Paper
       ref={dropRef}
       sx={{
@@ -163,28 +156,28 @@ const Step: React.FC<StepProps> = ({ step, onDropItem, onRemoveItem }) => {
         borderRadius: 1,
         boxShadow: 1,
         height: 180,
-        width: 200,
+        width: 180,
         transition: "background-color 0.2s",
       }}
     >
-        <Snackbar
-              open={openSnackbar}
-              autoHideDuration={3000}
-              onClose={handleSnackbarClose}
-              anchorOrigin={{ vertical: "top", horizontal: "right" }}
-            >
-              <Alert
-                onClose={handleSnackbarClose}
-                severity={alertSeverity}
-                sx={{ width: "100%", fontFamily: "Poppins, sans-serif" }}
-              >
-                {alertMessage}
-              </Alert>
-            </Snackbar>
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={3000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={alertSeverity}
+          sx={{ width: "100%", fontFamily: "Poppins, sans-serif" }}
+        >
+          {alertMessage}
+        </Alert>
+      </Snackbar>
       <div
         style={{
           display: "flex",
-          justifyContent: "space-between", 
+          justifyContent: "space-between",
           alignItems: "center",
         }}
       >
@@ -201,24 +194,24 @@ const Step: React.FC<StepProps> = ({ step, onDropItem, onRemoveItem }) => {
               height: "30px",
               borderRadius: "8px",
               "&:hover": {
-                backgroundColor: "#4072AF", 
+                backgroundColor: "#4072AF",
                 color: "white",
               },
             }}
           >
-            <FaCheck /> 
+            <FaCheck />
           </IconButton>
         )}
       </div>
 
       <div
         style={{
-          maxHeight: "100px", // Maximum height for the items list
-          overflowY: "auto", // Adds vertical scrollbar when content overflows
-          marginBottom: "10px", // Optional: adds some space between list and the button
+          maxHeight: "100px",
+          overflowY: "auto",
+          marginBottom: "10px",
         }}
       >
-      <ul style={{ listStyleType: "none", padding: 0 }}>
+        <ul style={{ listStyleType: "none", padding: 0 }}>
           {step.items.map((item, index) => (
             <li
               key={index}
@@ -230,11 +223,11 @@ const Step: React.FC<StepProps> = ({ step, onDropItem, onRemoveItem }) => {
               }}
             >
               {item.name}
-              {/* {item.id && (
+              {item.id && (
                 <span>
-                  ({item.type === ItemType.TEST ? 'Test' : 'Chemical'} ID: {item.id})
+                  ({item.type === ItemType.TEST ? "Test" : "Chemical"} ID: {item.id})
                 </span>
-              )} */}
+              )}
               <IconButton
                 size="small"
                 onClick={() => onRemoveItem(step.id, item.name)}
@@ -245,41 +238,40 @@ const Step: React.FC<StepProps> = ({ step, onDropItem, onRemoveItem }) => {
             </li>
           ))}
         </ul>
-
       </div>
     </Paper>
   );
 };
 
-
-
-const DraggableItem: React.FC<DraggableItemProps> = ({ name, type }) => {
+const DraggableItem: React.FC<DraggableItemProps> = ({ name, type, id }) => {
   const [, dragRef] = useDrag({
     type,
-    item: { name, type },
+    item: { name, type, id },
   });
 
   return (
-    <li ref={dragRef} style={{ marginBottom: "10px", cursor: "grab" }}>
+    <div ref={dragRef} style={{ marginBottom: "10px", cursor: "grab" }}>
       {name}
-    </li>
+    </div>
   );
 };
 
 const FlowCustomizationDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const [isEditing, setIsEditing] = useState(false); // State for edit mode
+  const [isEditing, setIsEditing] = useState(false);
   const [steps, setSteps] = useState<StepItem[]>([]);
-
-  const [tests, setTests] = useState<string[]>([]); // State for backend tests
-  const [chemicals, setChemicals] = useState<string[]>([]); // State for backend tests
+  const [tests, setTests] = useState<Test[]>([]);
+  const [chemicals, setChemicals] = useState<Chemical[]>([]);
 
   useEffect(() => {
     const fetchTests = async () => {
       try {
         const data = await getTests();
-        const testNames = data.map((test: { testName: string }) => test.testName);
-        setTests(testNames);
+        const testData = data.map((test: { id: number; testName: string }) => ({
+          id: test.id,
+          name: test.testName,
+        }));
+        setTests(testData);
       } catch (error) {
         console.error("Error fetching tests:", error);
       }
@@ -292,8 +284,11 @@ const FlowCustomizationDashboard: React.FC = () => {
     const fetchChemicals = async () => {
       try {
         const data = await getChemicals();
-        const chemicalName = data.map((chemical: { chemicalName: string }) => chemical.chemicalName);
-        setChemicals(chemicalName);
+        const chemicalData = data.map((chemical: { id: number; chemicalName: string }) => ({
+          id: chemical.id,
+          name: chemical.chemicalName,
+        }));
+        setChemicals(chemicalData);
       } catch (error) {
         console.error("Error fetching chemicals:", error);
       }
@@ -306,10 +301,11 @@ const FlowCustomizationDashboard: React.FC = () => {
     const fetchSteps = async () => {
       try {
         const data = await getSteps();
-        const stepsData = data.map((step: { id: number, stepName: string }) => ({
+        const stepsData = data.map((step: { id: number; stepName: string }) => ({
           id: step.id,
-          title: step.stepName,  // Ensure you assign stepName to title
-          items: [], // You can modify this if you have specific items to assign here
+          title: step.stepName,
+          items: [],
+          confirmed: false,
         }));
         setSteps(stepsData);
       } catch (error) {
@@ -320,37 +316,21 @@ const FlowCustomizationDashboard: React.FC = () => {
     fetchSteps();
   }, []);
 
-  const handleDropItem = (stepId: number, itemName: string, itemType: ItemType) => {
+  const handleDropItem = (stepId: number, itemName: string, itemType: ItemType, itemId: number) => {
     setSteps((prevSteps) =>
-      prevSteps.map((step) => {
-        if (step.id === stepId) {
-          // Find the ID based on the item type and name
-          let itemId: number | undefined;
-          if (itemType === ItemType.TEST) {
-            const testIndex = tests.findIndex(test => test === itemName);
-            itemId = testIndex !== -1 ? testIndex + 1 : undefined;
-          } else if (itemType === ItemType.CHEMICAL) {
-            const chemicalIndex = chemicals.findIndex(chemical => chemical === itemName);
-            itemId = chemicalIndex !== -1 ? chemicalIndex + 1 : undefined;
-          }
-  
-          // Check if item already exists
-          const itemExists = step.items.some(item => 
-            item.name === itemName && item.type === itemType
-          );
-  
-          if (!itemExists) {
-            return {
+      prevSteps.map((step) =>
+        step.id === stepId
+          ? {
               ...step,
-              items: [...step.items, { name: itemName, type: itemType, id: itemId }]
-            };
-          }
-        }
-        return step;
-      })
+              items: [
+                ...step.items,
+                { name: itemName, type: itemType, id: itemId },
+              ],
+            }
+          : step
+      )
     );
-  };;
-  
+  };
 
   const handleRemoveItem = (stepId: number, itemName: string) => {
     setSteps((prevSteps) =>
@@ -361,7 +341,6 @@ const FlowCustomizationDashboard: React.FC = () => {
       )
     );
   };
-  
 
   const handleAddChemicalClick = () => {
     navigate("/flow/add-chemicals");
@@ -370,11 +349,13 @@ const FlowCustomizationDashboard: React.FC = () => {
   const handleAddStep = () => {
     navigate("/flow/add-step");
   };
+
   const handleAddTestClick = () => {
     navigate("/flow/add-test");
   };
+
   const handleEditStep = () => {
-    setIsEditing((prev) => !prev); // Toggle edit mode
+    setIsEditing((prev) => !prev);
   };
 
   const moveStep = async (fromIndex: number, toIndex: number) => {
@@ -382,10 +363,8 @@ const FlowCustomizationDashboard: React.FC = () => {
     const [removedStep] = updatedSteps.splice(fromIndex, 1);
     updatedSteps.splice(toIndex, 0, removedStep);
 
-    // Update local state
     setSteps(updatedSteps);
 
-    // Prepare the steps data
     const stepsToUpdate = updatedSteps.map((step, index) => ({
       id: step.id,
       stepOrder: index + 1,
@@ -399,7 +378,6 @@ const FlowCustomizationDashboard: React.FC = () => {
     }
   };
 
-
   return (
     <DndProvider backend={HTML5Backend}>
       <Box
@@ -411,10 +389,6 @@ const FlowCustomizationDashboard: React.FC = () => {
           minHeight: "100vh",
         }}
       >
-        <Typography variant="h4" color="black" gutterBottom>
-          Flow Customization
-        </Typography>
-
         <Grid container spacing={2}>
           {/* Left Section */}
           <Grid item xs={12} md={4}>
@@ -450,22 +424,37 @@ const FlowCustomizationDashboard: React.FC = () => {
                   <FaPlus />
                 </IconButton>
               </div>
-              <ul style={{ listStyleType: "none", padding: 0 }}
-              >                {tests.map((test, index) => (
-                <li style={{
-                  backgroundColor: "#F3FAFD", // Light blue background
-                  padding: "7px",
-                  borderRadius: "5px",
-                  marginBottom: "8px",
-                  boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)", // Subtle shadow for better visibility
-                }}>                  <DraggableItem key={index} name={test} type={ItemType.TEST} />
-                </li>
-              ))}
+              <ul style={{ listStyleType: "none", padding: 0 }}>
+                {tests.map((test) => (
+                  <li
+                    key={test.id}
+                    style={{
+                      backgroundColor: "#F3FAFD",
+                      padding: "7px",
+                      borderRadius: "5px",
+                      marginBottom: "8px",
+                      boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
+                    }}
+                  >
+                    <DraggableItem
+                      key={test.id}
+                      name={test.name}
+                      type={ItemType.TEST}
+                      id={test.id}
+                    />
+                  </li>
+                ))}
               </ul>
             </Paper>
 
             <Paper sx={{ padding: 2, maxHeight: "300px", overflowY: "auto" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
                 <Typography variant="h6" gutterBottom>
                   Chemicals
                 </Typography>
@@ -484,29 +473,39 @@ const FlowCustomizationDashboard: React.FC = () => {
                 </IconButton>
               </div>
               <ul style={{ listStyleType: "none", padding: 0 }}>
-                {chemicals.map((chemical, index) => (
+                {chemicals.map((chemical) => (
                   <li
-                    key={index}
+                    key={chemical.id}
                     style={{
-                      backgroundColor: "#DFF5FF", // Light blue background
+                      backgroundColor: "#DFF5FF",
                       padding: "7px",
                       borderRadius: "5px",
                       marginBottom: "8px",
-                      boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)", // Subtle shadow for better visibility
+                      boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
                     }}
                   >
-                    <DraggableItem name={chemical} type={ItemType.CHEMICAL} />
+                    <DraggableItem
+                      key={chemical.id}
+                      name={chemical.name}
+                      type={ItemType.CHEMICAL}
+                      id={chemical.id}
+                    />
                   </li>
                 ))}
               </ul>
             </Paper>
           </Grid>
 
-
           {/* Right Section */}
           <Grid item xs={12} md={8}>
             <Paper sx={{ padding: 2, height: "96%" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
                 <Typography variant="h5" sx={{ flex: 1 }}>
                   Steps
                 </Typography>
@@ -542,17 +541,15 @@ const FlowCustomizationDashboard: React.FC = () => {
 
               <Grid container spacing={2} sx={{ marginTop: 2 }}>
                 {steps.map((step, index) => (
-                  <Grid item sm={6} md={4} key={index}>
+                  <Grid item sm={6} md={4} key={step.id}>
                     <DraggableStep
-                      key={step.id}
                       step={step}
                       index={index}
                       moveStep={moveStep}
                       onDropItem={handleDropItem}
                       onRemoveItem={handleRemoveItem}
-                      isEditing={isEditing} // Pass the editing state
+                      isEditing={isEditing}
                     />
-
                   </Grid>
                 ))}
               </Grid>
