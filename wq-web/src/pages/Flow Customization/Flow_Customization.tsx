@@ -47,6 +47,7 @@ interface DraggableStepProps {
   onDropItem: (stepId: number, itemName: string, itemType: ItemType, itemId: number) => void;
   onRemoveItem: (stepId: number, itemName: string) => void;
   isEditing: boolean;
+  setSteps: React.Dispatch<React.SetStateAction<StepItem[]>>; // Add this line
 }
 
 interface DraggableItemProps {
@@ -62,6 +63,7 @@ const DraggableStep: React.FC<DraggableStepProps> = ({
   onDropItem,
   onRemoveItem,
   isEditing,
+  setSteps, // Add this line
 }) => {
   const [, dragRef] = useDrag({
     type: ItemType.STEP,
@@ -81,7 +83,12 @@ const DraggableStep: React.FC<DraggableStepProps> = ({
 
   return (
     <div ref={(node) => dragRef(dropRef(node))}>
-      <Step step={step} onDropItem={onDropItem} onRemoveItem={onRemoveItem} />
+      <Step
+        step={step}
+        onDropItem={onDropItem}
+        onRemoveItem={onRemoveItem}
+        setSteps={setSteps} // Pass setSteps here
+      />
     </div>
   );
 };
@@ -90,9 +97,10 @@ interface StepProps {
   step: StepItem;
   onDropItem: (stepId: number, itemName: string, itemType: ItemType, itemId: number) => void;
   onRemoveItem: (stepId: number, itemName: string) => void;
+  setSteps: React.Dispatch<React.SetStateAction<StepItem[]>>; // Add this line
 }
 
-const Step: React.FC<StepProps> = ({ step, onDropItem, onRemoveItem }) => {
+const Step: React.FC<StepProps> = ({ step, onDropItem, onRemoveItem, setSteps }) => {
   const [{ isOver }, dropRef] = useDrop({
     accept: [ItemType.CHEMICAL, ItemType.TEST],
     drop: (item: DraggableItemProps) => {
@@ -125,9 +133,16 @@ const Step: React.FC<StepProps> = ({ step, onDropItem, onRemoveItem }) => {
           chemicalId: item.type === ItemType.CHEMICAL ? item.id : undefined,
         };
 
-        const token = "your-token-here";
+        const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3MzkzMjAwNTR9.VENbOG2AGTA77cIHirCq6FAagBfdV1LS0RDvekwcrJE";
         await createStepValue(token, payload);
       }
+
+      // Clear the items for the confirmed step
+      setSteps((prevSteps) =>
+        prevSteps.map((s) =>
+          s.id === step.id ? { ...s, confirmed: true, items: [] } : s
+        )
+      );
 
       setAlertSeverity("success");
       setAlertMessage("Step confirmed and values updated!");
@@ -223,11 +238,6 @@ const Step: React.FC<StepProps> = ({ step, onDropItem, onRemoveItem }) => {
               }}
             >
               {item.name}
-              {item.id && (
-                <span>
-                  ({item.type === ItemType.TEST ? "Test" : "Chemical"} ID: {item.id})
-                </span>
-              )}
               <IconButton
                 size="small"
                 onClick={() => onRemoveItem(step.id, item.name)}
@@ -549,6 +559,7 @@ const FlowCustomizationDashboard: React.FC = () => {
                       onDropItem={handleDropItem}
                       onRemoveItem={handleRemoveItem}
                       isEditing={isEditing}
+                      setSteps={setSteps} // Pass setSteps here
                     />
                   </Grid>
                 ))}
