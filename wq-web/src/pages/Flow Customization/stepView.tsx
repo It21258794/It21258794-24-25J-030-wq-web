@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Box, Grid, TextField, Button, Typography, Paper, Snackbar, Alert } from "@mui/material";
 import { Table, TableHead, TableRow, TableCell, TableBody } from "@mui/material";
-import { getStepValuesByStepId ,getSteps} from "../../server/flow-customisation/flow-customisationAPI"; // Import the API function
+import { getStepValuesByStepId, getSteps } from "../../server/flow-customisation/flow-customisationAPI"; // Import the API function
 
 interface StepValue {
   id: number;
@@ -20,6 +20,11 @@ interface Test {
   value?: string;
 }
 
+interface Step {
+  id: number;
+  stepName: string;
+}
+
 const StepView: React.FC = () => {
   const { stepId } = useParams<{ stepId: string }>(); // Get stepId from the URL
   const [testValues, setTestValues] = useState<{ [testName: string]: string }>({});
@@ -30,13 +35,23 @@ const StepView: React.FC = () => {
   const [alertSeverity, setAlertSeverity] = useState<"error" | "warning" | "info" | "success">();
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
   const [searchDate, setSearchDate] = useState<string>("");
+  const [stepName, setStepName] = useState<string>(""); // State to store the step name
   const navigate = useNavigate();
 
-  // Fetch step values from the backend
+  // Fetch step details and step values from the backend
   useEffect(() => {
-    const fetchStepValues = async () => {
+    const fetchStepDetails = async () => {
       try {
         const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3MzkzMjM5Njl9.9CDEkqzgb1kAergh_iSLel6LLpABb6alMvZ9PcO7rz4";
+
+        // Fetch step details
+        const steps = await getSteps(token);
+        const step = steps.find((step: Step) => step.id === Number(stepId));
+        if (step) {
+          setStepName(step.stepName); // Set the step name
+        }
+
+        // Fetch step values
         const stepValues = await getStepValuesByStepId(Number(stepId), token);
 
         // Map step values to pastTests and currentTests
@@ -60,14 +75,14 @@ const StepView: React.FC = () => {
         setPastTests(pastTestsData);
         setCurrentTests(currentTestsData);
       } catch (error) {
-        console.error("Error fetching step values:", error);
+        console.error("Error fetching step details or values:", error);
         setAlertSeverity("error");
-        setAlertMessage("Failed to fetch step values. Please try again.");
+        setAlertMessage("Failed to fetch step details or values. Please try again.");
         setOpenSnackbar(true);
       }
     };
 
-    fetchStepValues();
+    fetchStepDetails();
   }, [stepId]);
 
   // Handle input value change
@@ -137,7 +152,7 @@ const StepView: React.FC = () => {
       }}
     >
       <Grid item xs={12} md={8}>
-        {/* Right side: Add Values to Coagulation form */}
+        {/* Right side: Add Values to Step form */}
         <Paper
           sx={{
             padding: 4,
@@ -171,7 +186,7 @@ const StepView: React.FC = () => {
             </Button>
           </Box>
           <Typography variant="h4" color="black" gutterBottom>
-            Coagulation
+            {stepName} {/* Display the dynamic step name */}
           </Typography>
           <Box
             sx={{
@@ -185,7 +200,7 @@ const StepView: React.FC = () => {
             }}
           >
             <Typography variant="h5" gutterBottom sx={{ textAlign: "center" }}>
-              Add new Values to Coagulation
+              Add new Values to {stepName} {/* Display the dynamic step name */}
             </Typography>
             {/* Tests List with Input Fields */}
             {currentTests.length === 0 ? (
