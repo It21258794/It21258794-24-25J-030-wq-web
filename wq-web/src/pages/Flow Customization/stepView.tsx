@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Box, Grid, TextField, Button, Typography, Paper, Snackbar, Alert } from "@mui/material";
 import { Table, TableHead, TableRow, TableCell, TableBody } from "@mui/material";
-import { getStepValuesByStepId, getSteps } from "../../server/flow-customisation/flow-customisationAPI"; // Import the API function
+import { getStepValuesByStepId, getSteps, updateStepValue } from "../../server/flow-customisation/flow-customisationAPI";
 
 interface StepValue {
   id: number;
@@ -11,6 +11,8 @@ interface StepValue {
   date?: string;
   time?: string;
   value?: string;
+  testId?: number;
+  chemicalId?: number;
 }
 
 interface Test {
@@ -25,38 +27,52 @@ interface Step {
   stepName: string;
 }
 
+// This uses ID as the key to ensure uniqueness
+interface InputValues {
+  [id: number]: string;
+}
+
 const StepView: React.FC = () => {
-  const { stepId } = useParams<{ stepId: string }>(); // Get stepId from the URL
-  const [testValues, setTestValues] = useState<{ [testName: string]: string }>({});
+  const { stepId } = useParams<{ stepId: string }>();
+  const [inputValues, setInputValues] = useState<InputValues>({});
   const [pastTests, setPastTests] = useState<Test[]>([]);
   const [currentTests, setCurrentTests] = useState<Test[]>([]);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertSeverity, setAlertSeverity] = useState<"error" | "warning" | "info" | "success">();
-  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
+  const [pendingSubmissions, setPendingSubmissions] = useState<Set<number>>(new Set());
   const [searchDate, setSearchDate] = useState<string>("");
-  const [stepName, setStepName] = useState<string>(""); // State to store the step name
+  const [stepName, setStepName] = useState<string>("");
+  const [stepValueMap, setStepValueMap] = useState<Map<number, StepValue>>(new Map());
   const navigate = useNavigate();
+
+  // Token constant - could be moved to environment variable or auth context
+  const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzk3MjE5NDJ9.tiglE-V_R3yl930QOhdtTEejAzGLndY2g3tEaCZHthU";
 
   // Fetch step details and step values from the backend
   useEffect(() => {
     const fetchStepDetails = async () => {
       try {
-        const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3MzkzMjM5Njl9.9CDEkqzgb1kAergh_iSLel6LLpABb6alMvZ9PcO7rz4";
-
         // Fetch step details
-        const steps = await getSteps(token);
+        const steps = await getSteps(TOKEN);
         const step = steps.find((step: Step) => step.id === Number(stepId));
         if (step) {
-          setStepName(step.stepName); // Set the step name
+          setStepName(step.stepName);
         }
 
         // Fetch step values
-        const stepValues = await getStepValuesByStepId(Number(stepId), token);
+        const stepValues = await getStepValuesByStepId(Number(stepId), TOKEN);
+        
+        // Create a map for quick lookup by ID
+        const valueMap = new Map();
+        stepValues.forEach((value: StepValue) => {
+          valueMap.set(value.id, value);
+        });
+        setStepValueMap(valueMap);
 
         // Map step values to pastTests and currentTests
         const pastTestsData = stepValues
-          .filter((value: StepValue) => value.value) // Filter tests with values (past tests)
+          .filter((value: StepValue) => value.value)
           .map((value: StepValue) => ({
             testName: value.testName || value.chemicalName || "Unknown",
             date: value.date,
@@ -65,8 +81,9 @@ const StepView: React.FC = () => {
           }));
 
         const currentTestsData = stepValues
-          .filter((value: StepValue) => !value.value) // Filter tests without values (current tests)
+          .filter((value: StepValue) => !value.value)
           .map((value: StepValue) => ({
+            id: value.id,
             testName: value.testName || value.chemicalName || "Unknown",
             date: value.date,
             time: value.time,
@@ -82,46 +99,109 @@ const StepView: React.FC = () => {
       }
     };
 
-    fetchStepDetails();
+    if (stepId) {
+      fetchStepDetails();
+    }
   }, [stepId]);
 
   // Handle input value change
-  const handleInputChange = (testName: string, value: string) => {
-    setTestValues((prev) => ({
+  const handleInputChange = (id: number, value: string) => {
+    setInputValues((prev) => ({
       ...prev,
-      [testName]: value,
+      [id]: value,
     }));
   };
 
-  // Handle form submission
-  const handleConfirmClick = () => {
-    setIsButtonDisabled(true);
-
-    // Check if any input is empty
-    if (currentTests.some((test) => !testValues[test.testName])) {
+  // Handle individual test confirmation
+  const handleConfirmSingleTest = async (id: number, testName: string) => {
+    // Check if the value is empty
+    if (!inputValues[id]) {
       setAlertSeverity("error");
-      setAlertMessage("Please fill in all test values.");
+      setAlertMessage(`Please fill in the value for ${testName}.`);
       setOpenSnackbar(true);
       return;
     }
-
-    // Add current tests to past tests
-    const updatedPastTests = currentTests.map((test) => ({
-      ...test,
-      value: testValues[test.testName],
-    }));
-    setPastTests((prev) => [...prev, ...updatedPastTests]);
-
-    // Clear current test values and reset the current tests
-    setTestValues({});
-    setCurrentTests([]);
-
-    // Show success message
-    setAlertSeverity("success");
-    setAlertMessage("Test values added successfully.");
-    setOpenSnackbar(true);
+  
+    // Check if the same value already exists for this test/chemical
+    const isDuplicate = pastTests.some(
+      (test) =>
+        test.testName === testName && test.value === inputValues[id]
+    );
+  
+    if (isDuplicate) {
+      setAlertSeverity("error");
+      setAlertMessage(
+        `The value "${inputValues[id]}" for ${testName} already exists. Please enter a different value.`
+      );
+      setOpenSnackbar(true);
+      return;
+    }
+  
+    // Add to pending submissions
+    setPendingSubmissions((prev) => new Set([...prev, id]));
+  
+    try {
+      // Get the step value from our map
+      const stepValue = stepValueMap.get(id);
+  
+      // Validate stepValue
+      if (!stepValue || stepValue.id === undefined || stepValue.id === null) {
+        throw new Error(`Could not find step value or ID for test/chemical: ${testName}`);
+      }
+  
+      // Determine if this is a test or chemical based on the actual properties in stepValue
+      const isTest = !!stepValue.testName;
+      const value = Number(inputValues[id]);
+  
+      // Pass the correct ID to updateStepValue
+      await updateStepValue(
+        stepValue.id,
+        Number(stepId),
+        isTest ? value : null,
+        !isTest ? value : null,
+        TOKEN
+      );
+  
+      // Add to past tests
+      const currentTest = currentTests.find((test) => test.id === id);
+      if (currentTest) {
+        const updatedTest = {
+          testName: currentTest.testName,
+          date: currentTest.date,
+          time: currentTest.time,
+          value: inputValues[id],
+        };
+        setPastTests((prev) => [...prev, updatedTest]);
+      }
+  
+      // Remove from current tests
+      setCurrentTests((prev) => prev.filter((test) => test.id !== id));
+  
+      // Clear the value for this test
+      setInputValues((prev) => {
+        const newValues = { ...prev };
+        delete newValues[id];
+        return newValues;
+      });
+  
+      // Show success message
+      setAlertSeverity("success");
+      setAlertMessage(`Value for ${testName} added successfully.`);
+      setOpenSnackbar(true);
+    } catch (error) {
+      console.error(`Error updating value for ${testName}:`, error);
+      setAlertSeverity("error");
+      setAlertMessage(`Failed to update value for ${testName}. Please try again.`);
+      setOpenSnackbar(true);
+    } finally {
+      // Remove from pending submissions
+      setPendingSubmissions((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(id);
+        return newSet;
+      });
+    }
   };
-
   // Handle cancel action
   const handleCancelClick = () => {
     navigate(-1);
@@ -186,7 +266,7 @@ const StepView: React.FC = () => {
             </Button>
           </Box>
           <Typography variant="h4" color="black" gutterBottom>
-            {stepName} {/* Display the dynamic step name */}
+            {stepName}
           </Typography>
           <Box
             sx={{
@@ -200,12 +280,12 @@ const StepView: React.FC = () => {
             }}
           >
             <Typography variant="h5" gutterBottom sx={{ textAlign: "center" }}>
-              Add new Values to {stepName} {/* Display the dynamic step name */}
+              Add new Values to {stepName}
             </Typography>
             {/* Tests List with Input Fields */}
             {currentTests.length === 0 ? (
               <Typography variant="body1" sx={{ textAlign: "left" }}>
-                No test to add values.
+                No test or chemical values to add.
               </Typography>
             ) : (
               <Box
@@ -217,66 +297,56 @@ const StepView: React.FC = () => {
                   borderRadius: "8px",
                 }}
               >
-                {currentTests.map((test) => (
-                  <Box
-                    key={test.testName}
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 2,
-                    }}
-                  >
-                    <Typography
-                      variant="body1"
-                      sx={{
-                        width: "45%",
-                        textAlign: "left",
-                      }}
-                    >
-                      {test.testName}
-                    </Typography>
+               {currentTests.map((test) => (
+                 <Box
+                   key={test.id}
+                   sx={{
+                     display: "flex",
+                     alignItems: "center",
+                     gap: 2,
+                   }}
+                 >
+                   <Typography
+                     variant="body1"
+                     sx={{
+                       width: "45%",
+                       textAlign: "left",
+                     }}
+                   >
+                     {test.testName}
+                   </Typography>
 
-                    <TextField
-                      variant="outlined"
-                      size="small"
-                      sx={{
-                        marginLeft: "18%",
-                        width: "30%",
-                      }}
-                      value={testValues[test.testName] || ""}
-                      onChange={(e) => handleInputChange(test.testName, e.target.value)}
-                    />
-                  </Box>
-                ))}
+                   <TextField
+                     variant="outlined"
+                     size="small"
+                     sx={{
+                       width: "30%",
+                     }}
+                     value={inputValues[test.id] || ""}
+                     onChange={(e) => handleInputChange(test.id, e.target.value)}
+                   />
+
+                   <Button
+                     variant="contained"
+                     size="small"
+                     sx={{
+                       backgroundColor: "#102D4D",
+                       color: "white",
+                       "&:hover": {
+                         backgroundColor: "#154273",
+                         boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                       },
+                       ml: 2,
+                     }}
+                     onClick={() => handleConfirmSingleTest(test.id, test.testName)}
+                     disabled={pendingSubmissions.has(test.id)}
+                   >
+                     Confirm
+                   </Button>
+                 </Box>
+               ))}
               </Box>
             )}
-
-            {/* Buttons */}
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "flex-start",
-                gap: 2,
-                marginTop: 3,
-                marginLeft: "77%",
-              }}
-            >
-              <Button
-                variant="contained"
-                sx={{
-                  backgroundColor: "#102D4D",
-                  color: "white",
-                  "&:hover": {
-                    backgroundColor: "#154273",
-                    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-                  },
-                }}
-                onClick={handleConfirmClick}
-                disabled={isButtonDisabled}
-              >
-                Confirm
-              </Button>
-            </Box>
           </Box>
 
           {/* Past Tests Table */}
@@ -303,7 +373,7 @@ const StepView: React.FC = () => {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Test Name</TableCell>
+                  <TableCell>Name</TableCell>
                   <TableCell>Date</TableCell>
                   <TableCell>Time</TableCell>
                   <TableCell>Value</TableCell>
