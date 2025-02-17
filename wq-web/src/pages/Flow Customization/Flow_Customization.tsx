@@ -125,40 +125,40 @@ const Step: React.FC<StepProps> = ({ step, onDropItem, onRemoveItem, setSteps })
   };
 
   const handleConfirmClick = async () => {
-    try {
-      for (const item of step.items) {
-        const payload = {
-          stepId: step.id,
-          testId: item.type === ItemType.TEST ? item.id : undefined,
-          chemicalId: item.type === ItemType.CHEMICAL ? item.id : undefined,
-        };
+  try {
+    for (const item of step.items) {
+      const payload = {
+        stepId: step.id,
+        testId: item.type === ItemType.TEST ? item.id : undefined,
+        chemicalId: item.type === ItemType.CHEMICAL ? item.id : undefined,
+      };
 
-        const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3MzkzMjAwNTR9.VENbOG2AGTA77cIHirCq6FAagBfdV1LS0RDvekwcrJE";
-        await createStepValue(token, payload);
-      }
-
-      // Clear the items for the confirmed step
-      setSteps((prevSteps) =>
-        prevSteps.map((s) =>
-          s.id === step.id ? { ...s, confirmed: true, items: [] } : s
-        )
-      );
-
-      setAlertSeverity("success");
-      setAlertMessage("Step confirmed and values updated!");
-      setOpenSnackbar(true);
-      console.log("Step confirmed and values updated!");
-    } catch (error) {
-      setAlertSeverity("error");
-      setAlertMessage(
-        error instanceof Error
-          ? error.message
-          : "An unexpected error occurred. Please try again."
-      );
-      setOpenSnackbar(true);
-      console.error("Error confirming step:", error);
+      const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzk3MTQwNjV9.jqOXKf-CGR7k9Hd4vpkQaB9iJ4a5A5RNGooL9ch7Y4I";
+      await createStepValue(token, payload);
     }
-  };
+
+    // Update the state immutably
+    setSteps((prevSteps) =>
+      prevSteps.map((s) =>
+        s.id === step.id ? { ...s, confirmed: false, items: [] } : s
+      )
+    );
+
+    setAlertSeverity("success");
+    setAlertMessage("Step confirmed and values updated!");
+    setOpenSnackbar(true);
+    console.log("Step confirmed and values updated!");
+  } catch (error) {
+    setAlertSeverity("error");
+    setAlertMessage(
+      error instanceof Error
+        ? error.message
+        : "An unexpected error occurred. Please try again."
+    );
+    setOpenSnackbar(true);
+    console.error("Error confirming step:", error);
+  }
+};
 
   const hasItems = (step.items || []).length > 0;
 
@@ -252,7 +252,6 @@ const Step: React.FC<StepProps> = ({ step, onDropItem, onRemoveItem, setSteps })
     </Paper>
   );
 };
-
 const DraggableItem: React.FC<DraggableItemProps> = ({ name, type, id }) => {
   const [, dragRef] = useDrag({
     type,

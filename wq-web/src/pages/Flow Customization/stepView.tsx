@@ -420,42 +420,41 @@ const StepView: React.FC = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                
-                {filteredStepValues.length > 0 ? (
-                  filteredStepValues.map((stepValue, index) => {
-                    const isTest = !!stepValue.testName;
-                    const rowColor = isTest ? "#FFCCCB" : "#ADD8E6";
-                    const displayValue = isTest ? stepValue.testValue : stepValue.chemicalValue;
-                    const { date, time } = formatDateTime(stepValue.valueAddedDate); // Use valueAddedDate
-                    const stepName = getStepNameById(stepValue.stepId);
+  {filteredStepValues.length > 0 ? (
+    filteredStepValues.map((stepValue, index) => {
+      const isTest = !!stepValue.testName;
+      const rowColor = isTest ? "#F3FAFD" : "#DFF5FF"; // Updated colors
+      const displayValue = isTest ? stepValue.testValue : stepValue.chemicalValue;
+      const { date, time } = formatDateTime(stepValue.valueAddedDate);
+      const stepName = getStepNameById(stepValue.stepId);
 
-                    return (
-                      <TableRow
-                        key={index}
-                        sx={{
-                          backgroundColor: rowColor,
-                          "&:hover": {
-                            backgroundColor: isTest ? "#FFB6B6" : "#9AC5E6",
-                          },
-                        }}
-                      >
-                        <TableCell>{index + 1}</TableCell>
-                        <TableCell>{stepName}</TableCell>
-                        <TableCell>{stepValue.testName || stepValue.chemicalName || "Unknown"}</TableCell>
-                        <TableCell>{displayValue}</TableCell>
-                        <TableCell>{date}</TableCell>
-                        <TableCell>{time}</TableCell>
-                      </TableRow>
-                    );
-                  })
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={6} align="center">
-                      No data available
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
+      return (
+        <TableRow
+          key={index}
+          sx={{
+            backgroundColor: rowColor,
+            "&:hover": {
+              backgroundColor: isTest ? "#E0F2F7" : "#C2E7FF", // Optional: Adjust hover colors
+            },
+          }}
+        >
+          <TableCell>{index + 1}</TableCell>
+          <TableCell>{stepName}</TableCell>
+          <TableCell>{stepValue.testName || stepValue.chemicalName || "Unknown"}</TableCell>
+          <TableCell>{displayValue}</TableCell>
+          <TableCell>{date}</TableCell>
+          <TableCell>{time}</TableCell>
+        </TableRow>
+      );
+    })
+  ) : (
+    <TableRow>
+      <TableCell colSpan={6} align="center">
+        No data available
+      </TableCell>
+    </TableRow>
+  )}
+</TableBody>
             </Table>
           </Box>
         </Paper>
