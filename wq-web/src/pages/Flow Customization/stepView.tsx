@@ -2,20 +2,23 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Box, Grid, TextField, Button, Typography, Paper, Snackbar, Alert } from "@mui/material";
 import { Table, TableHead, TableRow, TableCell, TableBody } from "@mui/material";
-import { getStepValuesByStepId, getSteps, updateStepValue } from "../../server/flow-customisation/flow-customisationAPI";
+import { getStepValuesByStepId, getSteps, updateStepValue, getAllStepValues } from "../../server/flow-customisation/flow-customisationAPI";
 
 interface StepValue {
   id: number;
-  testName?: string;
-  chemicalName?: string;
-  date?: string;
-  time?: string;
-  value?: string;
+  stepId: number;
   testId?: number;
   chemicalId?: number;
+  testName?: string;
+  chemicalName?: string;
+  testValue?: string;
+  chemicalValue?: string;
+  valueAddedDate?: string;
+  status?: string;
 }
 
 interface Test {
+  id: number;
   testName: string;
   date?: string;
   time?: string;
@@ -27,7 +30,6 @@ interface Step {
   stepName: string;
 }
 
-// This uses ID as the key to ensure uniqueness
 interface InputValues {
   [id: number]: string;
 }
@@ -44,33 +46,57 @@ const StepView: React.FC = () => {
   const [searchDate, setSearchDate] = useState<string>("");
   const [stepName, setStepName] = useState<string>("");
   const [stepValueMap, setStepValueMap] = useState<Map<number, StepValue>>(new Map());
+  const [allStepValues, setAllStepValues] = useState<StepValue[]>([]);
+  const [steps, setSteps] = useState<Step[]>([]);
   const navigate = useNavigate();
 
-  // Token constant - could be moved to environment variable or auth context
-  const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzk3MjE5NDJ9.tiglE-V_R3yl930QOhdtTEejAzGLndY2g3tEaCZHthU";
+  const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzk4MTgwMTl9.Lrc3JYMMhIFxhhAqmL0gMjunClfGuyKvW_ZVofgvI2Q";
 
-  // Fetch step details and step values from the backend
+  useEffect(() => {
+    const fetchAllStepValues = async () => {
+      try {
+        const data = await getAllStepValues(TOKEN);
+        setAllStepValues(data);
+      } catch (error) {
+        console.error("Error fetching all step values:", error);
+        setAlertSeverity("error");
+        setAlertMessage("Failed to fetch all step values. Please try again.");
+        setOpenSnackbar(true);
+      }
+    };
+
+    const fetchSteps = async () => {
+      try {
+        const data = await getSteps(TOKEN);
+        setSteps(data);
+      } catch (error) {
+        console.error("Error fetching steps:", error);
+        setAlertSeverity("error");
+        setAlertMessage("Failed to fetch steps. Please try again.");
+        setOpenSnackbar(true);
+      }
+    };
+
+    fetchAllStepValues();
+    fetchSteps();
+  }, []);
+
   useEffect(() => {
     const fetchStepDetails = async () => {
       try {
-        // Fetch step details
-        const steps = await getSteps(TOKEN);
         const step = steps.find((step: Step) => step.id === Number(stepId));
         if (step) {
           setStepName(step.stepName);
         }
 
-        // Fetch step values
         const stepValues = await getStepValuesByStepId(Number(stepId), TOKEN);
         
-        // Create a map for quick lookup by ID
         const valueMap = new Map();
         stepValues.forEach((value: StepValue) => {
           valueMap.set(value.id, value);
         });
         setStepValueMap(valueMap);
 
-        // Map step values to pastTests and currentTests
         const pastTestsData = stepValues
           .filter((value: StepValue) => value.value)
           .map((value: StepValue) => ({
@@ -102,9 +128,8 @@ const StepView: React.FC = () => {
     if (stepId) {
       fetchStepDetails();
     }
-  }, [stepId]);
+  }, [stepId, steps]);
 
-  // Handle input value change
   const handleInputChange = (id: number, value: string) => {
     setInputValues((prev) => ({
       ...prev,
@@ -112,9 +137,26 @@ const StepView: React.FC = () => {
     }));
   };
 
-  // Handle individual test confirmation
+  const formatDateTime = (datetimeStr: string | undefined) => {
+    if (!datetimeStr) return { date: "", time: "" };
+  
+    try {
+      const datetime = new Date(datetimeStr);
+      if (isNaN(datetime.getTime())) {
+        throw new Error("Invalid date format");
+      }
+      
+      // Format date as YYYY-MM-DD for consistency
+      const date = datetime.toISOString().split('T')[0];
+      const time = datetime.toLocaleTimeString();
+      return { date, time };
+    } catch (error) {
+      console.error("Error formatting datetime:", error);
+      return { date: "", time: "" };
+    }
+  };
+
   const handleConfirmSingleTest = async (id: number, testName: string) => {
-    // Check if the value is empty
     if (!inputValues[id]) {
       setAlertSeverity("error");
       setAlertMessage(`Please fill in the value for ${testName}.`);
@@ -122,10 +164,8 @@ const StepView: React.FC = () => {
       return;
     }
   
-    // Check if the same value already exists for this test/chemical
     const isDuplicate = pastTests.some(
-      (test) =>
-        test.testName === testName && test.value === inputValues[id]
+      (test) => test.testName === testName && test.value === inputValues[id]
     );
   
     if (isDuplicate) {
@@ -137,23 +177,18 @@ const StepView: React.FC = () => {
       return;
     }
   
-    // Add to pending submissions
     setPendingSubmissions((prev) => new Set([...prev, id]));
   
     try {
-      // Get the step value from our map
       const stepValue = stepValueMap.get(id);
   
-      // Validate stepValue
       if (!stepValue || stepValue.id === undefined || stepValue.id === null) {
         throw new Error(`Could not find step value or ID for test/chemical: ${testName}`);
       }
   
-      // Determine if this is a test or chemical based on the actual properties in stepValue
       const isTest = !!stepValue.testName;
       const value = Number(inputValues[id]);
   
-      // Pass the correct ID to updateStepValue
       await updateStepValue(
         stepValue.id,
         Number(stepId),
@@ -162,7 +197,15 @@ const StepView: React.FC = () => {
         TOKEN
       );
   
-      // Add to past tests
+      const updatedStepValue: StepValue = {
+        ...stepValue,
+        testValue: isTest ? inputValues[id] : undefined,
+        chemicalValue: !isTest ? inputValues[id] : undefined,
+        valueAddedDate: new Date().toISOString(),
+      };
+  
+      setAllStepValues((prev) => [...prev, updatedStepValue]);
+  
       const currentTest = currentTests.find((test) => test.id === id);
       if (currentTest) {
         const updatedTest = {
@@ -174,17 +217,14 @@ const StepView: React.FC = () => {
         setPastTests((prev) => [...prev, updatedTest]);
       }
   
-      // Remove from current tests
       setCurrentTests((prev) => prev.filter((test) => test.id !== id));
   
-      // Clear the value for this test
       setInputValues((prev) => {
         const newValues = { ...prev };
         delete newValues[id];
         return newValues;
       });
   
-      // Show success message
       setAlertSeverity("success");
       setAlertMessage(`Value for ${testName} added successfully.`);
       setOpenSnackbar(true);
@@ -194,7 +234,6 @@ const StepView: React.FC = () => {
       setAlertMessage(`Failed to update value for ${testName}. Please try again.`);
       setOpenSnackbar(true);
     } finally {
-      // Remove from pending submissions
       setPendingSubmissions((prev) => {
         const newSet = new Set(prev);
         newSet.delete(id);
@@ -202,192 +241,220 @@ const StepView: React.FC = () => {
       });
     }
   };
-  // Handle cancel action
+
   const handleCancelClick = () => {
     navigate(-1);
   };
 
-  // Handle date change for filtering past tests
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchDate(e.target.value);
+    const newDate = e.target.value;
+    if (!newDate || /^\d{4}-\d{2}-\d{2}$/.test(newDate)) {
+      setSearchDate(newDate);
+    }
   };
 
-  // Filter past tests based on selected date
-  const filteredPastTests = pastTests.filter((test) =>
-    searchDate ? test.date === searchDate : true
-  );
+  const filteredStepValues = allStepValues.filter((stepValue) => {
+    if (!searchDate) return true;
+    if (!stepValue.valueAddedDate) return false;
+    
+    const { date } = formatDateTime(stepValue.valueAddedDate);
+    return date === searchDate;
+  });
 
-  // Close the snackbar
   const handleSnackbarClose = () => {
     setOpenSnackbar(false);
   };
 
+  const getStepNameById = (stepId: number) => {
+    const step = steps.find((step) => step.id === stepId);
+    return step ? step.stepName : "Unknown Step";
+  };
+
   return (
-    <Box
-      sx={{
-        padding: 2,
-        backgroundColor: "#F1F2F7",
-        width: "full",
-        boxSizing: "border-box",
-      }}
-    >
+    <Box sx={{ padding: 2, backgroundColor: "#F1F2F7", width: "full", boxSizing: "border-box" }}>
       <Grid item xs={12} md={8}>
-        {/* Right side: Add Values to Step form */}
-        <Paper
-          sx={{
-            padding: 4,
-            display: "flex",
-            flexDirection: "column",
-            gap: 3,
-            position: "relative",
-            width: "93%",
-            marginLeft: "auto",
-            marginRight: "auto",
-            marginBottom: "2%",
-          }}
-        >
-          {/* Back button at the top-right corner */}
-          <Box
-            sx={{
-              position: "absolute",
-              top: 16,
-              right: 16,
-            }}
-          >
+        <Paper sx={{
+          padding: 4,
+          display: "flex",
+          flexDirection: "column",
+          gap: 3,
+          position: "relative",
+          width: "93%",
+          marginLeft: "auto",
+          marginRight: "auto",
+          marginBottom: "2%",
+        }}>
+          <Box sx={{ position: "absolute", top: 16, right: 16 }}>
             <Button
               variant="outlined"
-              sx={{
-                backgroundColor: "#F1F2F7",
-                color: "#8F8F8F",
-              }}
+              sx={{ backgroundColor: "#F1F2F7", color: "#8F8F8F" }}
               onClick={handleCancelClick}
             >
               Back
             </Button>
           </Box>
+          
           <Typography variant="h4" color="black" gutterBottom>
             {stepName}
           </Typography>
-          <Box
-            sx={{
-              gap: 2,
-              backgroundColor: "#F1F2F7",
-              padding: 2,
-              borderRadius: "8px",
-              width: "50%",
-              margin: "0 auto",
-              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-            }}
-          >
+
+          <Box sx={{
+            gap: 2,
+            backgroundColor: "#F1F2F7",
+            padding: 2,
+            borderRadius: "8px",
+            width: "50%",
+            margin: "0 auto",
+            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+          }}>
             <Typography variant="h5" gutterBottom sx={{ textAlign: "center" }}>
               Add new Values to {stepName}
             </Typography>
-            {/* Tests List with Input Fields */}
+
             {currentTests.length === 0 ? (
               <Typography variant="body1" sx={{ textAlign: "left" }}>
                 No test or chemical values to add.
               </Typography>
             ) : (
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 2,
-                  padding: 2,
-                  borderRadius: "8px",
-                }}
-              >
-               {currentTests.map((test) => (
-                 <Box
-                   key={test.id}
-                   sx={{
-                     display: "flex",
-                     alignItems: "center",
-                     gap: 2,
-                   }}
-                 >
-                   <Typography
-                     variant="body1"
-                     sx={{
-                       width: "45%",
-                       textAlign: "left",
-                     }}
-                   >
-                     {test.testName}
-                   </Typography>
+              <Box sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 2,
+                padding: 2,
+                borderRadius: "8px",
+              }}>
+                {currentTests.map((test) => (
+                  <Box
+                    key={test.id}
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 2,
+                    }}
+                  >
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        width: "45%",
+                        textAlign: "left",
+                      }}
+                    >
+                      {test.testName}
+                    </Typography>
 
-                   <TextField
-                     variant="outlined"
-                     size="small"
-                     sx={{
-                       width: "30%",
-                     }}
-                     value={inputValues[test.id] || ""}
-                     onChange={(e) => handleInputChange(test.id, e.target.value)}
-                   />
+                    <TextField
+                      variant="outlined"
+                      size="small"
+                      sx={{ width: "30%" }}
+                      value={inputValues[test.id] || ""}
+                      onChange={(e) => handleInputChange(test.id, e.target.value)}
+                    />
 
-                   <Button
-                     variant="contained"
-                     size="small"
-                     sx={{
-                       backgroundColor: "#102D4D",
-                       color: "white",
-                       "&:hover": {
-                         backgroundColor: "#154273",
-                         boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-                       },
-                       ml: 2,
-                     }}
-                     onClick={() => handleConfirmSingleTest(test.id, test.testName)}
-                     disabled={pendingSubmissions.has(test.id)}
-                   >
-                     Confirm
-                   </Button>
-                 </Box>
-               ))}
+                    <Button
+                      variant="contained"
+                      size="small"
+                      sx={{
+                        backgroundColor: "#102D4D",
+                        color: "white",
+                        "&:hover": {
+                          backgroundColor: "#154273",
+                          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                        },
+                        ml: 2,
+                      }}
+                      onClick={() => handleConfirmSingleTest(test.id, test.testName)}
+                      disabled={pendingSubmissions.has(test.id)}
+                    >
+                      Confirm
+                    </Button>
+                  </Box>
+                ))}
               </Box>
             )}
           </Box>
 
-          {/* Past Tests Table */}
-          <Box
-            sx={{
-              marginTop: 4,
-              backgroundColor: "#F1F2F7",
-              padding: 2,
-              borderRadius: "8px",
-              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-            }}
-          >
+          <Box sx={{
+            marginTop: 4,
+            backgroundColor: "#F1F2F7",
+            padding: 2,
+            borderRadius: "8px",
+            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+          }}>
             <Typography variant="h5" gutterBottom sx={{ textAlign: "center" }}>
               Past Test Values
             </Typography>
-            <TextField
-              type="date"
-              variant="outlined"
-              size="small"
-              sx={{ marginBottom: 2 }}
-              value={searchDate}
-              onChange={handleDateChange}
-            />
+            
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, marginBottom: 2 }}>
+              <TextField
+                type="date"
+                variant="outlined"
+                size="small"
+                value={searchDate}
+                onChange={handleDateChange}
+                inputProps={{
+                  max: new Date().toISOString().split('T')[0]
+                }}
+                sx={{ width: '200px' }}
+              />
+              {searchDate && (
+                <Button
+              sx={{ backgroundColor: "#F1F2F7", color: "#8F8F8F",marginLeft: 1 }}
+                  variant="outlined"
+                  size="medium"
+                  onClick={() => setSearchDate("")}
+                >
+                  Clear Filter
+                </Button>
+              )}
+            </Box>
+
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Name</TableCell>
+                  <TableCell></TableCell>
+                  <TableCell>Step Name</TableCell>
+                  <TableCell>Test/Chemical Name</TableCell>
+                  <TableCell>Value</TableCell>
                   <TableCell>Date</TableCell>
                   <TableCell>Time</TableCell>
-                  <TableCell>Value</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {filteredPastTests.map((test, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{test.testName}</TableCell>
-                    <TableCell>{test.date}</TableCell>
-                    <TableCell>{test.time}</TableCell>
-                    <TableCell>{test.value}</TableCell>
+                
+                {filteredStepValues.length > 0 ? (
+                  filteredStepValues.map((stepValue, index) => {
+                    const isTest = !!stepValue.testName;
+                    const rowColor = isTest ? "#FFCCCB" : "#ADD8E6";
+                    const displayValue = isTest ? stepValue.testValue : stepValue.chemicalValue;
+                    const { date, time } = formatDateTime(stepValue.valueAddedDate); // Use valueAddedDate
+                    const stepName = getStepNameById(stepValue.stepId);
+
+                    return (
+                      <TableRow
+                        key={index}
+                        sx={{
+                          backgroundColor: rowColor,
+                          "&:hover": {
+                            backgroundColor: isTest ? "#FFB6B6" : "#9AC5E6",
+                          },
+                        }}
+                      >
+                        <TableCell>{index + 1}</TableCell>
+                        <TableCell>{stepName}</TableCell>
+                        <TableCell>{stepValue.testName || stepValue.chemicalName || "Unknown"}</TableCell>
+                        <TableCell>{displayValue}</TableCell>
+                        <TableCell>{date}</TableCell>
+                        <TableCell>{time}</TableCell>
+                      </TableRow>
+                    );
+                  })
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={6} align="center">
+                      No data available
+                    </TableCell>
                   </TableRow>
-                ))}
+                )}
               </TableBody>
             </Table>
           </Box>

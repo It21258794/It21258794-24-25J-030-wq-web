@@ -16,7 +16,7 @@ export const createStep = async (
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzk3MjE5NDJ9.tiglE-V_R3yl930QOhdtTEejAzGLndY2g3tEaCZHthU`,
+          Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzk4MTgwMTl9.Lrc3JYMMhIFxhhAqmL0gMjunClfGuyKvW_ZVofgvI2Q`,
         },
       }
     );
@@ -43,7 +43,7 @@ export const addTest = async (
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzk3MjE5NDJ9.tiglE-V_R3yl930QOhdtTEejAzGLndY2g3tEaCZHthU`,
+          Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzk4MTgwMTl9.Lrc3JYMMhIFxhhAqmL0gMjunClfGuyKvW_ZVofgvI2Q`,
         },
       }
     );
@@ -70,7 +70,7 @@ export const createChemical = async (
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzk3MjE5NDJ9.tiglE-V_R3yl930QOhdtTEejAzGLndY2g3tEaCZHthU`,
+          Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzk4MTgwMTl9.Lrc3JYMMhIFxhhAqmL0gMjunClfGuyKvW_ZVofgvI2Q`,
         },
       }
     );
@@ -88,7 +88,7 @@ export const getChemicals = async () => {
     const response = await axios.get(`${BASE_URL}/chemicals/get/all-chemicals`, {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzk3MjE5NDJ9.tiglE-V_R3yl930QOhdtTEejAzGLndY2g3tEaCZHthU`,
+        Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzk4MTgwMTl9.Lrc3JYMMhIFxhhAqmL0gMjunClfGuyKvW_ZVofgvI2Q`,
       },
     });
     return response.data;
@@ -104,7 +104,7 @@ export const getTests = async () => {
     const response = await axios.get(`${BASE_URL}/tests/get/all-tests`, {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzk3MjE5NDJ9.tiglE-V_R3yl930QOhdtTEejAzGLndY2g3tEaCZHthU`,
+        Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzk4MTgwMTl9.Lrc3JYMMhIFxhhAqmL0gMjunClfGuyKvW_ZVofgvI2Q`,
       },
     });
     return response.data;
@@ -120,7 +120,7 @@ export const getSteps = async () => {
     const response = await axios.get(`${BASE_URL}/steps/get/all-steps`, {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzk3MjE5NDJ9.tiglE-V_R3yl930QOhdtTEejAzGLndY2g3tEaCZHthU`,
+        Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzk4MTgwMTl9.Lrc3JYMMhIFxhhAqmL0gMjunClfGuyKvW_ZVofgvI2Q`,
       },
     });
     return response.data;
@@ -136,7 +136,7 @@ export const updateStepOrder = async (steps: { id: number; stepOrder: number }[]
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzk3MjE5NDJ9.tiglE-V_R3yl930QOhdtTEejAzGLndY2g3tEaCZHthU`,
+        Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzk4MTgwMTl9.Lrc3JYMMhIFxhhAqmL0gMjunClfGuyKvW_ZVofgvI2Q`,
 
       },
       body: JSON.stringify(steps),
@@ -172,7 +172,7 @@ export const createStepValue = async (
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzk3MjE5NDJ9.tiglE-V_R3yl930QOhdtTEejAzGLndY2g3tEaCZHthU`,
+          Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzk4MTgwMTl9.Lrc3JYMMhIFxhhAqmL0gMjunClfGuyKvW_ZVofgvI2Q`,
         },
       }
     );
@@ -190,7 +190,7 @@ export const getStepValuesByStepId = async (stepId: number, token: string) => {
     const response = await axios.get(`${BASE_URL}/step-values/get-by-step/${stepId}`, {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzk3MjE5NDJ9.tiglE-V_R3yl930QOhdtTEejAzGLndY2g3tEaCZHthU`,
+        Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzk4MTgwMTl9.Lrc3JYMMhIFxhhAqmL0gMjunClfGuyKvW_ZVofgvI2Q`,
       },
     });
     return response.data;
@@ -231,7 +231,7 @@ export const updateStepValue = async (
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzk3MjE5NDJ9.tiglE-V_R3yl930QOhdtTEejAzGLndY2g3tEaCZHthU`,
+          Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzk4MTgwMTl9.Lrc3JYMMhIFxhhAqmL0gMjunClfGuyKvW_ZVofgvI2Q`,
         },
       }
     );
@@ -239,6 +239,26 @@ export const updateStepValue = async (
     return response.data;
   } catch (error) {
     console.error("Error updating step value:", error);
+    if (axios.isAxiosError(error)) {
+      console.error("Axios error details:", error.response?.data);
+    }
+    throw error;
+  }
+};
+
+// Function to fetch all step values
+export const getAllStepValues = async (token: string) => {
+  try {
+    const response = await axios.get(`${BASE_URL}/step-values/get-all-step-values`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzk4MTgwMTl9.Lrc3JYMMhIFxhhAqmL0gMjunClfGuyKvW_ZVofgvI2Q`,
+      },
+    });
+    console.log("Step values fetched successfully:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching step values:", error);
     if (axios.isAxiosError(error)) {
       console.error("Axios error details:", error.response?.data);
     }
