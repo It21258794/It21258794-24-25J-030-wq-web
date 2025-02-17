@@ -119,9 +119,9 @@ const StepView: React.FC = () => {
         setCurrentTests(currentTestsData);
       } catch (error) {
         console.error("Error fetching step details or values:", error);
-        setAlertSeverity("error");
-        setAlertMessage("Failed to fetch step details or values. Please try again.");
-        setOpenSnackbar(true);
+        // setAlertSeverity("error");
+        // setAlertMessage("Failed to fetch step details or values. Please try again.");
+        // setOpenSnackbar(true);
       }
     };
 
