@@ -1,10 +1,13 @@
 import { AppBar, Toolbar, Box, Typography } from "@mui/material";
+import { AuthContext } from "../components/auth/AuthProvider";
+import React from "react";
 
 interface IProps {
   currentTab: string;
 }
 
 const AppHeader = ({ currentTab }: IProps): JSX.Element => {
+  const authContext = React.useContext(AuthContext);
   return (
     <AppBar
       position="static"
@@ -20,9 +23,9 @@ const AppHeader = ({ currentTab }: IProps): JSX.Element => {
           </Typography>
           <Typography
             variant="body2"
-            sx={{ fontSize: 15, color: "#8E8B98", fontWeight: 750 }}
+            sx={{ fontSize: 15, color: "#8E8B98", fontWeight: 750, marginTop:"15px"}}
           >
-            Welcome Shamry
+            {authContext?.user?.firstName +" " +authContext?.user?.lastName}
           </Typography>
         </Box>
       </Toolbar>
