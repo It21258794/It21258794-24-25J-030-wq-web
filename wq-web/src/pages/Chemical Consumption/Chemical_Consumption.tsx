@@ -10,6 +10,7 @@ import {
 import { LineChart } from "@mui/x-charts";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { Divider } from "@mui/material";
 
 const Chemical_Consumption = () => {
   const [lastUsage, setLastUsage] = useState([]);
@@ -154,7 +155,7 @@ const Chemical_Consumption = () => {
               xAxis={[{ data: xAxisData }]}
               series={[{ data: turbidityData, color: "#efcc00" }]}
               width={300}
-              height={300}
+              height={200}
             />
             <Typography sx={{ fontSize: 10, color: "gray" }}>
               Last 5 days
@@ -186,7 +187,7 @@ const Chemical_Consumption = () => {
               xAxis={[{ data: xAxisData }]}
               series={[{ data: phData, color: "#c71585" }]}
               width={300}
-              height={300}
+              height={200}
             />
             <Typography sx={{ fontSize: 10, color: "gray" }}>
               Last 5 days
@@ -218,7 +219,7 @@ const Chemical_Consumption = () => {
               xAxis={[{ data: xAxisData }]}
               series={[{ data: conductivityData, color: "#4169e1" }]}
               width={300}
-              height={300}
+              height={200}
             />
             <Typography sx={{ fontSize: 10, color: "gray" }}>
               Last 5 days
@@ -227,21 +228,21 @@ const Chemical_Consumption = () => {
         </Card>
       </Grid2>
 
-      <Card
+      {/* <Card
         sx={{
           textAlign: "center",
           borderRadius: 2,
-          boxShadow: 3,
+          boxShadow: 0,
           width: "93%",
           margin: "0 auto",
         }}
       >
-        <CardContent>
-          <Typography variant="h5" sx={{ fontSize: 15, fontWeight: "bold" }}>
+        <CardContent> */}
+          <Typography variant="h5" sx={{ fontSize: 15, fontWeight: "bold", textAlign: "center" }}>
             Daily Prediction Data
           </Typography>
-        </CardContent>
-      </Card>
+        {/* </CardContent>
+      </Card> */}
 
       <Grid2
         container
@@ -332,6 +333,9 @@ const Chemical_Consumption = () => {
         </Card>
       </Grid2>
 
+      <Typography variant="h5" sx={{ fontSize: 15, fontWeight: "bold", textAlign: "center", mb: 4, mt: 4 }}>   
+            Future Prediction Data
+          </Typography>
       <Card
         sx={{
           textAlign: "center",
@@ -342,31 +346,48 @@ const Chemical_Consumption = () => {
         }}
       >
         <CardContent>
-          <Typography variant="h5" sx={{ fontSize: 15, fontWeight: "bold" }}>
-            Future Prediction Data
-          </Typography>
 
-          <Grid2
-            container
-            spacing={2}
-            justifyContent="center"
-            sx={{ marginTop: "20px", marginBottom: "20px" }}
-          >
+      <Grid2
+         container
+         spacing={2}
+         justifyContent="center"
+         sx={{ marginTop: "20px", marginBottom: "20px" }}
+        >
             <TextField
-              type="date"
-              value={selectedDate}
-              onChange={handleDateChange}
-              sx={{ display: "flex", justifyContent: "end" }}
+            type="date"
+            value={selectedDate}
+            onChange={handleDateChange}
+            sx={{
+              height: "30px",
+              "& .MuiInputBase-root": {
+                height: "40px",
+                fontSize: "12px",
+                padding: "4px 8px",
+              }
+            }}
             />
-            <Button variant="contained" size="small" onClick={fetchWeatherData}>
+  
+        <Button
+          variant="contained"
+          size="small"
+          onClick={fetchWeatherData}
+          sx={{ fontSize: 10, padding: "2px 8px", minWidth: "auto",height: "40px", backgroundColor: "#102D4D", fontWeight: "bold" }}
+        >
               Get Weather
-            </Button>
-            {viewbtn ? (
-              <Button variant="contained" size="small" onClick={SubmitData}>
-                Future Predict
-              </Button>
-            ) : null}
-          </Grid2>
+        </Button>
+
+          {viewbtn && (
+        <Button
+         variant="contained"
+         size="small"
+         onClick={SubmitData}
+         sx={{ fontSize: 10, padding: "2px 8px", minWidth: "auto", height: "40px", backgroundColor: "#102D4D", fontWeight: "bold" }}
+        >
+           Future Predict
+        </Button>
+                   )}
+      </Grid2>
+
           {viewbtn ? (
             <>
               <Typography
@@ -441,6 +462,7 @@ const Chemical_Consumption = () => {
             </>
           ) : null}
 
+          <Divider sx={{ width: "100%", backgroundColor: "grey", marginY: 2 }} />
           {futureview ? <>
             <Typography
                 variant="h5"
@@ -515,7 +537,7 @@ const Chemical_Consumption = () => {
             </Grid>
           </> : null}
 
-
+          <Divider sx={{ width: "100%", backgroundColor: "grey", marginY: 2 }} />
 
 
           {futureview ? <>
