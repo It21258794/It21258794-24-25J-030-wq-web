@@ -1,0 +1,52 @@
+.status-badge {
+    font-size: 0.6rem;
+    height: 20px;
+    width: 80px;
+    border-radius: 5px;
+    text-align: center;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid;
+  }
+  
+  .status-active {
+    background-color: #a8f1d4;
+    color: #008000;
+    border-color: #008000;
+  }
+  
+  .status-inactive {
+    background-color: #fdd5d5;
+    color: #ff0000;
+    border-color: #ff0000;
+  }
+  
+  .cardContainer {
+    padding: 20px;
+    border-radius: 2px;
+    box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.2);
+    width: 95%;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+  }
+  
+  .typographyStyles {
+    font-weight: 750;
+    font-size: 15px;
+    margin-top: 1px;
+    color: gray;
+  }
+  
+  .lineChartCard {
+    padding: 20px;
+    border-radius: 2px;
+    box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.2);
+    width: 45%;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+  }
+  

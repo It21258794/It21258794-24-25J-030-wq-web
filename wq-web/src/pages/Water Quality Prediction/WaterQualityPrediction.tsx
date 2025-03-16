@@ -4,7 +4,6 @@ import {
   Chip,
   FormControl,
   Grid2,
-  InputLabel,
   MenuItem,
   Select,
   SelectChangeEvent,
@@ -15,44 +14,151 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
+import Pagination from "@mui/material/Pagination";
+import Stack from '@mui/material/Stack';
 import { LineChart } from "@mui/x-charts";
 import "./WaterQualityPrediction.css";
 import React from "react";
+import { PredictionParameter } from "./types/api";
+import { getFuturePredictions, getPredictions } from "./services/api";
+import { AuthContext } from "../../components/auth/AuthProvider";
 
 const WaterQualityPrediction = (): JSX.Element => {
-  const [Turbidity, setTurbidity] = React.useState("");
-  const [Week, setWeek] = React.useState("");
+  const authContext = React.useContext(AuthContext);
+  const [predictionPeriod, setPredictionPeriod] = React.useState<number>(7);
+  const [parameter, setParameter] = React.useState<PredictionParameter>("ph");
+  const [predictions, setPredictions] = React.useState<number[]>([]);
+  const [dates, setDates] = React.useState<string[]>([]);
+  const [pastPredictionPeriod, setPastPredictionPeriod] = React.useState<number>(7);
+  const [pastParameter, setPastParameter] = React.useState<PredictionParameter>("ph");
+  const [futureParameter, setFutureParameter] = React.useState<any>("ph");
+  const [pastPredictions, setPastPredictions] = React.useState<number[]>([]);
+  const [pastDates, setPastDates] = React.useState<string[]>([]);
+  const [error, setError] = React.useState<string | null>(null);
+  const [isPast, setIsPast] = React.useState(false);
+  const [rows, setRows] = React.useState([]);
+  const [page, setPage] = React.useState(0);
+  const [totalPages, setTotalPages] = React.useState(1);
 
-  const handleChange = (event: SelectChangeEvent) => {
-    if (event.target.name === "week") {
-      setWeek(event.target.value);
-    } else if (event.target.name === "turbidity") {
-      setTurbidity(event.target.value);
+  const token :any = authContext?.token;
+  
+  React.useEffect(() => {
+    fetchPredictions(predictionPeriod, parameter, isPast);
+  }, [predictionPeriod, parameter, isPast]);
+
+  React.useEffect(() => {
+    fetchPastPredictions(pastPredictionPeriod, pastParameter, isPast);
+  }, [pastPredictionPeriod, pastParameter, isPast]);
+
+
+  React.useEffect(() => {
+    fetchFuturePredictions(futureParameter,page);
+  }, [futureParameter,page]);
+
+
+
+  const fetchPredictions = async (days: number, parameter: PredictionParameter, isPast: boolean) => {
+    authContext?.setIsLoading(true)
+    setError(null);
+    try {
+      const result = await getPredictions(days, parameter, isPast, token);
+      const formattedDates = result.dates.map((dateString: string) => {
+        const date = new Date(dateString);
+        return date.toISOString().split('T')[0];
+      });
+      setPredictions(result.values);
+      setDates(formattedDates)
+      setTimeout(() => {
+        authContext?.setIsLoading(false);
+      }, 1000);
+    } catch (err) {
+      setError("Failed to fetch predictions");
+    } finally {
+      // setLoading(false);
+      console.log(error);
     }
   };
 
-  const rows = [
-    {
-      date: "2024-02-04",
-      parameter: "Turbidity",
-      predictedValue: 5.4,
-      rainfall: 12,
-      flowRate: 3.2,
-      depth: 1.5,
-      threshold: 7,
-      status: "Active",
-    },
-    {
-      date: "2024-02-05",
-      parameter: "pH",
-      predictedValue: 7.2,
-      rainfall: 8,
-      flowRate: 2.9,
-      depth: 1.3,
-      threshold: 6.5,
-      status: "Inactive",
-    },
-  ];
+  const fetchPastPredictions = async (days: number, parameter: PredictionParameter, isPast: boolean) => {
+    // setLoading(true);
+    setError(null);
+    isPast = true;
+    try {
+      const result = await getPredictions(days, parameter, isPast, token);
+      const formattedDates = result.dates.map((dateString: string) => {
+        const date = new Date(dateString);
+        return date.toISOString().split('T')[0];
+      });
+      setPastPredictions(result.values);
+      setPastDates(formattedDates)
+      console.log(pastDates)
+      console.log(pastPredictions)
+      console.log(setIsPast)
+    } catch (err) {
+      setError("Failed to fetch predictions");
+    } finally {
+      // setLoading(false);
+    }
+  };
+
+  const fetchFuturePredictions = async (parameter: PredictionParameter, page: number) => {
+    // setLoading(true);
+    setError(null);
+    try {
+      const pageSize = 10; 
+      const result:any = await getFuturePredictions(parameter,page,pageSize,token);
+      console.log(result)
+      if (result && Array.isArray(result.content)) {
+       
+      setRows(result.content);
+      setTotalPages(result.pagination.totalPages);
+      } else {
+        setRows([]);
+        setError("No valid data found");
+      }
+      
+    } catch (err) {
+      setError("Failed to fetch predictions");
+    } finally {
+      // setLoading(false);
+    }
+  };
+
+
+
+  const handlePeriodChange = (event: SelectChangeEvent) => {
+    if (event.target.name != null) {
+      setPredictionPeriod(Number(event.target.value));
+    }
+  };
+
+  const handleParameterChange = (event: SelectChangeEvent) => {
+    if (event.target.name != null) {
+      setParameter(event.target.value as PredictionParameter);
+    }
+  };
+
+  const handlePastPeriodChange = (event: SelectChangeEvent) => {
+    if (event.target.name != null) {
+      setPastPredictionPeriod(Number(event.target.value));
+    }
+  };
+
+  const handlePastParameterChange = (event: SelectChangeEvent) => {
+    if (event.target.name != null) {
+      setPastParameter(event.target.value as PredictionParameter);
+    }
+  };
+
+  const handleFutureParameterChange = (event: SelectChangeEvent) => {
+    if (event.target.name != null) {
+      setFutureParameter(event.target.value as any);
+    }
+  };
+
+  const handlePageChange = (_event: React.ChangeEvent<unknown>, newPage: number) => {
+    setPage(newPage-1);
+  };
 
   return (
     <>
@@ -76,57 +182,53 @@ const WaterQualityPrediction = (): JSX.Element => {
             width="100%"
           >
             <Typography className="typographyStyles">
-              Turbidity Prediction
+              {parameter.charAt(0).toUpperCase() + parameter.slice(1)} Prediction
             </Typography>
-            <Box display="flex" gap={2}>
-              <FormControl sx={{ m: 1, minWidth: 130 }} size="small">
-                <InputLabel id="demo-select-small-label">Turbidity</InputLabel>
+            <Box display="flex" gap={1}>
+              <FormControl sx={{ m: 1, minWidth: 60 }} size="small">
+
                 <Select
-                  name="turbidity"
-                  labelId="demo-select-small-label"
+                  name="parameter"
                   id="demo-select-small"
-                  value={Turbidity}
-                  label="Turbidity"
-                  onChange={handleChange}
+                  value={parameter}
+                  onChange={handleParameterChange}
+                  sx={{ width: "110px", height: "30px",fontSize: "12px",
+                    borderRadius: 3,
+                    "& .MuiSelect-select": {
+                      padding: "10px",
+                    } }} 
                 >
-                  <MenuItem value="">
-                    <em>None</em>
-                  </MenuItem>
-                  <MenuItem value={10}>Ten</MenuItem>
-                  <MenuItem value={20}>Twenty</MenuItem>
-                  <MenuItem value={30}>Thirty</MenuItem>
+                
+                  <MenuItem value={"ph"}>Ph</MenuItem>
+                  <MenuItem value={"turbidity"}>Turbidity</MenuItem>
+                  <MenuItem value={"conductivity"}>Conductivity</MenuItem>
                 </Select>
               </FormControl>
               <FormControl sx={{ m: 1, minWidth: 130 }} size="small">
-                <InputLabel id="demo-select-small-label">Next Week</InputLabel>
                 <Select
-                  name="week"
-                  labelId="demo-select-small-label"
+                  name="predictionPeriod"
                   id="demo-select-small"
-                  value={Week}
-                  label="Last Week"
-                  onChange={handleChange}
+                  value={String(predictionPeriod)} 
+                  onChange={handlePeriodChange}
+                  sx={{ width: "110px", height: "30px",fontSize: "12px",
+                    borderRadius: 3,
+                    "& .MuiSelect-select": {
+                      padding: "10px",
+                    } }} 
                 >
-                  <MenuItem value="">
-                    <em>None</em>
-                  </MenuItem>
-                  <MenuItem value={10}>Ten</MenuItem>
-                  <MenuItem value={20}>Twenty</MenuItem>
-                  <MenuItem value={30}>Thirty</MenuItem>
+                  <MenuItem value={7}>Next Week</MenuItem>
+                  <MenuItem value={14}>Next Two Weeks</MenuItem>
+                  <MenuItem value={30}>Next Month</MenuItem>
                 </Select>
               </FormControl>
             </Box>
           </Box>
           <></>
           <LineChart
-            xAxis={[{ data: [1, 2, 3, 5, 8, 10] }]}
-            series={[
-              {
-                data: [2, 5.5, 2, 8.5, 1.5, 5],
-              },
-            ]}
-            width={720}
-            height={300}
+              xAxis={[{ scaleType: "point", data: dates }]}
+              series={[{ data: predictions }]}
+              width={450}
+              height={300}
           />
         </Card>
         <Card className="lineChartCard">
@@ -137,43 +239,41 @@ const WaterQualityPrediction = (): JSX.Element => {
             width="100%"
           >
             <Typography className="typographyStyles">
-              Turbidity Analysis
+              {pastParameter.charAt(0).toUpperCase() + pastParameter.slice(1)} Analysis
             </Typography>
-            <Box display="flex" gap={2}>
-              <FormControl sx={{ m: 1, minWidth: 130 }} size="small">
-                <InputLabel id="demo-select-small-label">Turbidity</InputLabel>
+            <Box display="flex" gap={1}>
+              <FormControl sx={{ m: 1, minWidth: 60 }} size="small">
                 <Select
                   name="turbidity"
-                  labelId="demo-select-small-label"
                   id="demo-select-small"
-                  value={Turbidity}
-                  label="Turbidity"
-                  onChange={handleChange}
+                  value={String(pastParameter)}
+                  onChange={handlePastParameterChange}
+                  sx={{ width: "110px", height: "30px" ,fontSize: "12px",
+                    borderRadius: 3,
+                    "& .MuiSelect-select": {
+                      padding: "10px",
+                    }}} 
                 >
-                  <MenuItem value="">
-                    <em>None</em>
-                  </MenuItem>
-                  <MenuItem value={10}>Ten</MenuItem>
-                  <MenuItem value={20}>Twenty</MenuItem>
-                  <MenuItem value={30}>Thirty</MenuItem>
+                  <MenuItem value={"ph"}>Ph</MenuItem>
+                  <MenuItem value={"turbidity"}>Turbidity</MenuItem>
+                  <MenuItem value={"conductivity"}>Conductivity</MenuItem>
                 </Select>
               </FormControl>
               <FormControl sx={{ m: 1, minWidth: 130 }} size="small">
-                <InputLabel id="demo-select-small-label">Last Week</InputLabel>
                 <Select
                   name="week"
-                  labelId="demo-select-small-label"
                   id="demo-select-small"
-                  value={Week}
-                  label="Last Week"
-                  onChange={handleChange}
+                  value={String(pastPredictionPeriod)} 
+                  onChange={handlePastPeriodChange}
+                  sx={{ width: "110px", height: "30px",fontSize: "12px",
+                    borderRadius: 3,
+                    "& .MuiSelect-select": {
+                      padding: "10px",
+                    } }} 
                 >
-                  <MenuItem value="">
-                    <em>None</em>
-                  </MenuItem>
-                  <MenuItem value={10}>Ten</MenuItem>
-                  <MenuItem value={20}>Twenty</MenuItem>
-                  <MenuItem value={30}>Thirty</MenuItem>
+                  <MenuItem value={7}>Last Week</MenuItem>
+                  <MenuItem value={14}>Last Two Weeks</MenuItem>
+                  <MenuItem value={30}>Last Month</MenuItem>
                 </Select>
               </FormControl>
             </Box>
@@ -182,15 +282,31 @@ const WaterQualityPrediction = (): JSX.Element => {
           <LineChart
             xAxis={[{ data: [1, 2, 3, 5, 8, 10] }]}
             series={[
-              { color: "green", data: [0, 5, 2, 6, 3, 9.3] },
               { color: "red", data: [6, 3, 7, 9.5, 4, 2] },
               { color: "blue", data: [3, 1, 3, 6, 2, 1] },
             ]}
-            width={720}
+            width={450}
             height={300}
           />
         </Card>
         <Card className="cardContainer">
+          <Box style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", marginBottom: "10px" }}>
+            <Select
+              name="parameter"
+              id="demo-select-small"
+              value={futureParameter}
+              onChange={handleFutureParameterChange}
+              sx={{ width: "110px", height: "30px",fontSize: "12px",
+                borderRadius: 3,
+                "& .MuiSelect-select": {
+                  padding: "10px",
+                } }} 
+            >
+              <MenuItem value={"ph"}>Ph</MenuItem>
+              <MenuItem value={"Turbidity"}>Turbidity</MenuItem>
+              <MenuItem value={"Conductivity"}>Conductivity</MenuItem>
+            </Select>
+          </Box>
           <Table className="table">
             <TableHead>
               <TableRow>
@@ -199,52 +315,66 @@ const WaterQualityPrediction = (): JSX.Element => {
                   "Parameter",
                   "Predicted Value",
                   "Rainfall (mm)",
-                  "Flow Rate (m³/s)",
-                  "Depth (m)",
+                  "Humidity (g/m³)",
+                  "Temperature (°C)",
                   "Threshold Value",
                   "Status",
                 ].map((header) => (
-                  <TableCell key={header} className="table-header">
+                  <TableCell 
+                    key={header} 
+                    className="table-header"
+                    sx={header === "Date" ? { width: "110px" } : {}}
+                    >
                     {header}
                   </TableCell>
                 ))}
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.map((row, index) => (
-                <TableRow key={index}>
-                  <TableCell className="table-cell">{row.date}</TableCell>
-                  <TableCell className="table-cell">{row.parameter}</TableCell>
-                  <TableCell className="table-cell">
-                    {row.predictedValue}
-                  </TableCell>
-                  <TableCell className="table-cell">{row.rainfall}</TableCell>
-                  <TableCell className="table-cell">{row.flowRate}</TableCell>
-                  <TableCell className="table-cell">{row.depth}</TableCell>
-                  <TableCell className="table-cell">{row.threshold}</TableCell>
-                  <TableCell className="table-cell">
-                    <Chip
-                      label={row.status}
-                      sx={{
-                        fontSize: "0.6rem",
-                        height: "20px",
-                        width: "80px",
-                        backgroundColor:
-                          row.status === "Active" ? "#a8f1d4" : "#fdd5d5",
-                        color: row.status === "Active" ? "#008000" : "#ff0000",
-                        border: `1px solid ${
-                          row.status === "Active" ? "#008000" : "#ff0000"
-                        }`,
-                        borderRadius: "5px",
-                        textAlign: "center",
-                        fontWeight: "bold",
-                      }}
-                    />
-                  </TableCell>
-                </TableRow>
-              ))}
+              {rows.map((row: any, index) => {
+                const predictedValue = futureParameter.includes("ph")
+                  ? parseFloat(row.avgPh.toFixed(3))
+                  : futureParameter.includes("Conductivity")
+                  ? parseFloat(row.avgConductivity.toFixed(3))
+                  : futureParameter.includes("Turbidity")
+                  ? parseFloat(row.avgTurbidity.toFixed(3))
+                  : 0;
+                const status = predictedValue > row.threshold ? "Exceeds" : "Good";
+                const isActive = status === "Good";
+
+                return (
+                  <TableRow key={index}>
+                    <TableCell className="table-cell">{row.date.split('T')[0]}</TableCell>
+                    <TableCell className="table-cell"> {futureParameter} </TableCell>
+                    <TableCell className="table-cell">{predictedValue}</TableCell>
+                    <TableCell className="table-cell">{row.weatherReadings[0]?.rainfall}</TableCell>
+                    <TableCell className="table-cell">{row.weatherReadings[0]?.humidity}</TableCell>
+                    <TableCell className="table-cell">{row.weatherReadings[0]?.temp}</TableCell>
+                    <TableCell className="table-cell">{row.threshold}</TableCell>
+                    <TableCell className="table-cell">
+                      <Chip
+                        sx={{
+                          fontSize: "0.6rem",
+                          height: "20px",
+                          width: "80px",
+                          backgroundColor: isActive ? "#a8f1d4" : "#fdd5d5",
+                          color: isActive ? "#008000" : "#ff0000",
+                          border: `1px solid ${isActive ? "#008000" : "#ff0000"}`,
+                          borderRadius: "5px",
+                          textAlign: "center",
+                          fontWeight: "bold",
+                        }}
+                        label={status}
+                      />
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
+          <Stack spacing={2} sx={{ marginTop: "10px" }}>
+            <Pagination count={totalPages} page={page+1} onChange={handlePageChange} />
+          </Stack>
         </Card>
       </Grid2>
     </>
