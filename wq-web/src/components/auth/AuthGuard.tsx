@@ -9,7 +9,7 @@ export const PrivateGuard: React.FC<{ children: ReactNode }> = ({ children }) =>
     throw new Error('PrivateGuard must be used within an AuthProvider');
   }
 
-  const { user, isLoading } = authContext;
+  const { user } = authContext;
   if (user) {
     return <>{children}</>;
   }
@@ -24,7 +24,7 @@ export const GuestGuard: React.FC<{ children: ReactNode }> = ({ children }) => {
     throw new Error('GuestGuard must be used within an AuthProvider');
   }
 
-  const { user, isLoading } = authContext;
+  const { user } = authContext;
 
   if (user) {
     return <Navigate to="/user/waterQualityDashboard" replace />;

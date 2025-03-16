@@ -1,6 +1,4 @@
 import axios from "axios";
-import React from "react";
-import { AuthContext } from "../../../components/auth/AuthProvider";
 
 const BASE_URL = "http://localhost:8080/api";
 

@@ -23,7 +23,6 @@ export default function SendOtpScreen() {
   const [showResend, setShowResend] = React.useState(true);
   const [otp, setOtp] = React.useState('');
   const [otpError, setOtpError] = React.useState('');
-  const [resendTimer, setResendTimer] = React.useState<any>(null);
   const [countdown, setCountdown] = React.useState(60);
   const navigate = useNavigate();
 
@@ -119,14 +118,6 @@ export default function SendOtpScreen() {
     } else {
       setOtpError('');
     }
-  };
-
-  const startResendTimer = () => {
-    if (resendTimer) clearTimeout(resendTimer);
-    const timer = setTimeout(() => {
-      setShowResend(true);
-    }, 60000);
-    setResendTimer(timer);
   };
 
   return (

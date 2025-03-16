@@ -110,6 +110,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     setLogoutReason(null);
     setDialogOpen(false);
     setIsUserLoggedIn(false);
+    console.log(logoutReason)
   };
 
   return (
