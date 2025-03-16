@@ -11,7 +11,6 @@ import {
   Typography
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import axios from 'axios';
 import PasswordResetConfirmation from './DialogBoxes/PasswordResetConfirmation.tsx.tsx';
 import { useNavigate } from 'react-router-dom';
 import { forgetPassword } from './Services/api.ts';
@@ -78,6 +77,7 @@ export default function ResetPassword() {
     } else {
       setConfirmPasswordError('');
     }
+    console.log(confirmPassword)
   };
 
   const onClose = () => {

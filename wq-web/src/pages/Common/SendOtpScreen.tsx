@@ -10,7 +10,6 @@ import {
   Grid,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import OtpSendConfirmation from './DialogBoxes/OtpSendConfirmation';
 import { forgetPasswordSendOtp, forgetPasswordToken } from './Services/api';
 
@@ -24,7 +23,6 @@ export default function SendOtpScreen() {
   const [showResend, setShowResend] = React.useState(true);
   const [otp, setOtp] = React.useState('');
   const [otpError, setOtpError] = React.useState('');
-  const [passwordResetToken, setPasswordResetToken] = React.useState('');
   const [resendTimer, setResendTimer] = React.useState<any>(null);
   const [countdown, setCountdown] = React.useState(60);
   const navigate = useNavigate();
@@ -87,7 +85,6 @@ export default function SendOtpScreen() {
       try {
         const res = await forgetPasswordToken(serverRef,otp);
         console.log(res.data.passwordResetToken);
-        setPasswordResetToken(res.data.passwordResetToken);
 
         sessionStorage.setItem('passwordResetEmail', email);
         sessionStorage.setItem('passwordResetToken', res.data.passwordResetToken);

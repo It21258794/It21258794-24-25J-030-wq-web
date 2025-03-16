@@ -28,7 +28,7 @@ const CreateUserDialog = ({ open, onClose }: { open: boolean; onClose: (user?: a
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }> | SelectChangeEvent<string> // Handle both types
+    e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }> | SelectChangeEvent<string>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name!]: value }));
@@ -53,6 +53,7 @@ const CreateUserDialog = ({ open, onClose }: { open: boolean; onClose: (user?: a
   };
 
   const handleCloseDialog = (e: React.SyntheticEvent, reason: string) => {
+    console.log(e);
     if (reason !== "backdropClick" && isSubmitted) {
       onClose();
     } else {

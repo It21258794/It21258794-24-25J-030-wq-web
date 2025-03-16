@@ -4,7 +4,6 @@ import {
   Chip,
   FormControl,
   Grid2,
-  InputLabel,
   MenuItem,
   Select,
   SelectChangeEvent,
@@ -35,13 +34,11 @@ const WaterQualityPrediction = (): JSX.Element => {
   const [futureParameter, setFutureParameter] = React.useState<any>("ph");
   const [pastPredictions, setPastPredictions] = React.useState<number[]>([]);
   const [pastDates, setPastDates] = React.useState<string[]>([]);
-  const [loading, setLoading] = React.useState<boolean>(true);
   const [error, setError] = React.useState<string | null>(null);
   const [isPast, setIsPast] = React.useState(false);
   const [rows, setRows] = React.useState([]);
   const [page, setPage] = React.useState(0);
   const [totalPages, setTotalPages] = React.useState(1);
-  const [data, setData] = React.useState<any>([]);
 
   const token :any = authContext?.token;
   
@@ -77,12 +74,13 @@ const WaterQualityPrediction = (): JSX.Element => {
     } catch (err) {
       setError("Failed to fetch predictions");
     } finally {
-      setLoading(false);
+      // setLoading(false);
+      console.log(error);
     }
   };
 
   const fetchPastPredictions = async (days: number, parameter: PredictionParameter, isPast: boolean) => {
-    setLoading(true);
+    // setLoading(true);
     setError(null);
     isPast = true;
     try {
@@ -93,21 +91,23 @@ const WaterQualityPrediction = (): JSX.Element => {
       });
       setPastPredictions(result.values);
       setPastDates(formattedDates)
+      console.log(pastDates)
+      console.log(pastPredictions)
+      console.log(setIsPast)
     } catch (err) {
       setError("Failed to fetch predictions");
     } finally {
-      setLoading(false);
+      // setLoading(false);
     }
   };
 
   const fetchFuturePredictions = async (parameter: PredictionParameter, page: number) => {
-    setLoading(true);
+    // setLoading(true);
     setError(null);
     try {
       const pageSize = 10; 
       const result:any = await getFuturePredictions(parameter,page,pageSize,token);
       console.log(result)
-      // setData(result);
       if (result && Array.isArray(result.content)) {
        
       setRows(result.content);
@@ -120,7 +120,7 @@ const WaterQualityPrediction = (): JSX.Element => {
     } catch (err) {
       setError("Failed to fetch predictions");
     } finally {
-      setLoading(false);
+      // setLoading(false);
     }
   };
 

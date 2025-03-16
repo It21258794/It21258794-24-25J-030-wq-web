@@ -1,9 +1,5 @@
-import React, { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import {
-  Grid,
-  Card,
-  CardContent,
-  Typography,
   TextField,
   InputAdornment,
   Button,
@@ -27,10 +23,8 @@ import { getUsers } from "./services/api";
 import { AuthContext } from "../../components/auth/AuthProvider";
 import AddIcon from "@mui/icons-material/Add";
 import CreateUserDialog from "../Common/DialogBoxes/CreateUserDialog";
-import EditIcon from "@mui/icons-material/Edit";
 import { Tooltip } from "@mui/material"
 import DeleteIcon from '@mui/icons-material/Delete';
-import { IconButton } from '@mui/material';
 import RemoveUserConfirmation from "../Common/DialogBoxes/RemoveUserConfirmationDialog";
 
 const UserManagement = (): JSX.Element => {
@@ -39,7 +33,6 @@ const UserManagement = (): JSX.Element => {
   const [rows, setRows] = useState<any[]>([]);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [startDate, setStartDate] = useState<dayjs.Dayjs | null>(
     dayjs().subtract(30, "day").startOf("day")
@@ -87,8 +80,9 @@ const UserManagement = (): JSX.Element => {
       }, 1000);
     } catch (err) {
       setError("Failed to fetch users");
+      console.log(error)
     } finally {
-      setLoading(false);
+      // setLoading(false);
     }
   };
 

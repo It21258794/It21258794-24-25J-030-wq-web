@@ -10,7 +10,6 @@ import {
   FormControl,
   FormHelperText
 } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
 import {Visibility, VisibilityOff} from '@mui/icons-material';
 import { changeCurrentPass } from './Services/api';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -156,7 +155,7 @@ export default function PasswordChangePage() {
         <TextField
           required
           placeholder="*Confirm Password"
-          type={showPassword ? 'text' : 'password'}
+          type={showConfirmPassword ? 'text' : 'password'}
           id="confirm-password"
           autoComplete="confirm-password"
           onChange={(e) => {
@@ -171,7 +170,7 @@ export default function PasswordChangePage() {
                   onClick={handleShowPasswordToggle}
                   edge="end"
                 >
-                  {showPassword ? <Visibility /> : <VisibilityOff />}
+                  {showConfirmPassword ? <Visibility /> : <VisibilityOff />}
                 </IconButton>
               </InputAdornment>
             ),
@@ -202,7 +201,7 @@ export default function PasswordChangePage() {
         <TextField
           required
           placeholder="*Current Password"
-          type={showPassword ? 'text' : 'password'}
+          type={showCurrentPassword ? 'text' : 'password'}
           id="current-password"
           autoComplete="current-password"
           onChange={(e) => setCurrentPassword(e.target.value)}
@@ -214,7 +213,7 @@ export default function PasswordChangePage() {
                   onClick={handleShowCurrentPasswordToggle}
                   edge="end"
                 >
-                  {showPassword ? <Visibility /> : <VisibilityOff />}
+                  {showCurrentPassword ? <Visibility /> : <VisibilityOff />}
                 </IconButton>
               </InputAdornment>
             ),
