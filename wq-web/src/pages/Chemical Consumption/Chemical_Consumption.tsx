@@ -462,7 +462,7 @@ const Chemical_Consumption = () => {
             </>
           ) : null}
 
-          <Divider sx={{ width: "100%", backgroundColor: "grey", marginY: 2 }} />
+          <Divider sx={{ width: "100%", backgroundColor: "#ededed", marginY: 2 }} />
           {futureview ? <>
             <Typography
                 variant="h5"
@@ -537,7 +537,7 @@ const Chemical_Consumption = () => {
             </Grid>
           </> : null}
 
-          <Divider sx={{ width: "100%", backgroundColor: "grey", marginY: 2 }} />
+          <Divider sx={{ width: "100%", backgroundColor: "#ededed", marginY: 2 }} />
 
 
           {futureview ? <>
