@@ -1,161 +1,584 @@
-import React, { useState } from "react";
 import {
-  Box,
+  Button,
   Card,
-  Chip,
-  FormControl,
+  CardContent,
   Grid,
-  InputLabel,
-  MenuItem,
-  Select,
-  SelectChangeEvent,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
+  Grid2,
+  TextField,
   Typography,
 } from "@mui/material";
 import { LineChart } from "@mui/x-charts";
-import "./Chemical_Consumption.css";
+import axios from "axios";
+import { useEffect, useState } from "react";
 
-const Chemical_Consumption = (): JSX.Element => {
-  const [chemical, setChemical] = useState("lime");
-  const [timePeriod, setTimePeriod] = useState("today");
-  const [multiGraphTime, setMultiGraphTime] = useState("today");
+const Chemical_Consumption = () => {
+  const [lastUsage, setLastUsage] = useState([]);
+  const [chlorine_usage, setchlorine_usage] = useState("");
+  const [lime_usage, setlime_usage] = useState("");
+  const [pac_usage, setpac_usage] = useState("");
+  const [selectedDate, setSelectedDate] = useState("");
+  const [weatherData, setWeatherData] = useState(null);
+  const [temp_c, settemp_c] = useState(0);
+  const [humidity, sethumidity] = useState(0);
+  const [precip_mm, setprecip_mm] = useState(0);
+  const [cloud, setcloud] = useState(0);
+  const [futurePrediction, setfuturePrediction] = useState(0);
+  const [viewbtn, setviewbtn] = useState(false);
+  const [futureview, setfutureview] = useState(false);
 
-  const handleChange = (event: SelectChangeEvent) => {
-    const { name, value } = event.target;
-    if (name === "chemical") setChemical(value);
-    else if (name === "timePeriod") setTimePeriod(value);
-    else if (name === "multiGraphTime") setMultiGraphTime(value);
+  useEffect(() => {
+    axios
+      .get("http://localhost:8080/api/predict")
+      .then((res) => {
+        setchlorine_usage(res.data.chlorine_usage);
+        setlime_usage(res.data.lime_usage);
+        setpac_usage(res.data.pac_usage);
+
+        axios
+          .get("http://localhost:8080/api/lastdaysusages")
+          .then((res) => {
+            setLastUsage(res.data);
+            console.log(res.data);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, [chlorine_usage]);
+
+  // Extracting data for charts
+  const xAxisData = lastUsage.map((_, index) => index + 1);
+  const turbidityData = lastUsage.map((item) => item.Turbidity);
+  const phData = lastUsage.map((item) => item.PH);
+  const conductivityData = lastUsage.map((item) => item.Conductivity);
+
+  const handleDateChange = (event) => {
+    setSelectedDate(event.target.value);
   };
 
-  // Sample data for today’s prediction
-  const todayPrediction = {
-    lime: { value: 5.2, threshold: 6.0, unit: "mg/L" },
-    pac: { value: 3.8, threshold: 5.0, unit: "mg/L" },
-    chlorine: { value: 2.5, threshold: 4.0, unit: "mg/L" },
+  const fetchWeatherData = () => {
+    if (!selectedDate) return;
+    const apiKey = "878c525f5a014e85a12145802242511";
+    const location = "7.8731,80.7718"; // Example coordinates (Paris)
+    const url = `https://api.weatherapi.com/v1/forecast.json?key=${apiKey}&q=${location}&dt=${selectedDate}`;
+
+    axios
+      .get(url)
+      .then((res) => {
+        setWeatherData(res.data.forecast.forecastday[0]);
+        console.log(res.data.forecast.forecastday[0].day);
+        settemp_c(res.data.forecast.forecastday[0].day.avgtemp_c);
+        sethumidity(res.data.forecast.forecastday[0].day.avghumidity);
+        setprecip_mm(res.data.forecast.forecastday[0].day.totalprecip_mm);
+        setcloud(res.data.forecast.forecastday[0].hour[0].cloud);
+        setviewbtn(true);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
-  // Function to determine status based on threshold
-  const getStatus = (value: number, threshold: number) => {
-    if (value < threshold * 0.7) return { label: "Safe", color: "#28a745" };
-    if (value < threshold) return { label: "Caution", color: "#ffc107" };
-    return { label: "Danger", color: "#dc3545" };
-  };
+  const SubmitData = () => {
+    // Split the date into parts
+    const [year, month, day] = selectedDate.split("-");
 
-  // Sample historical and future prediction data
-  const timeSeriesData: Record<string, number[]> = {
-    lime: [4.5, 5.2, 5.8, 5.1, 4.9, 5.3],
-    pac: [3.2, 3.8, 4.1, 3.7, 3.6, 3.9],
-    chlorine: [2.1, 2.5, 2.8, 2.4, 2.3, 2.6],
+    const ob = {
+      day,
+      month,
+      year,
+      temp_c,
+      humidity,
+      precip_mm,
+      cloud,
+    };
+
+    axios
+      .post("http://localhost:8080/api/future-predict", ob)
+      .then((res) => {
+        setfuturePrediction(res.data);
+        console.log(res.data);
+        setfutureview(true);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   return (
-    <Grid container spacing={2} justifyContent="center" sx={{ marginTop: "20px" }}>
-      {/* Today's Prediction */}
-      <Card className="predictionCard">
-        <Typography className="headerText">Today's Prediction</Typography>
-        <Box className="predictionBox">
-          {Object.entries(todayPrediction).map(([chem, data]) => {
-            const status = getStatus(data.value, data.threshold);
-            return (
-              <Chip
-                key={chem}
-                label={`${chem.toUpperCase()}: ${data.value} ${data.unit} (${status.label})`}
-                style={{ backgroundColor: status.color, color: "white", fontWeight: "bold" }}
-              />
-            );
-          })}
-        </Box>
+    <div>
+      <Card
+        sx={{
+          textAlign: "center",
+          borderRadius: 2,
+          boxShadow: 3,
+          width: "93%",
+          margin: "0 auto",
+        }}
+      >
+        <CardContent>
+          <Typography variant="h5" sx={{ fontSize: 15, fontWeight: "bold" }}>
+            Historical Data
+          </Typography>
+        </CardContent>
+      </Card>
+      <Grid2
+        container
+        spacing={2}
+        justifyContent="center"
+        sx={{ marginTop: "20px", marginBottom: "20px" }}
+      >
+        <Card
+          sx={{
+            textAlign: "center",
+
+            boxShadow: 3,
+            width: "30%",
+          }}
+        >
+          <CardContent>
+            <Typography
+              variant="h5"
+              sx={{
+                fontSize: 15,
+                fontWeight: "bold",
+                marginTop: 1,
+                color: "#efcc00",
+              }}
+            >
+              Turbidity
+            </Typography>
+            <LineChart
+              xAxis={[{ data: xAxisData }]}
+              series={[{ data: turbidityData, color: "#efcc00" }]}
+              width={300}
+              height={300}
+            />
+            <Typography sx={{ fontSize: 10, color: "gray" }}>
+              Last 5 days
+            </Typography>
+          </CardContent>
+        </Card>
+
+        <Card
+          sx={{
+            textAlign: "center",
+
+            boxShadow: 3,
+            width: "30%",
+          }}
+        >
+          <CardContent>
+            <Typography
+              variant="h5"
+              sx={{
+                fontSize: 15,
+                fontWeight: "bold",
+                marginTop: 1,
+                color: "#c71585",
+              }}
+            >
+              PH
+            </Typography>
+            <LineChart
+              xAxis={[{ data: xAxisData }]}
+              series={[{ data: phData, color: "#c71585" }]}
+              width={300}
+              height={300}
+            />
+            <Typography sx={{ fontSize: 10, color: "gray" }}>
+              Last 5 days
+            </Typography>
+          </CardContent>
+        </Card>
+
+        <Card
+          sx={{
+            textAlign: "center",
+
+            boxShadow: 3,
+            width: "30%",
+          }}
+        >
+          <CardContent>
+            <Typography
+              variant="h5"
+              sx={{
+                fontSize: 15,
+                fontWeight: "bold",
+                marginTop: 1,
+                color: "#4169e1",
+              }}
+            >
+              Conductivity
+            </Typography>
+            <LineChart
+              xAxis={[{ data: xAxisData }]}
+              series={[{ data: conductivityData, color: "#4169e1" }]}
+              width={300}
+              height={300}
+            />
+            <Typography sx={{ fontSize: 10, color: "gray" }}>
+              Last 5 days
+            </Typography>
+          </CardContent>
+        </Card>
+      </Grid2>
+
+      <Card
+        sx={{
+          textAlign: "center",
+          borderRadius: 2,
+          boxShadow: 3,
+          width: "93%",
+          margin: "0 auto",
+        }}
+      >
+        <CardContent>
+          <Typography variant="h5" sx={{ fontSize: 15, fontWeight: "bold" }}>
+            Daily Prediction Data
+          </Typography>
+        </CardContent>
       </Card>
 
-      {/* Individual Chemical Graph */}
-      <Card className="graphCard">
-        <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Typography className="headerText">Chemical Prediction Trend</Typography>
-          <Box display="flex" gap={2}>
-            <FormControl sx={{ minWidth: 150 }} size="small">
-              <InputLabel>Chemical</InputLabel>
-              <Select name="chemical" value={chemical} onChange={handleChange}>
-                <MenuItem value="lime">Lime</MenuItem>
-                <MenuItem value="pac">Poly Aluminium Chloride</MenuItem>
-                <MenuItem value="chlorine">Chlorine</MenuItem>
-              </Select>
-            </FormControl>
-            <FormControl sx={{ minWidth: 150 }} size="small">
-              <InputLabel>Time Period</InputLabel>
-              <Select name="timePeriod" value={timePeriod} onChange={handleChange}>
-                <MenuItem value="past">Past Week</MenuItem>
-                <MenuItem value="today">Today</MenuItem>
-                <MenuItem value="future">Next Week</MenuItem>
-              </Select>
-            </FormControl>
-          </Box>
-        </Box>
-        <LineChart
-          xAxis={[{ data: ["Day 1", "Day 2", "Day 3", "Day 4", "Day 5", "Day 6"], scaleType: "point" }]}
-          series={[{ data: timeSeriesData[chemical], color: chemical === "lime" ? "green" : chemical === "pac" ? "blue" : "red" }]}
-          width={700}
-          height={300}
-        />
-      </Card>
+      <Grid2
+        container
+        spacing={2}
+        justifyContent="center"
+        sx={{ marginTop: "20px", marginBottom: "20px" }}
+      >
+        <Card
+          sx={{
+            textAlign: "center",
+            borderRadius: 2,
+            boxShadow: 3,
+            width: "30%",
+          }}
+        >
+          <CardContent>
+            <Typography
+              variant="h5"
+              sx={{
+                fontSize: 15,
+                fontWeight: "bold",
+                marginTop: 1,
+                color: "#efcc00",
+              }}
+            >
+              {" "}
+              Chlorine{" "}
+            </Typography>
+            <Typography variant="h5" sx={{ fontSize: 15, fontWeight: "bold" }}>
+              {chlorine_usage}
+            </Typography>
+          </CardContent>
+        </Card>
 
-      {/* Multi-Chemical Graph */}
-      <Card className="graphCard">
-        <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Typography className="headerText">Overall Chemical Trends</Typography>
-          <FormControl sx={{ minWidth: 150 }} size="small">
-            <InputLabel>Time Period</InputLabel>
-            <Select name="multiGraphTime" value={multiGraphTime} onChange={handleChange}>
-              <MenuItem value="past">Past Week</MenuItem>
-              <MenuItem value="today">Today</MenuItem>
-              <MenuItem value="future">Next Week</MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
-        <LineChart
-          xAxis={[{ data: ["Day 1", "Day 2", "Day 3", "Day 4", "Day 5", "Day 6"], scaleType: "point" }]}
-          series={[
-            { data: timeSeriesData["lime"], color: "green", label: "Lime" },
-            { data: timeSeriesData["pac"], color: "blue", label: "PAC" },
-            { data: timeSeriesData["chlorine"], color: "red", label: "Chlorine" },
-          ]}
-          width={700}
-          height={300}
-        />
-      </Card>
+        <Card
+          sx={{
+            textAlign: "center",
+            borderRadius: 2,
+            boxShadow: 3,
+            width: "30%",
+          }}
+        >
+          <CardContent>
+            <Typography
+              variant="h5"
+              sx={{
+                fontSize: 15,
+                fontWeight: "bold",
+                marginTop: 1,
+                color: "#c71585",
+              }}
+            >
+              {" "}
+              PAC{" "}
+            </Typography>
+            <Typography variant="h5" sx={{ fontSize: 15, fontWeight: "bold" }}>
+              {pac_usage}
+            </Typography>
+          </CardContent>
+        </Card>
 
-      {/* Data Table */}
-      <Card className="tableCard">
-        <Typography className="headerText">Threshold and Prediction Data</Typography>
-        <Table className="table">
-          <TableHead>
-            <TableRow>
-              {["Chemical", "Predicted Value", "Threshold Value", "Status"].map((header) => (
-                <TableCell key={header} className="table-header">{header}</TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {Object.entries(todayPrediction).map(([chem, data]) => {
-              const status = getStatus(data.value, data.threshold);
-              return (
-                <TableRow key={chem}>
-                  <TableCell>{chem.toUpperCase()}</TableCell>
-                  <TableCell style={{ fontWeight: "bold" }}>{data.value} {data.unit}</TableCell>
-                  <TableCell>{data.threshold} {data.unit}</TableCell>
-                  <TableCell>
-                    <Chip label={status.label} style={{ backgroundColor: status.color, color: "white" }} />
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+        <Card
+          sx={{
+            textAlign: "center",
+            borderRadius: 2,
+            boxShadow: 3,
+            width: "30%",
+          }}
+        >
+          <CardContent>
+            <Typography
+              variant="h5"
+              sx={{
+                fontSize: 15,
+                fontWeight: "bold",
+                marginTop: 1,
+                color: "#4169e1",
+              }}
+            >
+              {" "}
+              Lime{" "}
+            </Typography>
+
+            <Typography variant="h5" sx={{ fontSize: 15, fontWeight: "bold" }}>
+              {lime_usage}
+            </Typography>
+          </CardContent>
+        </Card>
+      </Grid2>
+
+      <Card
+        sx={{
+          textAlign: "center",
+          borderRadius: 2,
+          boxShadow: 3,
+          width: "93%",
+          margin: "0 auto",
+        }}
+      >
+        <CardContent>
+          <Typography variant="h5" sx={{ fontSize: 15, fontWeight: "bold" }}>
+            Future Prediction Data
+          </Typography>
+
+          <Grid2
+            container
+            spacing={2}
+            justifyContent="center"
+            sx={{ marginTop: "20px", marginBottom: "20px" }}
+          >
+            <TextField
+              type="date"
+              value={selectedDate}
+              onChange={handleDateChange}
+              sx={{ display: "flex", justifyContent: "end" }}
+            />
+            <Button variant="contained" size="small" onClick={fetchWeatherData}>
+              Get Weather
+            </Button>
+            {viewbtn ? (
+              <Button variant="contained" size="small" onClick={SubmitData}>
+                Future Predict
+              </Button>
+            ) : null}
+          </Grid2>
+          {viewbtn ? (
+            <>
+              <Typography
+                variant="h5"
+                sx={{ fontSize: 15, fontWeight: "bold", marginTop:'40px', textAlign: "center" }}
+              >
+                Weather API Data
+              </Typography>
+
+              <Grid
+                container
+                spacing={2}
+                sx={{ marginTop: "10px", marginBottom: "30px" }}
+              >
+                <Grid item xs={3}>
+                  <Typography
+                    variant="h3"
+                    sx={{ fontSize: 13, fontWeight: "bold", color: "#8b0000" }}
+                  >
+                    Temperature
+                  </Typography>
+                  <Typography
+                    variant="h5"
+                    sx={{ fontSize: 15, fontWeight: "bold", color: "#8b0000" }}
+                  >
+                    {temp_c}
+                  </Typography>
+                </Grid>
+                <Grid item xs={3}>
+                  <Typography
+                    variant="h3"
+                    sx={{ fontSize: 13, fontWeight: "bold", color: "#b8860b" }}
+                  >
+                    Humidity
+                  </Typography>
+                  <Typography
+                    variant="h5"
+                    sx={{ fontSize: 15, fontWeight: "bold", color: "#b8860b" }}
+                  >
+                    {humidity}
+                  </Typography>
+                </Grid>
+                <Grid item xs={3}>
+                  <Typography
+                    variant="h3"
+                    sx={{ fontSize: 13, fontWeight: "bold", color: "#0047ab" }}
+                  >
+                    Precipitation
+                  </Typography>
+                  <Typography
+                    variant="h5"
+                    sx={{ fontSize: 15, fontWeight: "bold", color: "#0047ab" }}
+                  >
+                    {precip_mm}
+                  </Typography>
+                </Grid>
+                <Grid item xs={3}>
+                  <Typography
+                    variant="h3"
+                    sx={{ fontSize: 13, fontWeight: "bold", color: "#555555" }}
+                  >
+                    Cloud
+                  </Typography>
+                  <Typography
+                    variant="h5"
+                    sx={{ fontSize: 15, fontWeight: "bold", color: "#555555" }}
+                  >
+                    {cloud}
+                  </Typography>
+                </Grid>
+              </Grid>
+            </>
+          ) : null}
+
+          {futureview ? <>
+            <Typography
+                variant="h5"
+                sx={{ fontSize: 15, fontWeight: "bold", marginTop:'40px', textAlign: "center" }}
+              >
+                Water Quality
+              </Typography>
+            <Grid
+              container
+              spacing={2}
+              sx={{ marginTop: "10px", marginBottom: "30px" }}
+            >
+              <Grid item xs={3}>
+                <Typography
+                  variant="h3"
+                  sx={{ fontSize: 13, fontWeight: "bold", color: "black" }}
+                >
+                  Predicted Water Production
+                </Typography>
+                <Typography
+                  variant="h5"
+                  sx={{ fontSize: 15, fontWeight: "bold", color: "black" }}
+                >
+                  {futurePrediction.predicted_water_production.toFixed(2)}
+                </Typography>
+              </Grid>
+
+              <Grid item xs={3}>
+                <Typography
+                  variant="h3"
+                  sx={{ fontSize: 13, fontWeight: "bold", color: "black" }}
+                >
+                  Predicted Conductivity
+                </Typography>
+                <Typography
+                  variant="h5"
+                  sx={{ fontSize: 15, fontWeight: "bold", color: "black" }}
+                >
+                  {futurePrediction.predicted_conductivity.toFixed(2)}
+                </Typography>
+              </Grid>
+
+              <Grid item xs={3}>
+                <Typography
+                  variant="h3"
+                  sx={{ fontSize: 13, fontWeight: "bold", color: "black" }}
+                >
+                  Predicted PH
+                </Typography>
+                <Typography
+                  variant="h5"
+                  sx={{ fontSize: 15, fontWeight: "bold", color: "black" }}
+                >
+                  {futurePrediction.predicted_ph.toFixed(2)}
+                </Typography>
+              </Grid>
+
+              <Grid item xs={3}>
+                <Typography
+                  variant="h3"
+                  sx={{ fontSize: 13, fontWeight: "bold", color: "black" }}
+                >
+                  Predicted Turbidity
+                </Typography>
+                <Typography
+                  variant="h5"
+                  sx={{ fontSize: 15, fontWeight: "bold", color: "black" }}
+                >
+                  {futurePrediction.predicted_turbidity.toFixed(2)}
+                </Typography>
+              </Grid>
+            </Grid>
+          </> : null}
+
+
+
+
+          {futureview ? <>
+            <Typography
+                variant="h5"
+                sx={{ fontSize: 15, fontWeight: "bold", marginTop:'40px', textAlign: "center" }}
+              >
+                Future Chemical Prediction
+              </Typography>
+            <Grid
+              container
+              spacing={2}
+              sx={{ marginTop: "10px", marginBottom: "30px" }}
+            >
+              <Grid item xs={4}>
+                <Typography
+                  variant="h3"
+                  sx={{ fontSize: 13, fontWeight: "bold", color: "#efcc00" }}
+                >
+                  Chlorine
+                </Typography>
+                <Typography
+                  variant="h5"
+                  sx={{ fontSize: 15, fontWeight: "bold", color: "#efcc00" }}
+                >
+                  {futurePrediction.chlorine_usage.toFixed(4)}
+                </Typography>
+              </Grid>
+
+              <Grid item xs={4}>
+                <Typography
+                  variant="h3"
+                  sx={{ fontSize: 13, fontWeight: "bold", color: "#c71585" }}
+                >
+                  PAC
+                </Typography>
+                <Typography
+                  variant="h5"
+                  sx={{ fontSize: 15, fontWeight: "bold", color: "#c71585" }}
+                >
+                  {futurePrediction.pac_usage.toFixed(4)}
+                </Typography>
+              </Grid>
+
+              <Grid item xs={4}>
+                <Typography
+                  variant="h3"
+                  sx={{ fontSize: 13, fontWeight: "bold", color: "#4169e1" }}
+                >
+                  Lime
+                </Typography>
+                <Typography
+                  variant="h5"
+                  sx={{ fontSize: 15, fontWeight: "bold", color: "#4169e1" }}
+                >
+                  {futurePrediction.lime_usage.toFixed(4)}
+                </Typography>
+              </Grid>
+            </Grid>
+          </> : null}
+        </CardContent>
       </Card>
-    </Grid>
+    </div>
   );
 };
 
