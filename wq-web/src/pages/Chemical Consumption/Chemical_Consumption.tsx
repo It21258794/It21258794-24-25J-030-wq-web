@@ -271,7 +271,7 @@ const Chemical_Consumption = () => {
               {" "}
               Chlorine{" "}
             </Typography>
-            <Typography variant="h5" sx={{ fontSize: 15, fontWeight: "bold" }}>
+            <Typography variant="h5" sx={{ fontSize: 15, fontWeight: "bold",marginTop: 3 }}>
               {chlorine_usage}
             </Typography>
           </CardContent>
@@ -298,7 +298,7 @@ const Chemical_Consumption = () => {
               {" "}
               PAC{" "}
             </Typography>
-            <Typography variant="h5" sx={{ fontSize: 15, fontWeight: "bold" }}>
+            <Typography variant="h5" sx={{ fontSize: 15, fontWeight: "bold", marginTop: 3 }}>
               {pac_usage}
             </Typography>
           </CardContent>
@@ -326,7 +326,7 @@ const Chemical_Consumption = () => {
               Lime{" "}
             </Typography>
 
-            <Typography variant="h5" sx={{ fontSize: 15, fontWeight: "bold" }}>
+            <Typography variant="h5" sx={{ fontSize: 15, fontWeight: "bold", marginTop: 3 }}>
               {lime_usage}
             </Typography>
           </CardContent>
