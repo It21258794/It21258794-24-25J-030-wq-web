@@ -28,7 +28,6 @@ interface SelectedOptions {
   turbidityGraph: boolean;
   phGraph: boolean;
   conductivityGraph: boolean;
-  totalAnalysisGraph: boolean;
 }
 
 function AreaGradient({ color, id }: { color: string; id: string }) {
