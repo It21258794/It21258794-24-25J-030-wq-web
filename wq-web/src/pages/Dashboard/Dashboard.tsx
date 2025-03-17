@@ -28,7 +28,6 @@ interface SelectedOptions {
   turbidityGraph: boolean;
   phGraph: boolean;
   conductivityGraph: boolean;
-  chartGraph: boolean;
   totalAnalysisGraph: boolean;
 }
 
