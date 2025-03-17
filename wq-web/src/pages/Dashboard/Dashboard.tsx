@@ -4,17 +4,20 @@ import {
   CardContent,
   Chip,
   Drawer,
+  FormControl,
   Grid2,
   Grow,
   IconButton,
+  MenuItem,
+  Select,
   ToggleButton,
   ToggleButtonGroup,
   Typography,
   useTheme,
 } from "@mui/material";
 import { LineChart } from "@mui/x-charts";
-import React, { useState } from "react";
-import "./Dashboard.css";
+import React, { useContext, useEffect, useState } from "react";
+import { AuthContext } from "../../components/auth/AuthProvider";
 
 interface SelectedOptions {
   turbidity: boolean;
@@ -22,6 +25,8 @@ interface SelectedOptions {
   conductivity: boolean;
   chart: boolean;
   totalAnalysis: boolean;
+  turbidityGraph: boolean;
+  phGraph: boolean;
   conductivityGraph: boolean;
   chartGraph: boolean;
   totalAnalysisGraph: boolean;
@@ -41,6 +46,7 @@ function AreaGradient({ color, id }: { color: string; id: string }) {
 const Dashboard = (): JSX.Element => {
   const [alignment, setAlignment] = React.useState("web");
   const [openSettings, setOpenSettings] = React.useState(false);
+  const [selectedOption, handleSelectChange] = useState<string>("Turbidity");
   const [selectedOptions, setSelectedOptions] = useState({
     turbidity: true,
     ph: true,
@@ -70,6 +76,8 @@ const Dashboard = (): JSX.Element => {
   ) => {
     setAlignment(newAlignment);
   };
+  const authContext = useContext(AuthContext);
+  const token: string | undefined = authContext?.token;
 
   const handleToggle = (option: keyof SelectedOptions) => {
     setSelectedOptionsTimeout((prev) => ({
@@ -84,35 +92,61 @@ const Dashboard = (): JSX.Element => {
     }, 400);
   };
 
-  const stats = [
-    {
-      title: "Turbidity",
-      value: "11.15",
-      change: 25,
-      color: "green",
-      data: [2, 3, 3, 4, 5, 7],
-    },
-    {
-      title: "pH",
-      value: "7.12",
-      change: -25,
-      color: "red",
-      data: [6, 5, 4, 3, 3, 2],
-    },
-    {
-      title: "Conductivity",
-      value: "34.54",
-      change: 5,
-      color: "blue",
-      data: [4, 4, 4, 5, 5, 5],
-    },
-  ];
-
   const colorPalette = [
     theme.palette.primary.light,
     theme.palette.primary.main,
     theme.palette.primary.dark,
   ];
+
+  const [turbidityData, setTurbidityData] = useState<number[]>([]);
+  const [phData, setPhData] = useState<number[]>([]);
+  const [conductivityData, setConductivityData] = useState<number[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:8090/api/dashboard/fetchModbusData",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        const data = await response.json();
+
+        if (data) {
+          setTurbidityData((prev) => [...prev.slice(-9), data[5001] || 0]);
+          setPhData((prev) => [...prev.slice(-9), data[5002] || 0]);
+          setConductivityData((prev) => [...prev.slice(-9), data[5003] || 0]);
+        }
+      } catch (error) {
+        console.error("Error fetching Modbus data:", error);
+      }
+    };
+
+    fetchData();
+    const interval = setInterval(fetchData, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const getChartData = () => {
+    switch (selectedOption) {
+      case "Turbidity":
+        return { data: turbidityData, color: "green" };
+      case "Ph":
+        return { data: phData, color: "blue" };
+      case "Conductivity":
+        return { data: conductivityData, color: "red" };
+      default:
+        return { data: turbidityData, color: "green" };
+    }
+  };
+
+  const { data, color } = getChartData();
 
   return (
     <>
@@ -284,7 +318,8 @@ const Dashboard = (): JSX.Element => {
                 padding: 2,
                 borderRadius: 2,
                 boxShadow: 3,
-                width: "30%",
+                flex: "1 1 30%",
+                minWidth: "200px",
               }}
             >
               <CardContent>
@@ -299,10 +334,13 @@ const Dashboard = (): JSX.Element => {
                   variant="h6"
                   sx={{ fontSize: 24, fontWeight: "bold", marginTop: 1 }}
                 >
-                  11.15
+                  {turbidityData[turbidityData.length - 1]?.toFixed(2) || "N/A"}
                 </Typography>
                 <Typography sx={{ fontSize: 10, marginTop: 1, color: "gray" }}>
-                  Last Updated: 4 days ago
+                  Last Updated:{" "}
+                  {conductivityData.length > 0
+                    ? new Date().toLocaleString()
+                    : "No recent data"}
                 </Typography>
               </CardContent>
             </Card>
@@ -316,7 +354,8 @@ const Dashboard = (): JSX.Element => {
                 padding: 2,
                 borderRadius: 2,
                 boxShadow: 3,
-                width: "30%",
+                flex: "1 1 30%",
+                minWidth: "200px",
               }}
             >
               <CardContent>
@@ -331,10 +370,13 @@ const Dashboard = (): JSX.Element => {
                   variant="h6"
                   sx={{ fontSize: 24, fontWeight: "bold", marginTop: 1 }}
                 >
-                  7.12
+                  {phData[phData.length - 1]?.toFixed(2) || "N/A"}
                 </Typography>
                 <Typography sx={{ fontSize: 10, marginTop: 1, color: "gray" }}>
-                  Last Updated: 4 days ago
+                  Last Updated:{" "}
+                  {conductivityData.length > 0
+                    ? new Date().toLocaleString()
+                    : "No recent data"}
                 </Typography>
               </CardContent>
             </Card>
@@ -348,7 +390,8 @@ const Dashboard = (): JSX.Element => {
                 padding: 2,
                 borderRadius: 2,
                 boxShadow: 3,
-                width: "30%",
+                flex: "1 1 30%",
+                minWidth: "200px",
               }}
             >
               <CardContent>
@@ -363,10 +406,14 @@ const Dashboard = (): JSX.Element => {
                   variant="h6"
                   sx={{ fontSize: 24, fontWeight: "bold", marginTop: 1 }}
                 >
-                  34.54
+                  {conductivityData[conductivityData.length - 1]?.toFixed(2) ||
+                    "N/A"}
                 </Typography>
                 <Typography sx={{ fontSize: 10, marginTop: 1, color: "gray" }}>
-                  Last Updated: 4 days ago
+                  Last Updated:{" "}
+                  {conductivityData.length > 0
+                    ? new Date().toLocaleString()
+                    : "No recent data"}
                 </Typography>
               </CardContent>
             </Card>
@@ -379,65 +426,101 @@ const Dashboard = (): JSX.Element => {
         justifyContent="center"
         sx={{ marginTop: "20px" }}
       >
-        {stats.map(({ title, value, change, color, data }) => (
-          <Card
-            key={title}
-            sx={{
-              textAlign: "center",
-              borderRadius: 2,
-              boxShadow: 3,
-              width: "30%",
-              height: "300px",
-            }}
-          >
-            <CardContent>
-              <Typography sx={{ fontWeight: 700, fontSize: 14, color: "gray" }}>
-                {title}
-              </Typography>
-              <Typography sx={{ fontWeight: 700, fontSize: 24, marginTop: 1 }}>
-                {value}
-              </Typography>
-              <Typography
-                sx={{
-                  fontSize: 14,
-                  color: change > 0 ? "green" : "red",
-                }}
-              >
-                {change > 0 ? `+${change}%` : `${change}%`}
-              </Typography>
-              <LineChart
-                colors={colorPalette}
-                xAxis={[{ data: [1, 2, 3, 4, 5, 6] }]}
-                series={[
-                  {
-                    id: title.toLowerCase().replace(/\s/g, ""),
-                    color: color,
-                    data: data,
-                    showMark: false,
-                    area: true,
-                    stack: "total",
-                    stackOrder: "ascending",
-                    curve: "linear",
-                  },
-                ]}
-                grid={{ horizontal: false, vertical: false }}
-                height={200}
-                sx={{
-                  [`& .MuiAreaElement-series-${title
-                    .toLowerCase()
-                    .replace(/\s/g, "")}`]: {
-                    fill: `url('#${title.toLowerCase().replace(/\s/g, "")}')`,
-                  },
-                }}
-              >
-                <AreaGradient
-                  color={color}
-                  id={title.toLowerCase().replace(/\s/g, "")}
-                />
-              </LineChart>
-            </CardContent>
-          </Card>
-        ))}
+        {[
+          {
+            title: "Turbidity",
+            key: 5001,
+            data: turbidityData,
+            color: "green",
+          },
+          { title: "pH", key: 5002, data: phData, color: "red" },
+          {
+            title: "Conductivity",
+            key: 5003,
+            data: conductivityData,
+            color: "blue",
+          },
+        ].map(({ title, data, color }) => {
+          const latestValue = data[data.length - 1] || 0;
+          const previousValue =
+            data.length > 1 ? data[data.length - 2] : latestValue;
+          const change = previousValue
+            ? ((latestValue - previousValue) / previousValue) * 100
+            : 0;
+
+          return (
+            <Card
+              key={title}
+              sx={{
+                textAlign: "center",
+                borderRadius: 2,
+                boxShadow: 3,
+                flex: "1 1 30%",
+                minWidth: "200px",
+              }}
+            >
+              <CardContent>
+                <Typography
+                  sx={{ fontWeight: 700, fontSize: 14, color: "gray" }}
+                >
+                  {title}
+                </Typography>
+                <Typography
+                  sx={{ fontWeight: 700, fontSize: 24, marginTop: 1 }}
+                >
+                  {latestValue.toFixed(2)}
+                </Typography>
+                <Typography
+                  sx={{
+                    fontSize: 14,
+                    color: change > 0 ? "green" : "red",
+                  }}
+                >
+                  {change > 0
+                    ? `+${change.toFixed(2)}%`
+                    : `${change.toFixed(2)}%`}
+                </Typography>
+                <LineChart
+                  colors={colorPalette}
+                  xAxis={[
+                    {
+                      data: Array.from(
+                        { length: data.length },
+                        (_, i) => i + 1
+                      ),
+                    },
+                  ]}
+                  series={[
+                    {
+                      id: title.toLowerCase().replace(/\s/g, ""),
+                      color: color,
+                      data: data,
+                      showMark: false,
+                      area: true,
+                      stack: "total",
+                      stackOrder: "ascending",
+                      curve: "linear",
+                    },
+                  ]}
+                  grid={{ horizontal: false, vertical: false }}
+                  height={200}
+                  sx={{
+                    [`& .MuiAreaElement-series-${title
+                      .toLowerCase()
+                      .replace(/\s/g, "")}`]: {
+                      fill: `url('#${title.toLowerCase().replace(/\s/g, "")}')`,
+                    },
+                  }}
+                >
+                  <AreaGradient
+                    color={color}
+                    id={title.toLowerCase().replace(/\s/g, "")}
+                  />
+                </LineChart>
+              </CardContent>
+            </Card>
+          );
+        })}
       </Grid2>
 
       <Grid2
@@ -458,10 +541,12 @@ const Dashboard = (): JSX.Element => {
                 padding: 2,
                 borderRadius: 2,
                 boxShadow: 3,
-                width: "45%",
+                flex: "1 1 30%",
+                minWidth: "200px",
                 display: "flex",
                 justifyContent: "center",
                 flexDirection: "column",
+                position: "relative",
               }}
             >
               <Typography
@@ -472,11 +557,37 @@ const Dashboard = (): JSX.Element => {
                   color: "gray",
                 }}
               >
-                Chart
+                {selectedOption} Overview
               </Typography>
+
+              <div style={{ position: "absolute", top: 10, right: 10 }}>
+                <FormControl sx={{ m: 2, minWidth: 60 }} size="small">
+                  <Select
+                    labelId="demo-simple-select-label"
+                    id="demo-simple-select"
+                    value={selectedOption}
+                    onChange={(event) =>
+                      handleSelectChange(event.target.value as string)
+                    }
+                    sx={{
+                      width: "110px",
+                      height: "30px",
+                      fontSize: "12px",
+                      borderRadius: 3,
+                      "& .MuiSelect-select": {
+                        padding: "10px",
+                      },
+                    }}
+                  >
+                    <MenuItem value="Turbidity">Turbidity</MenuItem>
+                    <MenuItem value="Ph">Ph</MenuItem>
+                    <MenuItem value="Conductivity">Conductivity</MenuItem>
+                  </Select>
+                </FormControl>
+              </div>
+
               <LineChart
-                xAxis={[{ data: [1, 2, 3, 5, 8, 10] }]}
-                series={[{ data: [2, 5.5, 2, 8.5, 1.5, 5] }]}
+                series={[{ color, data }]}
                 height={300}
                 sx={{ width: "100%" }}
               />
@@ -491,7 +602,8 @@ const Dashboard = (): JSX.Element => {
                 padding: 2,
                 borderRadius: 2,
                 boxShadow: 3,
-                width: "46%",
+                flex: "1 1 30%",
+                minWidth: "200px",
                 display: "flex",
                 justifyContent: "center",
                 flexDirection: "column",
@@ -505,14 +617,13 @@ const Dashboard = (): JSX.Element => {
                   color: "gray",
                 }}
               >
-                Total Analysis
+                Water Quality Parameters Overview
               </Typography>
               <LineChart
-                xAxis={[{ data: [1, 2, 3, 5, 8, 10] }]}
                 series={[
-                  { color: "green", data: [0, 5, 2, 6, 3, 9.3] },
-                  { color: "red", data: [6, 3, 7, 9.5, 4, 2] },
-                  { color: "blue", data: [3, 1, 3, 6, 2, 1] },
+                  { label: "Turbidity", color: "green", data: turbidityData },
+                  { label: "PH", color: "red", data: phData },
+                  { label: "Turbidity", color: "blue", data: conductivityData },
                 ]}
                 height={300}
                 sx={{ width: "100%" }}

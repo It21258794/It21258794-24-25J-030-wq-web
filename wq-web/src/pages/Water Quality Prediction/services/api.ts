@@ -1,13 +1,17 @@
 import axios from "axios";
 import { PredictionResult, PredictionParameter } from "../types/api";
 
-const BASE_URL = "http://localhost:8080/api";
+const BASE_URL = "http://localhost:8090/api";
 
-const getPredcitions = async <T>(endpoint: string, params: Record<string, unknown>, token: string): Promise<T> => {
+const getPredcitions = async <T>(
+  endpoint: string,
+  params: Record<string, unknown>,
+  token: string
+): Promise<T> => {
   try {
     const response = await axios.get<T>(`${BASE_URL}${endpoint}`, {
       headers: {
-        Authorization:token,
+        Authorization: token,
       },
       params: params,
     });
@@ -18,11 +22,15 @@ const getPredcitions = async <T>(endpoint: string, params: Record<string, unknow
   }
 };
 
-const getFutureAllPredictions = async <T>(endpoint: string, params: Record<string, unknown>, token: string): Promise<T> => {
+const getFutureAllPredictions = async <T>(
+  endpoint: string,
+  params: Record<string, unknown>,
+  token: string
+): Promise<T> => {
   try {
     const response = await axios.get<T>(`${BASE_URL}${endpoint}`, {
       headers: {
-        Authorization:token,
+        Authorization: token,
       },
       params: params,
     });
@@ -33,22 +41,40 @@ const getFutureAllPredictions = async <T>(endpoint: string, params: Record<strin
   }
 };
 
-export const getPredictions = async (days: number, parameter: PredictionParameter, isPast: boolean, token: string): Promise<PredictionResult> => {
+export const getPredictions = async (
+  days: number,
+  parameter: PredictionParameter,
+  isPast: boolean,
+  token: string
+): Promise<PredictionResult> => {
   const params = {
     days,
     parameter,
-    isPast
+    isPast,
   };
 
-  return getPredcitions<PredictionResult>("/water-quality/predictions", params, token);
+  return getPredcitions<PredictionResult>(
+    "/water-quality/predictions",
+    params,
+    token
+  );
 };
 
-export const getFuturePredictions = async (parameterName: PredictionParameter,page:number,size:number,token: string): Promise<PredictionResult> => {
+export const getFuturePredictions = async (
+  parameterName: PredictionParameter,
+  page: number,
+  size: number,
+  token: string
+): Promise<PredictionResult> => {
   const params = {
     parameterName,
     page,
-    size
+    size,
   };
 
-  return getFutureAllPredictions<PredictionResult>("/water-quality/future-predictions", params,token);
+  return getFutureAllPredictions<PredictionResult>(
+    "/water-quality/future-predictions",
+    params,
+    token
+  );
 };
