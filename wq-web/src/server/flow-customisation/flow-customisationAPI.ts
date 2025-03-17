@@ -1,6 +1,7 @@
 // api.ts
 import axios from "axios";
-
+import { AuthContext } from "../../components/auth/AuthProvider";
+import React from "react";
 // Base API URL
 const BASE_URL = "http://localhost:8085/api";
 
@@ -16,7 +17,7 @@ export const createStep = async (
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzk4MTgwMTl9.Lrc3JYMMhIFxhhAqmL0gMjunClfGuyKvW_ZVofgvI2Q`,
+          Authorization: token
         },
       }
     );
@@ -43,7 +44,7 @@ export const addTest = async (
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzk4MTgwMTl9.Lrc3JYMMhIFxhhAqmL0gMjunClfGuyKvW_ZVofgvI2Q`,
+          Authorization: token
         },
       }
     );
@@ -64,13 +65,14 @@ export const createChemical = async (
   const payload = { chemicalName, chemicalType };
 
   try {
+
     const response = await axios.post(
       `${BASE_URL}/chemicals/create`,
       payload,
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzk4MTgwMTl9.Lrc3JYMMhIFxhhAqmL0gMjunClfGuyKvW_ZVofgvI2Q`,
+          Authorization: token
         },
       }
     );
@@ -83,12 +85,13 @@ export const createChemical = async (
 
 
 // Function to get all chemicals
-export const getChemicals = async () => {
+export const getChemicals = async (token: string) => {
   try {
+
     const response = await axios.get(`${BASE_URL}/chemicals/get/all-chemicals`, {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzk4MTgwMTl9.Lrc3JYMMhIFxhhAqmL0gMjunClfGuyKvW_ZVofgvI2Q`,
+        Authorization: token
       },
     });
     return response.data;
@@ -99,12 +102,14 @@ export const getChemicals = async () => {
 };
 
 // Function to get all tests
-export const getTests = async () => {
+export const getTests = async (token: string) => {
   try {
+
     const response = await axios.get(`${BASE_URL}/tests/get/all-tests`, {
+      
       headers: {
         "Content-Type": "application/json",
-        Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzk4MTgwMTl9.Lrc3JYMMhIFxhhAqmL0gMjunClfGuyKvW_ZVofgvI2Q`,
+        Authorization: token
       },
     });
     return response.data;
@@ -115,12 +120,13 @@ export const getTests = async () => {
 };
 
 // Function to get all steps
-export const getSteps = async () => {
+export const getSteps = async (token: string) => {
   try {
+
     const response = await axios.get(`${BASE_URL}/steps/get/all-steps`, {
       headers: {
+        Authorization: token,
         "Content-Type": "application/json",
-        Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzk4MTgwMTl9.Lrc3JYMMhIFxhhAqmL0gMjunClfGuyKvW_ZVofgvI2Q`,
       },
     });
     return response.data;
@@ -130,13 +136,13 @@ export const getSteps = async () => {
   }
 };
 
-export const updateStepOrder = async (steps: { id: number; stepOrder: number }[]) => {
+export const updateStepOrder = async (token: string, steps: { id: number; stepOrder: number }[]) => {
   try {
     const response = await fetch(`${BASE_URL}/steps/update/step-order`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzk4MTgwMTl9.Lrc3JYMMhIFxhhAqmL0gMjunClfGuyKvW_ZVofgvI2Q`,
+        Authorization: token,
 
       },
       body: JSON.stringify(steps),
@@ -172,7 +178,7 @@ export const createStepValue = async (
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzk4MTgwMTl9.Lrc3JYMMhIFxhhAqmL0gMjunClfGuyKvW_ZVofgvI2Q`,
+          Authorization: token,
         },
       }
     );
@@ -185,12 +191,12 @@ export const createStepValue = async (
 
 
 
-export const getStepValuesByStepId = async (stepId: number, token: string) => {
+export const getStepValuesByStepId = async (token: string, stepId: number) => {
   try {
     const response = await axios.get(`${BASE_URL}/step-values/get-by-step/${stepId}`, {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzk4MTgwMTl9.Lrc3JYMMhIFxhhAqmL0gMjunClfGuyKvW_ZVofgvI2Q`,
+        Authorization: token,
       },
     });
     return response.data;
@@ -231,7 +237,7 @@ export const updateStepValue = async (
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzk4MTgwMTl9.Lrc3JYMMhIFxhhAqmL0gMjunClfGuyKvW_ZVofgvI2Q`,
+          Authorization: token,
         },
       }
     );
@@ -252,7 +258,7 @@ export const getAllStepValues = async (token: string) => {
     const response = await axios.get(`${BASE_URL}/step-values/get-all-step-values`, {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzk4MTgwMTl9.Lrc3JYMMhIFxhhAqmL0gMjunClfGuyKvW_ZVofgvI2Q`,
+        Authorization: token,
       },
     });
     console.log("Step values fetched successfully:", response.data);

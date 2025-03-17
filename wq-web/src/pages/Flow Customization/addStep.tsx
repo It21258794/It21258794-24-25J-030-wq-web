@@ -4,6 +4,7 @@ import { Box, TextField, Button, Typography, Paper, Snackbar, Alert } from "@mui
 import { createStep, getSteps } from "../../server/flow-customisation/flow-customisationAPI"; // Adjust the path as needed
 import "@fontsource/poppins";
 import { AxiosError } from 'axios'; // Import AxiosError if you're using Axios
+import { AuthContext } from "../../components/auth/AuthProvider";
 
 const AddStep: React.FC = (): JSX.Element => {
   const [stepName, setStepName] = useState<string>("");
@@ -14,12 +15,12 @@ const AddStep: React.FC = (): JSX.Element => {
   const [alertSeverity, setAlertSeverity] = useState<"error" | "warning" | "info" | "success">();
   const navigate = useNavigate();
 
-  const token = localStorage.getItem("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3MzgxNzUzOTl9.QbPRSxgRlQh5T4AIWZ_c5CV5i_6DqxyFC85JbJGo070");
-
+  const authcontext = React.useContext(AuthContext);
+  const token: string | undefined = authcontext?.token;
   useEffect(() => {
     const fetchSteps = async () => {
       try {
-        const steps = await getSteps();
+        const steps = await getSteps(token);
         const maxOrder = steps.reduce((max: number, step: { stepOrder: number }) => 
           step.stepOrder > max ? step.stepOrder : max, 0);
         setStepOrder(maxOrder + 1); 
@@ -44,7 +45,7 @@ const AddStep: React.FC = (): JSX.Element => {
       stepOrder, 
       stepDescription,
     };
-    
+ 
     try {
       // Call the API to create the step
       await createStep(token || "", payload);
@@ -111,7 +112,7 @@ const AddStep: React.FC = (): JSX.Element => {
           gutterBottom
           sx={{ textAlign: "center", fontFamily: "Poppins, sans-serif" }}
         >
-          Add New Step
+          Add New Stage
         </Typography>
 
         <TextField

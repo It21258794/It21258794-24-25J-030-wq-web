@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Box, Grid, TextField, Button, Typography, Paper, Snackbar, Alert } from "@mui/material";
-import { Table, TableHead, TableRow, TableCell, TableBody } from "@mui/material";
+import { Table, TableHead, TableRow, TableCell, TableBody, TableContainer, TableFooter, TablePagination, Chip, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent } from "@mui/material";
 import { getStepValuesByStepId, getSteps, updateStepValue, getAllStepValues } from "../../server/flow-customisation/flow-customisationAPI";
+import { AuthContext } from "../../components/auth/AuthProvider";
+import TablePaginationActions from "@mui/material/TablePagination/TablePaginationActions";
 
 interface StepValue {
   id: number;
@@ -48,14 +50,17 @@ const StepView: React.FC = () => {
   const [stepValueMap, setStepValueMap] = useState<Map<number, StepValue>>(new Map());
   const [allStepValues, setAllStepValues] = useState<StepValue[]>([]);
   const [steps, setSteps] = useState<Step[]>([]);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
   const navigate = useNavigate();
 
-  const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzk4MTgwMTl9.Lrc3JYMMhIFxhhAqmL0gMjunClfGuyKvW_ZVofgvI2Q";
+  const authcontext = React.useContext(AuthContext);
+  const token: string | undefined = authcontext?.token;
 
   useEffect(() => {
     const fetchAllStepValues = async () => {
       try {
-        const data = await getAllStepValues(TOKEN);
+        const data = await getAllStepValues(token);
         setAllStepValues(data);
       } catch (error) {
         console.error("Error fetching all step values:", error);
@@ -67,7 +72,7 @@ const StepView: React.FC = () => {
 
     const fetchSteps = async () => {
       try {
-        const data = await getSteps(TOKEN);
+        const data = await getSteps(token);
         setSteps(data);
       } catch (error) {
         console.error("Error fetching steps:", error);
@@ -89,8 +94,7 @@ const StepView: React.FC = () => {
           setStepName(step.stepName);
         }
 
-        const stepValues = await getStepValuesByStepId(Number(stepId), TOKEN);
-        
+        const stepValues = await getStepValuesByStepId(token, Number(stepId));
         const valueMap = new Map();
         stepValues.forEach((value: StepValue) => {
           valueMap.set(value.id, value);
@@ -119,9 +123,6 @@ const StepView: React.FC = () => {
         setCurrentTests(currentTestsData);
       } catch (error) {
         console.error("Error fetching step details or values:", error);
-        // setAlertSeverity("error");
-        // setAlertMessage("Failed to fetch step details or values. Please try again.");
-        // setOpenSnackbar(true);
       }
     };
 
@@ -139,14 +140,13 @@ const StepView: React.FC = () => {
 
   const formatDateTime = (datetimeStr: string | undefined) => {
     if (!datetimeStr) return { date: "", time: "" };
-  
+
     try {
       const datetime = new Date(datetimeStr);
       if (isNaN(datetime.getTime())) {
         throw new Error("Invalid date format");
       }
-      
-      // Format date as YYYY-MM-DD for consistency
+
       const date = datetime.toISOString().split('T')[0];
       const time = datetime.toLocaleTimeString();
       return { date, time };
@@ -163,11 +163,11 @@ const StepView: React.FC = () => {
       setOpenSnackbar(true);
       return;
     }
-  
+
     const isDuplicate = pastTests.some(
       (test) => test.testName === testName && test.value === inputValues[id]
     );
-  
+
     if (isDuplicate) {
       setAlertSeverity("error");
       setAlertMessage(
@@ -176,36 +176,36 @@ const StepView: React.FC = () => {
       setOpenSnackbar(true);
       return;
     }
-  
+
     setPendingSubmissions((prev) => new Set([...prev, id]));
-  
+
     try {
       const stepValue = stepValueMap.get(id);
-  
+
       if (!stepValue || stepValue.id === undefined || stepValue.id === null) {
         throw new Error(`Could not find step value or ID for test/chemical: ${testName}`);
       }
-  
+
       const isTest = !!stepValue.testName;
       const value = Number(inputValues[id]);
-  
+
       await updateStepValue(
         stepValue.id,
         Number(stepId),
         isTest ? value : null,
         !isTest ? value : null,
-        TOKEN
+        token
       );
-  
+
       const updatedStepValue: StepValue = {
         ...stepValue,
         testValue: isTest ? inputValues[id] : undefined,
         chemicalValue: !isTest ? inputValues[id] : undefined,
         valueAddedDate: new Date().toISOString(),
       };
-  
+
       setAllStepValues((prev) => [...prev, updatedStepValue]);
-  
+
       const currentTest = currentTests.find((test) => test.id === id);
       if (currentTest) {
         const updatedTest = {
@@ -216,15 +216,15 @@ const StepView: React.FC = () => {
         };
         setPastTests((prev) => [...prev, updatedTest]);
       }
-  
+
       setCurrentTests((prev) => prev.filter((test) => test.id !== id));
-  
+
       setInputValues((prev) => {
         const newValues = { ...prev };
         delete newValues[id];
         return newValues;
       });
-  
+
       setAlertSeverity("success");
       setAlertMessage(`Value for ${testName} added successfully.`);
       setOpenSnackbar(true);
@@ -256,7 +256,7 @@ const StepView: React.FC = () => {
   const filteredStepValues = allStepValues.filter((stepValue) => {
     if (!searchDate) return true;
     if (!stepValue.valueAddedDate) return false;
-    
+
     const { date } = formatDateTime(stepValue.valueAddedDate);
     return date === searchDate;
   });
@@ -269,6 +269,19 @@ const StepView: React.FC = () => {
     const step = steps.find((step) => step.id === stepId);
     return step ? step.stepName : "Unknown Step";
   };
+
+  const handleChangePage = (_: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const emptyRows = Math.max(0, (1 + page) * rowsPerPage - filteredStepValues.length);
 
   return (
     <Box sx={{ padding: 2, backgroundColor: "#F1F2F7", width: "full", boxSizing: "border-box" }}>
@@ -293,7 +306,7 @@ const StepView: React.FC = () => {
               Back
             </Button>
           </Box>
-          
+
           <Typography variant="h4" color="black" gutterBottom>
             {stepName}
           </Typography>
@@ -383,7 +396,7 @@ const StepView: React.FC = () => {
             <Typography variant="h5" gutterBottom sx={{ textAlign: "center" }}>
               Past Test Values
             </Typography>
-            
+
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, marginBottom: 2 }}>
               <TextField
                 type="date"
@@ -398,7 +411,7 @@ const StepView: React.FC = () => {
               />
               {searchDate && (
                 <Button
-              sx={{ backgroundColor: "#F1F2F7", color: "#8F8F8F",marginLeft: 1 }}
+                  sx={{ backgroundColor: "#F1F2F7", color: "#8F8F8F", marginLeft: 1 }}
                   variant="outlined"
                   size="medium"
                   onClick={() => setSearchDate("")}
@@ -408,59 +421,96 @@ const StepView: React.FC = () => {
               )}
             </Box>
 
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell></TableCell>
-                  <TableCell>Step Name</TableCell>
-                  <TableCell>Test/Chemical Name</TableCell>
-                  <TableCell>Value</TableCell>
-                  <TableCell>Date</TableCell>
-                  <TableCell>Time</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-  {filteredStepValues.length > 0 ? (
-    filteredStepValues.map((stepValue, index) => {
-      const isTest = !!stepValue.testName;
-      const rowColor = isTest ? "#F3FAFD" : "#DFF5FF"; // Updated colors
-      const displayValue = isTest ? stepValue.testValue : stepValue.chemicalValue;
-      const { date, time } = formatDateTime(stepValue.valueAddedDate);
-      const stepName = getStepNameById(stepValue.stepId);
+            <TableContainer component={Paper}>
+              <Table sx={{ minWidth: 500 }} aria-label="custom pagination table">
+                <TableHead>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem" }}>
+                      Step Name
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem" }} align="center">
+                      Test/Chemical Name
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem" }} align="center">
+                      Value
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem" }} align="center">
+                      Date
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem" }} align="center">
+                      Time
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {(rowsPerPage > 0
+                    ? filteredStepValues.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    : filteredStepValues
+                  ).map((stepValue, index) => {
+                    const isTest = !!stepValue.testName;
+                    const displayValue = isTest ? stepValue.testValue : stepValue.chemicalValue;
+                    const { date, time } = formatDateTime(stepValue.valueAddedDate);
+                    const stepName = getStepNameById(stepValue.stepId);
 
-      return (
-        <TableRow
-          key={index}
-          sx={{
-            backgroundColor: rowColor,
-            "&:hover": {
-              backgroundColor: isTest ? "#E0F2F7" : "#C2E7FF", // Optional: Adjust hover colors
-            },
-          }}
-        >
-          <TableCell>{index + 1}</TableCell>
-          <TableCell>{stepName}</TableCell>
-          <TableCell>{stepValue.testName || stepValue.chemicalName || "Unknown"}</TableCell>
-          <TableCell>{displayValue}</TableCell>
-          <TableCell>{date}</TableCell>
-          <TableCell>{time}</TableCell>
-        </TableRow>
-      );
-    })
-  ) : (
-    <TableRow>
-      <TableCell colSpan={6} align="center">
-        No data available
-      </TableCell>
-    </TableRow>
-  )}
-</TableBody>
-            </Table>
+                    return (
+                      <TableRow key={index}>
+                        <TableCell sx={{ fontSize: "0.8rem" }}>
+                          {stepName}
+                        </TableCell>
+                        <TableCell sx={{ fontSize: "0.8rem", width: 160 }} align="center">
+                          {stepValue.testName || stepValue.chemicalName || "Unknown"}
+                        </TableCell>
+                        <TableCell sx={{ fontSize: "0.8rem", width: 160 }} align="center">
+                          {displayValue}
+                        </TableCell>
+                        <TableCell sx={{ fontSize: "0.8rem", width: 160 }} align="center">
+                          {date}
+                        </TableCell>
+                        <TableCell sx={{ fontSize: "0.8rem", width: 160 }} align="center">
+                          {time}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                  {emptyRows > 0 && (
+                    <TableRow style={{ height: 53 * emptyRows }}>
+                      <TableCell colSpan={5} />
+                    </TableRow>
+                  )}
+                </TableBody>
+                <TableFooter>
+                  <TableRow>
+                    <TablePagination
+                      sx={{
+                        ".MuiTablePagination-toolbar": { fontSize: "0.7rem" },
+                        ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows": {
+                          fontSize: "0.7rem",
+                          fontWeight: 700,
+                          color: "grey",
+                        },
+                        ".MuiTablePagination-select": {
+                          fontSize: "0.7rem",
+                          fontWeight: 700,
+                          color: "grey",
+                        },
+                      }}
+                      rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
+                      colSpan={5}
+                      count={filteredStepValues.length}
+                      rowsPerPage={rowsPerPage}
+                      page={page}
+                      onPageChange={handleChangePage}
+                      onRowsPerPageChange={handleChangeRowsPerPage}
+                      ActionsComponent={TablePaginationActions}
+                    />
+                  </TableRow>
+                </TableFooter>
+              </Table>
+            </TableContainer>
           </Box>
         </Paper>
       </Grid>
 
-      {/* Snackbar for alerts */}
       <Snackbar
         open={openSnackbar}
         autoHideDuration={3000}

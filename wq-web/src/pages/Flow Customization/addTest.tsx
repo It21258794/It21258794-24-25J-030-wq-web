@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Box, TextField, Button, Typography, Paper, Snackbar, Alert } from "@mui/material";
 import "@fontsource/poppins"; // Import Poppins font
 import { addTest } from "../../server/flow-customisation/flow-customisationAPI"; // Import the addTest function
+import { AuthContext } from "../../components/auth/AuthProvider";
 
 const AddTest: React.FC = (): JSX.Element => {
   const [testName, setTestName] = useState<string>("");
@@ -14,8 +15,9 @@ const AddTest: React.FC = (): JSX.Element => {
   const [alertSeverity, setAlertSeverity] = useState<"error" | "warning" | "info" | "success">();
   const navigate = useNavigate();
 
-  const token = localStorage.getItem("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzc5OTQzNjN9.-jQ6lp1Z4MJhWcY8t6OqZQQGylf_ISkCSYHlvafjrRM") || ""; // Get token from localStorage
 
+  const authcontext = React.useContext(AuthContext);
+  const token: string | undefined = authcontext?.token;
   const handleConfirmClick = async () => {
     if (!testName || !testValue || !testDescription) {
       setAlertSeverity("error");
@@ -79,7 +81,7 @@ const AddTest: React.FC = (): JSX.Element => {
           gutterBottom
           sx={{ textAlign: "center", fontFamily: "Poppins, sans-serif" }}
         >
-          Add New Test
+          Add New Reading
         </Typography>
 
         <TextField

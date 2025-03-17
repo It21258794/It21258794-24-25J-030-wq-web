@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Box, TextField, Button, Paper, Snackbar, Alert } from "@mui/material";
 import { createChemical } from "../../server/flow-customisation/flow-customisationAPI"; // Import the addChemical API function
 import "@fontsource/poppins"; // Import Poppins font
+import { AuthContext } from "../../components/auth/AuthProvider";
 
 const AddChemical: React.FC = (): JSX.Element => {
   const [chemicalName, setChemicalName] = useState<string>("");
@@ -12,8 +13,8 @@ const AddChemical: React.FC = (): JSX.Element => {
   const [alertSeverity, setAlertSeverity] = useState<"error" | "warning" | "info" | "success">();
   const navigate = useNavigate();
 
-  const token = localStorage.getItem("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzc5OTQzNjN9.-jQ6lp1Z4MJhWcY8t6OqZQQGylf_ISkCSYHlvafjrRM"); // Get the token from localStorage
-
+const authcontext = React.useContext(AuthContext);
+  const token: string | undefined = authcontext?.token;
   const handleConfirmClick = async () => {
     if (!chemicalName || !chemicalType) {
       setAlertSeverity("error");

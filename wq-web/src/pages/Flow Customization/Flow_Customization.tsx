@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useDrag, useDrop, DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { FaTrash, FaPlus, FaEdit, FaCheck } from "react-icons/fa";
+import Tooltip from "@mui/material/Tooltip";
+import { FaTrash, FaPlus, FaEdit, FaCheck, FaChartArea } from "react-icons/fa";
 import { Box, Grid, Typography, Paper, IconButton } from "@mui/material";
 import { Snackbar, Alert } from "@mui/material";
 import { useNavigate } from "react-router-dom";
@@ -11,7 +12,8 @@ import {
   getSteps,
   updateStepOrder,
   createStepValue,
-} from "../../server/flow-customisation/flow-customisationAPI"; // Import the API function
+} from "../../server/flow-customisation/flow-customisationAPI";
+import { AuthContext } from "../../components/auth/AuthProvider";
 
 enum ItemType {
   CHEMICAL = "chemical",
@@ -47,7 +49,7 @@ interface DraggableStepProps {
   onDropItem: (stepId: number, itemName: string, itemType: ItemType, itemId: number) => void;
   onRemoveItem: (stepId: number, itemName: string) => void;
   isEditing: boolean;
-  setSteps: React.Dispatch<React.SetStateAction<StepItem[]>>; // Add this line
+  setSteps: React.Dispatch<React.SetStateAction<StepItem[]>>;
 }
 
 interface DraggableItemProps {
@@ -63,12 +65,12 @@ const DraggableStep: React.FC<DraggableStepProps> = ({
   onDropItem,
   onRemoveItem,
   isEditing,
-  setSteps, // Add this line
+  setSteps,
 }) => {
   const [, dragRef] = useDrag({
     type: ItemType.STEP,
     item: { index },
-    canDrag: isEditing, // Enable drag only in edit mode
+    canDrag: isEditing,
   });
 
   const [, dropRef] = useDrop({
@@ -87,7 +89,7 @@ const DraggableStep: React.FC<DraggableStepProps> = ({
         step={step}
         onDropItem={onDropItem}
         onRemoveItem={onRemoveItem}
-        setSteps={setSteps} // Pass setSteps here
+        setSteps={setSteps}
       />
     </div>
   );
@@ -97,68 +99,75 @@ interface StepProps {
   step: StepItem;
   onDropItem: (stepId: number, itemName: string, itemType: ItemType, itemId: number) => void;
   onRemoveItem: (stepId: number, itemName: string) => void;
-  setSteps: React.Dispatch<React.SetStateAction<StepItem[]>>; // Add this line
+  setSteps: React.Dispatch<React.SetStateAction<StepItem[]>>;
 }
 
 const Step: React.FC<StepProps> = ({ step, onDropItem, onRemoveItem, setSteps }) => {
   const [{ isOver }, dropRef] = useDrop({
     accept: [ItemType.CHEMICAL, ItemType.TEST],
     drop: (item: DraggableItemProps) => {
-      onDropItem(step.id, item.name, item.type, item.id); // Pass the item.id
+      onDropItem(step.id, item.name, item.type, item.id);
     },
     collect: (monitor) => ({
       isOver: !!monitor.isOver(),
     }),
   });
-
+  const authcontext = React.useContext(AuthContext);
+  const token: string | undefined = authcontext?.token;
   const navigate = useNavigate();
 
   const handleStepClick = () => {
-    navigate(`/flow/step/${step.id}`);
+    navigate(`/user/flow/step/${step.id}`);
   };
 
   const [openSnackbar, setOpenSnackbar] = useState<boolean>(false);
   const [alertMessage, setAlertMessage] = useState<string>("");
   const [alertSeverity, setAlertSeverity] = useState<"error" | "warning" | "info" | "success">();
+
   const handleSnackbarClose = () => {
     setOpenSnackbar(false);
   };
 
   const handleConfirmClick = async () => {
-  try {
-    for (const item of step.items) {
-      const payload = {
-        stepId: step.id,
-        testId: item.type === ItemType.TEST ? item.id : undefined,
-        chemicalId: item.type === ItemType.CHEMICAL ? item.id : undefined,
-      };
-
-      const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiU1VQRVJfQURNSU4iLCJzdWIiOiI0ZjlhYTIxOS0yMjY4LTQxYWEtYTU5MC1lZjVlM2QyMGU2NzMiLCJleHAiOjE3Mzk3MTQwNjV9.jqOXKf-CGR7k9Hd4vpkQaB9iJ4a5A5RNGooL9ch7Y4I";
-      await createStepValue(token, payload);
+    
+    if (!token) {
+      setAlertSeverity("error");
+      setAlertMessage("No authentication token found. Please log in.");
+      setOpenSnackbar(true);
+      return;
     }
-
-    // Update the state immutably
-    setSteps((prevSteps) =>
-      prevSteps.map((s) =>
-        s.id === step.id ? { ...s, confirmed: false, items: [] } : s
-      )
-    );
-
-    setAlertSeverity("success");
-    setAlertMessage("Step confirmed and values updated!");
-    setOpenSnackbar(true);
-    console.log("Step confirmed and values updated!");
-  } catch (error) {
-    setAlertSeverity("error");
-    setAlertMessage(
-      error instanceof Error
-        ? error.message
-        : "An unexpected error occurred. Please try again."
-    );
-    setOpenSnackbar(true);
-    console.error("Error confirming step:", error);
-  }
-};
+  
+    try {
+      for (const item of step.items) {
+        const payload = {
+          stepId: step.id,
+          testId: item.type === ItemType.TEST ? item.id : undefined,
+          chemicalId: item.type === ItemType.CHEMICAL ? item.id : undefined,
+        };
+  
+        await createStepValue(token, payload);
+      }
+  
+      setSteps((prevSteps) =>
+        prevSteps.map((s) =>
+          s.id === step.id ? { ...s, confirmed: true, items: [] } : s
+        )
+      );
+  
+      setAlertSeverity("success");
+      setAlertMessage("Step confirmed and values updated!");
+      setOpenSnackbar(true);
+    } catch (error) {
+      setAlertSeverity("error");
+      setAlertMessage(
+        error instanceof Error
+          ? error.message
+          : "An unexpected error occurred. Please try again."
+      );
+      setOpenSnackbar(true);
+      console.error("Error confirming step:", error);
+    }
+  };
 
   const hasItems = (step.items || []).length > 0;
 
@@ -252,6 +261,7 @@ const Step: React.FC<StepProps> = ({ step, onDropItem, onRemoveItem, setSteps })
     </Paper>
   );
 };
+
 const DraggableItem: React.FC<DraggableItemProps> = ({ name, type, id }) => {
   const [, dragRef] = useDrag({
     type,
@@ -271,11 +281,18 @@ const FlowCustomizationDashboard: React.FC = () => {
   const [steps, setSteps] = useState<StepItem[]>([]);
   const [tests, setTests] = useState<Test[]>([]);
   const [chemicals, setChemicals] = useState<Chemical[]>([]);
+  const authcontext = React.useContext(AuthContext);
+  const token: string | undefined = authcontext?.token;
 
   useEffect(() => {
     const fetchTests = async () => {
+      if (!token) {
+        console.error("No authentication token found. Please log in.");
+        return;
+      }
+
       try {
-        const data = await getTests();
+        const data = await getTests(token);
         const testData = data.map((test: { id: number; testName: string }) => ({
           id: test.id,
           name: test.testName,
@@ -287,12 +304,17 @@ const FlowCustomizationDashboard: React.FC = () => {
     };
 
     fetchTests();
-  }, []);
+  }, [token]);
 
   useEffect(() => {
     const fetchChemicals = async () => {
+      if (!token) {
+        console.error("No authentication token found. Please log in.");
+        return;
+      }
+
       try {
-        const data = await getChemicals();
+        const data = await getChemicals(token);
         const chemicalData = data.map((chemical: { id: number; chemicalName: string }) => ({
           id: chemical.id,
           name: chemical.chemicalName,
@@ -304,12 +326,17 @@ const FlowCustomizationDashboard: React.FC = () => {
     };
 
     fetchChemicals();
-  }, []);
+  }, [token]);
 
   useEffect(() => {
     const fetchSteps = async () => {
+      if (!token) {
+        console.error("No authentication token found. Please log in.");
+        return;
+      }
+
       try {
-        const data = await getSteps();
+        const data = await getSteps(token);
         const stepsData = data.map((step: { id: number; stepName: string }) => ({
           id: step.id,
           title: step.stepName,
@@ -323,7 +350,7 @@ const FlowCustomizationDashboard: React.FC = () => {
     };
 
     fetchSteps();
-  }, []);
+  }, [token]);
 
   const handleDropItem = (stepId: number, itemName: string, itemType: ItemType, itemId: number) => {
     setSteps((prevSteps) =>
@@ -355,12 +382,16 @@ const FlowCustomizationDashboard: React.FC = () => {
     navigate("/flow/add-chemicals");
   };
 
+  const prediction = () => {
+    navigate("/flow/prediction");
+  };
+
   const handleAddStep = () => {
     navigate("/flow/add-step");
   };
 
   const handleAddTestClick = () => {
-    navigate("/flow/add-test");
+    navigate("add-test");
   };
 
   const handleEditStep = () => {
@@ -379,8 +410,13 @@ const FlowCustomizationDashboard: React.FC = () => {
       stepOrder: index + 1,
     }));
 
+    if (!token) {
+      console.error("No authentication token found. Please log in.");
+      return;
+    }
+
     try {
-      await updateStepOrder(stepsToUpdate);
+      await updateStepOrder(token, stepsToUpdate);
       console.log("Step order updated successfully!");
     } catch (error) {
       console.error("Error updating step order:", error);
@@ -417,11 +453,11 @@ const FlowCustomizationDashboard: React.FC = () => {
                 }}
               >
                 <Typography variant="h6" gutterBottom>
-                  Tests
+                  Readings
                 </Typography>
                 <IconButton
                   size="small"
-                  onClick={handleAddTestClick}
+                  onClick={() => navigate("/user/flow/add-test")}
                   style={{
                     backgroundColor: "#102D4D",
                     color: "white",
@@ -430,7 +466,9 @@ const FlowCustomizationDashboard: React.FC = () => {
                     borderRadius: "8px",
                   }}
                 >
-                  <FaPlus />
+                  <Tooltip title="Add Reading" arrow>
+                    <FaPlus />
+                  </Tooltip>
                 </IconButton>
               </div>
               <ul style={{ listStyleType: "none", padding: 0 }}>
@@ -469,7 +507,7 @@ const FlowCustomizationDashboard: React.FC = () => {
                 </Typography>
                 <IconButton
                   size="small"
-                  onClick={handleAddChemicalClick}
+                  onClick={() => navigate("/user/flow/add-chemical")}
                   style={{
                     backgroundColor: "#102D4D",
                     color: "white",
@@ -478,7 +516,9 @@ const FlowCustomizationDashboard: React.FC = () => {
                     borderRadius: "8px",
                   }}
                 >
-                  <FaPlus />
+                  <Tooltip title="Add Chemical" arrow>
+                    <FaPlus />
+                  </Tooltip>
                 </IconButton>
               </div>
               <ul style={{ listStyleType: "none", padding: 0 }}>
@@ -516,12 +556,12 @@ const FlowCustomizationDashboard: React.FC = () => {
                 }}
               >
                 <Typography variant="h5" sx={{ flex: 1 }}>
-                  Steps
+                  Stages
                 </Typography>
                 <div style={{ display: "flex", gap: "10px" }}>
                   <IconButton
                     size="small"
-                    onClick={handleAddStep}
+                    onClick={() => navigate("/user/flow/prediction")}
                     style={{
                       backgroundColor: "#102D4D",
                       color: "white",
@@ -530,7 +570,24 @@ const FlowCustomizationDashboard: React.FC = () => {
                       borderRadius: "8px",
                     }}
                   >
-                    <FaPlus />
+                    <Tooltip title="Predict Values" arrow>
+                      <FaChartArea />
+                    </Tooltip>
+                  </IconButton>
+                  <IconButton
+                    size="small"
+                    onClick={() => navigate("/user/flow/add-step")}
+                    style={{
+                      backgroundColor: "#102D4D",
+                      color: "white",
+                      width: "40px",
+                      height: "40px",
+                      borderRadius: "8px",
+                    }}
+                  >
+                    <Tooltip title="Add Stage" arrow>
+                      <FaPlus />
+                    </Tooltip>
                   </IconButton>
                   <IconButton
                     size="small"
@@ -543,7 +600,9 @@ const FlowCustomizationDashboard: React.FC = () => {
                       borderRadius: "8px",
                     }}
                   >
-                    <FaEdit />
+                    <Tooltip title="Change Stage Order" arrow>
+                      <FaEdit />
+                    </Tooltip>
                   </IconButton>
                 </div>
               </div>
@@ -558,7 +617,7 @@ const FlowCustomizationDashboard: React.FC = () => {
                       onDropItem={handleDropItem}
                       onRemoveItem={handleRemoveItem}
                       isEditing={isEditing}
-                      setSteps={setSteps} // Pass setSteps here
+                      setSteps={setSteps}
                     />
                   </Grid>
                 ))}
