@@ -1,5 +1,5 @@
-import React from 'react';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
+import React, {useContext} from 'react';
+import {createTheme, ThemeProvider} from '@mui/material/styles';
 import {
   Box,
   Button,
@@ -10,14 +10,16 @@ import {
   TextField,
   Typography
 } from '@mui/material';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
+import {Visibility, VisibilityOff} from '@mui/icons-material';
 import PasswordResetConfirmation from './DialogBoxes/PasswordResetConfirmation.tsx.tsx';
-import { useNavigate } from 'react-router-dom';
-import { forgetPassword } from './Services/api.ts';
+import {useNavigate} from 'react-router-dom';
+import {forgetPassword} from './Services/api.ts';
+import {AuthContext} from '../../components/auth/AuthProvider.tsx';
 
 const defaultTheme = createTheme();
 
 export default function ResetPassword() {
+  const authContext = useContext(AuthContext);
   const [showNewPassword, setShowNewPassword] = React.useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
   const [dialogOpen, setDialogOpen] = React.useState(false);
@@ -25,21 +27,29 @@ export default function ResetPassword() {
   const [confirmPassword, setConfirmPassword] = React.useState('');
   const [newPasswordError, setNewPasswordError] = React.useState('');
   const [confirmPasswordError, setConfirmPasswordError] = React.useState('');
-  const email:any = sessionStorage.getItem('passwordResetEmail');
-  const passwordResetToken:any = sessionStorage.getItem('passwordResetToken');
+  const email: any = sessionStorage.getItem('passwordResetEmail');
+  const passwordResetToken: any = sessionStorage.getItem('passwordResetToken');
   const navigate = useNavigate();
 
   const handleSubmit = async () => {
     if (!newPasswordError && !confirmPasswordError) {
       try {
-        const res : any= await forgetPassword(email,newPassword, passwordResetToken);
-        console.log(res)
-        if (res.status === 200) {
-          setDialogOpen(true);
-        }
-      } catch (err:any) {
+        authContext?.setIsLoading(true);
+        const res: any = await forgetPassword(
+          email,
+          newPassword,
+          passwordResetToken
+        );
+        setTimeout(() => {
+          authContext?.setIsLoading(false);
+          if (res?.status === 200) {
+            setDialogOpen(true);
+          }
+        }, 1000);
+      } catch (err: any) {
         setConfirmPasswordError(
-          err.response?.data?.message || 'Cannot change password. Please try again.'
+          err.response?.data?.message ||
+            'Cannot change password. Please try again.'
         );
       }
     }
@@ -57,13 +67,15 @@ export default function ResetPassword() {
     setShowConfirmPassword((prev) => !prev);
   };
 
-  const validateNewPassword = (password:any) => {
+  const validateNewPassword = (password: any) => {
     if (password.length < 8) {
       setNewPasswordError(
         'New password must be at least 8 characters long and include a letter, a number, and a special character.'
       );
     } else if (!/[A-Z]/.test(password)) {
-      setNewPasswordError('Password must contain at least one uppercase letter.');
+      setNewPasswordError(
+        'Password must contain at least one uppercase letter.'
+      );
     } else if (!/[0-9]/.test(password)) {
       setNewPasswordError('Password must contain at least one number.');
     } else {
@@ -71,13 +83,13 @@ export default function ResetPassword() {
     }
   };
 
-  const validateConfirmPassword = (password:any) => {
+  const validateConfirmPassword = (password: any) => {
     if (password !== newPassword) {
       setConfirmPasswordError('Passwords do not match.');
     } else {
       setConfirmPasswordError('');
     }
-    console.log(confirmPassword)
+    console.log(confirmPassword);
   };
 
   const onClose = () => {
@@ -91,14 +103,14 @@ export default function ResetPassword() {
           backgroundColor: '#F3F3F4',
           minHeight: '100vh',
           width: '100%',
-          padding: { xs: 2, sm: 4, md: 8 }
+          padding: {xs: 2, sm: 4, md: 8}
         }}
       >
         <Box
           sx={{
             maxWidth: 600,
             margin: 'auto',
-            padding: { xs: 2, sm: 3, md: 5 },
+            padding: {xs: 2, sm: 3, md: 5},
             backgroundColor: '#F3F3F4',
             borderRadius: 2
           }}
@@ -108,7 +120,7 @@ export default function ResetPassword() {
             sx={{
               display: 'flex',
               justifyContent: 'center',
-              fontSize: { xs: '18px', sm: '22px' },
+              fontSize: {xs: '18px', sm: '22px'},
               fontWeight: 'bold'
             }}
           >
@@ -120,15 +132,20 @@ export default function ResetPassword() {
               pt: 1,
               display: 'flex',
               justifyContent: 'center',
-              fontSize: { xs: '11px', sm: '13px' },
+              fontSize: {xs: '11px', sm: '13px'},
               color: '#9C9C9C'
             }}
           >
             Please create a strong and secure password to protect your account.
           </Typography>
 
-          <Box sx={{ pt: 4, ml:10, mr:10 }}>
-            <FormControl variant="outlined" fullWidth margin="normal" error={!!newPasswordError}>
+          <Box sx={{pt: 4, ml: 10, mr: 10}}>
+            <FormControl
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              error={!!newPasswordError}
+            >
               <TextField
                 required
                 placeholder="*New Password"
@@ -169,11 +186,16 @@ export default function ResetPassword() {
                 }}
               />
               <FormHelperText>
-                <span style={{ fontWeight: 'bold' }}>{newPasswordError}</span>
+                <span style={{fontWeight: 'bold'}}>{newPasswordError}</span>
               </FormHelperText>
             </FormControl>
 
-            <FormControl variant="outlined" fullWidth margin="normal" error={!!confirmPasswordError}>
+            <FormControl
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              error={!!confirmPasswordError}
+            >
               <TextField
                 required
                 placeholder="*Confirm Password"
@@ -192,7 +214,11 @@ export default function ResetPassword() {
                         onClick={handleShowConfirmPasswordToggle}
                         edge="end"
                       >
-                        {showConfirmPassword ? <Visibility /> : <VisibilityOff />}
+                        {showConfirmPassword ? (
+                          <Visibility />
+                        ) : (
+                          <VisibilityOff />
+                        )}
                       </IconButton>
                     </InputAdornment>
                   ),
@@ -214,7 +240,7 @@ export default function ResetPassword() {
                 }}
               />
               <FormHelperText>
-                <span style={{ fontWeight: 'bold' }}>{confirmPasswordError}</span>
+                <span style={{fontWeight: 'bold'}}>{confirmPasswordError}</span>
               </FormHelperText>
             </FormControl>
 
@@ -222,7 +248,13 @@ export default function ResetPassword() {
               type="submit"
               fullWidth
               variant="contained"
-              sx={{ mt: 3, mb: 2, borderRadius: 4, fontWeight: 'bold',backgroundColor:"#102D4D" }}
+              sx={{
+                mt: 3,
+                mb: 2,
+                borderRadius: 4,
+                fontWeight: 'bold',
+                backgroundColor: '#102D4D'
+              }}
               onClick={handleSubmit}
             >
               Reset Password

@@ -187,7 +187,7 @@ const login = async <T>(endpoint: string, data: Record<string, unknown>, token?:
     return resetPassword<T>("/user/password-reset", data, token);
   };
   
-  export const changeCurrentPass = async <T>(email:string,password: any, currentPassword: string) => {
+  export const changeCurrentPass = async <T>(email:any,password: any, currentPassword: string) => {
     const data = { email,password, currentPassword };
     return await changePassword<T>("/user/password-change", data);
   };
