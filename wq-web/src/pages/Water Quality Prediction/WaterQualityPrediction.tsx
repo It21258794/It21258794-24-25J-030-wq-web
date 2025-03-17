@@ -72,7 +72,7 @@ const conductivity  =[58.6, 58.6, 58.3, 56.1, 54.3, 54.3, 54.3, 54.3, 56.1, 54.3
       const result = await getPredictions(days, parameter, isPast, token);
       const formattedDates = result.dates.map((dateString: string) => {
         const date = new Date(dateString);
-        return date.toISOString().split('T')[0];
+        return date.toISOString().split("T")[0];
       });
       setPredictions(result.values);
       setDates(formattedDates);
@@ -99,7 +99,7 @@ const conductivity  =[58.6, 58.6, 58.3, 56.1, 54.3, 54.3, 54.3, 54.3, 56.1, 54.3
       const result = await getPredictions(days, parameter, isPast, token);
       const formattedDates = result.dates.map((dateString: string) => {
         const date = new Date(dateString);
-        return date.toISOString().split('T')[0];
+        return date.toISOString().split("T")[0];
       });
       setPastPredictions(result.values);
       setPastDates(formattedDates);
@@ -198,7 +198,7 @@ const conductivity  =[58.6, 58.6, 58.3, 56.1, 54.3, 54.3, 54.3, 54.3, 56.1, 54.3
       ></Grid2>
       <Grid2
         container
-        spacing={10}
+        spacing={2}
         justifyContent="center"
         sx={{marginTop: '20px', display: 'flex', justifyContent: 'center'}}
       >
@@ -260,9 +260,74 @@ const conductivity  =[58.6, 58.6, 58.3, 56.1, 54.3, 54.3, 54.3, 54.3, 56.1, 54.3
           </Box>
           <></>
           <LineChart
-            xAxis={[{scaleType: 'point', data: dates}]}
-            series={[{data: predictions}]}
-            width={450}
+            xAxis={[{ scaleType: "point", data: dates }]}
+            series={[{ data: predictions }]}
+            height={300}
+          />
+        </Card>
+        <Card className="lineChartCard">
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
+            width="100%"
+          >
+            <Typography className="typographyStyles">
+              {pastParameter.charAt(0).toUpperCase() + pastParameter.slice(1)}{" "}
+              Analysis
+            </Typography>
+            <Box display="flex" gap={1}>
+              <FormControl sx={{ m: 1, minWidth: 60 }} size="small">
+                <Select
+                  name="turbidity"
+                  id="demo-select-small"
+                  value={String(pastParameter)}
+                  onChange={handlePastParameterChange}
+                  sx={{
+                    width: "110px",
+                    height: "30px",
+                    fontSize: "12px",
+                    borderRadius: 3,
+                    "& .MuiSelect-select": {
+                      padding: "10px",
+                    },
+                  }}
+                >
+                  <MenuItem value={"ph"}>Ph</MenuItem>
+                  <MenuItem value={"turbidity"}>Turbidity</MenuItem>
+                  <MenuItem value={"conductivity"}>Conductivity</MenuItem>
+                </Select>
+              </FormControl>
+              <FormControl sx={{ m: 1, minWidth: 130 }} size="small">
+                <Select
+                  name="week"
+                  id="demo-select-small"
+                  value={String(pastPredictionPeriod)}
+                  onChange={handlePastPeriodChange}
+                  sx={{
+                    width: "110px",
+                    height: "30px",
+                    fontSize: "12px",
+                    borderRadius: 3,
+                    "& .MuiSelect-select": {
+                      padding: "10px",
+                    },
+                  }}
+                >
+                  <MenuItem value={7}>Last Week</MenuItem>
+                  <MenuItem value={14}>Last Two Weeks</MenuItem>
+                  <MenuItem value={30}>Last Month</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+          </Box>
+          <></>
+          <LineChart
+            xAxis={[{ data: [1, 2, 3, 5, 8, 10] }]}
+            series={[
+              { color: "red", data: [6, 3, 7, 9.5, 4, 2] },
+              { color: "blue", data: [3, 1, 3, 6, 2, 1] },
+            ]}
             height={300}
           />
         </Card>

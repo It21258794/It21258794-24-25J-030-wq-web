@@ -15,30 +15,73 @@ import {
   Select,
   SelectChangeEvent,
   Button,
-  Box
-} from '@mui/material';
-import TablePaginationActions from '@mui/material/TablePagination/TablePaginationActions';
-import React from 'react';
-import {useState} from 'react';
-import {useNavigate} from 'react-router-dom';
+  Box,
+} from "@mui/material";
+import TablePaginationActions from "@mui/material/TablePagination/TablePaginationActions";
+import React, { useState, useEffect, useContext } from "react";
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../../components/auth/AuthProvider";
 
 const Sensors = (): JSX.Element => {
   const navigate = useNavigate();
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [age, setAge] = React.useState('');
+  const [rowsPerPage, setRowsPerPage] = useState(3);
+  const [age, setAge] = useState("");
+  const [sensorData, setSensorData] = useState<any[]>([]);
+  const authContext = useContext(AuthContext);
+  const token: string | undefined = authContext?.token;
 
   const handleChange = (event: SelectChangeEvent) => {
     setAge(event.target.value as string);
   };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:8090/api/dashboard/fetchModbusData",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        const data = await response.json();
 
-  const rows = [
-    {name: 'Sensor A', calories: 100, fat: 10, status: 'Active'},
-    {name: 'Sensor B', calories: 200, fat: 20, status: 'Inactive'},
-    {name: 'Sensor C', calories: 300, fat: 30, status: 'Active'},
-    {name: 'Sensor D', calories: 400, fat: 40, status: 'Inactive'},
-    {name: 'Sensor E', calories: 500, fat: 50, status: 'Active'}
-  ];
+        if (data) {
+          const formattedData = [
+            {
+              name: "Turbidity",
+              value: data[5001] || 0,
+              unit: "NTU",
+              status: "Active",
+            },
+            {
+              name: "pH",
+              value: data[5002] || 0,
+              unit: "pH",
+              status: "Active",
+            },
+            {
+              name: "Conductivity",
+              value: data[5003] || 0,
+              unit: "µS/cm",
+              status: "Active",
+            },
+          ];
+          setSensorData(formattedData);
+        }
+      } catch (error) {
+        console.error("Error fetching Modbus data:", error);
+      }
+    };
+
+    fetchData();
+    const interval = setInterval(fetchData, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
@@ -51,7 +94,7 @@ const Sensors = (): JSX.Element => {
     setPage(0);
   };
 
-  const emptyRows = Math.max(0, (1 + page) * rowsPerPage - rows.length);
+  const emptyRows = Math.max(0, (1 + page) * rowsPerPage - sensorData.length);
 
   return (
     <>
@@ -59,7 +102,6 @@ const Sensors = (): JSX.Element => {
         component={Paper}
         sx={{padding: '50px', borderRadius: '20px'}}
       >
-        {' '}
         <Box
           sx={{
             display: 'flex',
@@ -90,22 +132,17 @@ const Sensors = (): JSX.Element => {
           <Button
             sx={{height: 30, fontSize: '0.7rem'}}
             variant="contained"
-            onClick={() => navigate('/sensorsDashboard/compare')}
+            onClick={() => navigate("/user/sensorsDashboard/compare")}
           >
             Compare
           </Button>
         </Box>
-        <Table sx={{minWidth: 500}} aria-label="custom pagination table">
+
+        <Table sx={{ minWidth: 500 }} aria-label="custom pagination table">
           <TableHead>
             <TableRow>
               <TableCell sx={{fontWeight: 'bold', fontSize: '0.9rem'}}>
                 Sensor
-              </TableCell>
-              <TableCell
-                sx={{fontWeight: 'bold', fontSize: '0.9rem'}}
-                align="center"
-              >
-                Type
               </TableCell>
               <TableCell
                 sx={{fontWeight: 'bold', fontSize: '0.9rem'}}
@@ -129,21 +166,32 @@ const Sensors = (): JSX.Element => {
           </TableHead>
           <TableBody>
             {(rowsPerPage > 0
-              ? rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              : rows
-            ).map((row) => (
-              <TableRow key={row.name}>
-                <TableCell component="th" scope="row" sx={{fontSize: '0.8rem'}}>
+              ? sensorData.slice(
+                  page * rowsPerPage,
+                  page * rowsPerPage + rowsPerPage
+                )
+              : sensorData
+            ).map((row, index) => (
+              <TableRow key={index}>
+                <TableCell
+                  component="th"
+                  scope="row"
+                  sx={{ fontSize: "0.8rem" }}
+                >
                   {row.name}
                 </TableCell>
-                <TableCell sx={{fontSize: '0.8rem', width: 160}} align="center">
-                  {row.calories}
+
+                <TableCell
+                  sx={{ fontSize: "0.8rem", width: 160 }}
+                  align="center"
+                >
+                  {row.value}
                 </TableCell>
-                <TableCell sx={{fontSize: '0.8rem', width: 160}} align="center">
-                  {row.fat}
-                </TableCell>
-                <TableCell sx={{fontSize: '0.8rem', width: 160}} align="center">
-                  {row.fat}
+                <TableCell
+                  sx={{ fontSize: "0.8rem", width: 160 }}
+                  align="center"
+                >
+                  {row.unit}
                 </TableCell>
                 <TableCell sx={{fontSize: '0.8rem', width: 160}} align="center">
                   <Chip
@@ -189,10 +237,10 @@ const Sensors = (): JSX.Element => {
                     color: 'grey'
                   }
                 }}
-                rowsPerPageOptions={[5, 10, 25, {label: 'All', value: -1}]}
+                rowsPerPageOptions={[3, 6, 9, { label: "All", value: -1 }]}
                 colSpan={5}
-                count={rows.length}
-                rowsPerPage={rowsPerPage}
+                count={sensorData.length}
+                rowsPerPage={3}
                 page={page}
                 onPageChange={handleChangePage}
                 onRowsPerPageChange={handleChangeRowsPerPage}

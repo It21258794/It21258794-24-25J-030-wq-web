@@ -126,3 +126,12 @@ For more details, refer to the [Conventional Commits Specification](https://www.
 >- feat(sensor): created compare user interfaces
 >- fix(dashboard): added new logo
 >- fix(waterquality): water quality predictions enhancements
+
+> [!TIP]
+>https://github.com/It21258794/It21258794-24-25J-030-wq-web/pull/6
+> 
+> Feature/user management 
+> 
+>- feat(water-quality): water quality predictions are added to dashboard
+>- feat(user-management): login, logout, reset password, change password implemented admin dashboard implemented to manage users
+>- fix(all module) -unused imports removed
