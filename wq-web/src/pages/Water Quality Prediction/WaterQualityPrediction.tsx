@@ -69,15 +69,16 @@ const conductivity  =[58.6, 58.6, 58.3, 56.1, 54.3, 54.3, 54.3, 54.3, 56.1, 54.3
     authContext?.setIsLoading(true);
     setError(null);
     try {
-      const result = await getPredictions(days, parameter, isPast, token);
+      
+      setTimeout(async () => {
+        authContext?.setIsLoading(false);
+        const result = await getPredictions(days, parameter, isPast, token);
       const formattedDates = result.dates.map((dateString: string) => {
         const date = new Date(dateString);
         return date.toISOString().split("T")[0];
       });
       setPredictions(result.values);
       setDates(formattedDates);
-      setTimeout(() => {
-        authContext?.setIsLoading(false);
       }, 1000);
     } catch (err) {
       setError('Failed to fetch predictions');
@@ -258,12 +259,14 @@ const conductivity  =[58.6, 58.6, 58.3, 56.1, 54.3, 54.3, 54.3, 54.3, 56.1, 54.3
               </FormControl>
             </Box>
           </Box>
-          <></>
+          <Box >
           <LineChart
-            xAxis={[{scaleType: 'point', data: dates}]}
-            series={[{data: predictions}]}
+            xAxis={[{ scaleType: 'point', data: dates }]}
+            series={[{ data: predictions }]}
             height={300}
+            margin={{ left: 70 }}
           />
+        </Box>
         </Card>
         <Card className="lineChartCard">
       <Box display="flex" alignItems="center" justifyContent="space-between" width="100%">

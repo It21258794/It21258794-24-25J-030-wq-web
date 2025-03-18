@@ -27,6 +27,7 @@ import {Tooltip} from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import RemoveUserConfirmation from '../Common/DialogBoxes/RemoveUserConfirmationDialog';
 import UserAddedConfirmation from '../Common/DialogBoxes/UserAddedConfirmation';
+import { debounce } from 'lodash';
 
 const UserManagement = (): JSX.Element => {
   const authContext = useContext(AuthContext);
@@ -50,7 +51,15 @@ const UserManagement = (): JSX.Element => {
   const [newUserRow, setNewUserRow] = useState<any>();
 
   useEffect(() => {
-    fetchUsers(page, searchQuery, startDate, endDate, status);
+    const fetchDebouncedUsers = debounce(() => {
+      fetchUsers(page, searchQuery, startDate, endDate, status);
+    }, 500);
+
+    fetchDebouncedUsers();
+    
+    return () => {
+      fetchDebouncedUsers.cancel();
+    };
   }, [page, searchQuery, startDate, endDate, status]);
 
   const fetchUsers = async (
@@ -63,7 +72,10 @@ const UserManagement = (): JSX.Element => {
     authContext?.setIsLoading(true);
     setError(null);
     try {
-      const formattedStartDate = startDate
+      
+      setTimeout(async () => {
+        authContext?.setIsLoading(false);
+        const formattedStartDate = startDate
         ? encodeURIComponent(startDate.startOf('day').toISOString())
         : '';
       const formattedEndDate = endDate
@@ -85,8 +97,6 @@ const UserManagement = (): JSX.Element => {
         setRows([]);
         setError('No valid data found');
       }
-      setTimeout(() => {
-        authContext?.setIsLoading(false);
       }, 1000);
     } catch (err) {
       setError('Failed to fetch users');
@@ -112,8 +122,8 @@ const UserManagement = (): JSX.Element => {
   const handleOpenDialog = () => setOpenDialog(true);
   const handleCloseDialog = (newUser?: any) => {
     setOpenDialog(false);
-    authContext?.setIsLoading(true);
     if (newUser) {
+      authContext?.setIsLoading(true);
       setTimeout(() => {
         authContext?.setIsLoading(false);
         setNewUserRow(newUser);
@@ -134,7 +144,6 @@ const UserManagement = (): JSX.Element => {
     if (updatedUser) {
       setTimeout(() => {
         authContext?.setIsLoading(false);
-        setUserAddedDialog(true);
         setRows((prevRows) =>
           prevRows.map((r) =>
             r.id === updatedUser.id ? {...r, status: 'REMOVED'} : r
