@@ -271,3 +271,26 @@ export const getAllStepValues = async (token: string) => {
     throw error;
   }
 };
+
+// Function to predict treated water values
+export const predictTreatedWater = async (
+  data: {
+    raw_turbidity: number;
+    raw_ph: number;
+    raw_conductivity: number;
+  },
+  token: string // Add token as a parameter
+) => {
+  try {
+    const response = await axios.post(`${BASE_URL}/water-treatment/predict`, data, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: token, // Include the token in the headers
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error predicting treated water values:", error);
+    throw error;
+  }
+};

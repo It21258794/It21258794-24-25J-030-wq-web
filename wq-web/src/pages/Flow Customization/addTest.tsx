@@ -85,7 +85,7 @@ const AddTest: React.FC = (): JSX.Element => {
         </Typography>
 
         <TextField
-          label="Test Name"
+          label="Reading Name"
           variant="outlined"
           fullWidth
           value={testName}
