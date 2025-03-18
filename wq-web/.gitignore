@@ -34,3 +34,6 @@ babel.config.js
 babel.config.json
 babel.config.cjs
 babel.config.mjs
+
+# Environment variables
+.env

@@ -1,0 +1,39 @@
+.predictionCard {
+  padding: 15px;
+  background-color: #f7f7f7;
+  border-radius: 8px;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  width: 95%;
+}
+
+.predictionBox {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.graphCard, .tableCard {
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.2);
+  width: 95%;
+  margin-top: 20px;
+}
+
+.headerText {
+  font-size: 16px;
+  font-weight: bold;
+  color: #444;
+}
+
+.table-header {
+  font-weight: bold;
+  background-color: #f0f0f0;
+}
+
+.tableCell {
+  font-size: 14px;
+  font-weight: bold;
+}
