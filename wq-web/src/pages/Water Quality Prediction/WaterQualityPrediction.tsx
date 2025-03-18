@@ -228,7 +228,7 @@ const WaterQualityPrediction = (): JSX.Element => {
                 mb: 1,
                 textTransform: 'uppercase',
                 color: '#102D4D',
-                fontWeight: 'bold',
+                fontWeight: 'bold'
                 // marginBottom:"30px"
               }}
             >
@@ -314,7 +314,6 @@ const WaterQualityPrediction = (): JSX.Element => {
               />
               <Typography variant="body2">Predicted Data</Typography>
             </Box>
-            
           </Box>
         </Card>
         <Card className="lineChartCard">
@@ -329,7 +328,7 @@ const WaterQualityPrediction = (): JSX.Element => {
                 fontWeight: 'bold'
               }}
             >
-              {pastParameter.toUpperCase()} PREDICTIONS FOR{' '}
+              {pastParameter.toUpperCase()} ANALYSIS FOR{' '}
               {pastPredictionPeriod === 7
                 ? 'LAST WEEK'
                 : pastPredictionPeriod === 14
@@ -397,7 +396,6 @@ const WaterQualityPrediction = (): JSX.Element => {
               {color: '#A294F9', data: pastPredictions},
               {color: '#EB5B00', data: realData}
             ]}
-            width={450}
             height={300}
           />
           <Box display="flex" justifyContent="center" gap={2} mt={1}>
@@ -428,17 +426,17 @@ const WaterQualityPrediction = (): JSX.Element => {
           </Box>
         </Card>
         <Card className="cardContainer">
-        <Typography
-    sx={{
-      textAlign: 'center',
-      mb: 2,
-      textTransform: 'uppercase',
-      color: '#102D4D',
-      fontWeight: 'bold'
-    }}
-  >
-    {futureParameter.toUpperCase()} Predictions with Weather Data
-  </Typography>
+          <Typography
+            sx={{
+              textAlign: 'center',
+              mb: 2,
+              textTransform: 'uppercase',
+              color: '#102D4D',
+              fontWeight: 'bold'
+            }}
+          >
+            {futureParameter.toUpperCase()} Predictions with Weather Data
+          </Typography>
           <Box
             style={{
               display: 'flex',
@@ -469,33 +467,32 @@ const WaterQualityPrediction = (): JSX.Element => {
           </Box>
           <Table className="table">
             <TableHead>
-            <TableRow>
-  {[
-    'Date',
-    'Parameter',
-    'Predicted Value',
-    'Rainfall (mm)',
-    'Humidity (g/m³)',
-    'Temperature (°C)',
-    'Threshold Value',
-    'Status'
-  ].map((header) => (
-    <TableCell
-      key={header}
-      className="table-header"
-      sx={{
-        backgroundColor: '#f0f0f0',
-        fontWeight: 'bold',
-        color: '#102D4D',
-        padding: '10px',
-        ...(header === 'Date' && { width: '110px' })
-      }}
-    >
-      {header}
-    </TableCell>
-  ))}
-</TableRow>
-
+              <TableRow>
+                {[
+                  'Date',
+                  'Parameter',
+                  'Predicted Value',
+                  'Rainfall (mm)',
+                  'Humidity (g/m³)',
+                  'Temperature (°C)',
+                  'Threshold Value',
+                  'Status'
+                ].map((header) => (
+                  <TableCell
+                    key={header}
+                    className="table-header"
+                    sx={{
+                      backgroundColor: '#f0f0f0',
+                      fontWeight: 'bold',
+                      color: '#102D4D',
+                      padding: '10px',
+                      ...(header === 'Date' && {width: '110px'})
+                    }}
+                  >
+                    {header}
+                  </TableCell>
+                ))}
+              </TableRow>
             </TableHead>
             <TableBody>
               {rows.map((row: any, index) => {
