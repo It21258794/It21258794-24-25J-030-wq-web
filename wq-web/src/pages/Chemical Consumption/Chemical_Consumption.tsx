@@ -13,7 +13,13 @@ import { useEffect, useState } from "react";
 import { Divider } from "@mui/material";
 
 const Chemical_Consumption = () => {
-  const [lastUsage, setLastUsage] = useState([]);
+  interface UsageData {
+    Turbidity: number;
+    PH: number;
+    Conductivity: number;
+  }
+
+  const [lastUsage, setLastUsage] = useState<UsageData[]>([]);
   const [chlorine_usage, setchlorine_usage] = useState("");
   const [lime_usage, setlime_usage] = useState("");
   const [pac_usage, setpac_usage] = useState("");
@@ -56,7 +62,7 @@ const Chemical_Consumption = () => {
   const phData = lastUsage.map((item) => item.PH);
   const conductivityData = lastUsage.map((item) => item.Conductivity);
 
-  const handleDateChange = (event) => {
+  const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedDate(event.target.value);
   };
 
