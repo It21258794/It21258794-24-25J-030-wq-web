@@ -6,25 +6,32 @@ import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import {changeUserStatus} from '../Services/api';
 import {useContext} from 'react';
 import {AuthContext} from '../../../components/auth/AuthProvider';
+import {useNavigate} from 'react-router-dom';
 
 interface RemoveUserDialogProps {
   open: boolean;
-  onClose: (data?: any) => void;
-  row: any;
+  onClose: () => void;
+  id: any;
 }
 
-export default function RemoveUserConfirmation({
+export default function DeactivateAcccountConfirmation({
   open,
   onClose,
-  row
+  id
 }: RemoveUserDialogProps) {
   const authContext = useContext(AuthContext);
   const token: any = authContext?.token;
+  const navigate = useNavigate();
 
   const handleSubmit = async () => {
-    const response = await changeUserStatus(row.id, 'REMOVED', token);
+    const response = await changeUserStatus(id, 'INACTIVE', token);
     if (response?.data) {
-      onClose(response.data);
+      authContext?.setIsLoading(true);
+      onClose();
+      setTimeout(() => {
+        authContext?.setIsLoading(false);
+        navigate('/');
+      }, 1000);
     } else {
       onClose();
     }
@@ -33,7 +40,7 @@ export default function RemoveUserConfirmation({
   return (
     <Dialog
       open={open}
-      onClose={() => onClose()}
+      onClose={onClose}
       PaperProps={{
         style: {
           width: '500px',
@@ -64,9 +71,9 @@ export default function RemoveUserConfirmation({
             fontSize: 18
           }}
         >
-          Are you sure you want to remove
+          Are you sure you want to delete this account?
         </Typography>
-        <Typography
+        {/* <Typography
           sx={{
             display: 'flex',
             alignItems: 'center',
@@ -79,7 +86,10 @@ export default function RemoveUserConfirmation({
           }}
         >
           {row?.firstName + ' ' + row?.lastName}
-        </Typography>
+        </Typography> */}
+        {/* <Typography sx={{display:'flex', alignItems:'center' , justifyContent:'center',fontSize:14}} >
+            Please check above.
+        </Typography> */}
       </DialogContent>
       <Box
         sx={{

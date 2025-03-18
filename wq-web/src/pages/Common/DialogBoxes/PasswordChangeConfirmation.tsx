@@ -1,39 +1,37 @@
+import React from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import Button from '@mui/material/Button';
 import {Box, Typography} from '@mui/material';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import {changeUserStatus} from '../Services/api';
-import {useContext} from 'react';
 import {AuthContext} from '../../../components/auth/AuthProvider';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import {useNavigate} from 'react-router-dom';
 
-interface RemoveUserDialogProps {
+interface SessionExpiryWarningDialogProps {
   open: boolean;
-  onClose: (data?: any) => void;
-  row: any;
+  onClose: () => void;
 }
 
-export default function RemoveUserConfirmation({
+export default function PasswordChangeConfirmation({
   open,
-  onClose,
-  row
-}: RemoveUserDialogProps) {
-  const authContext = useContext(AuthContext);
-  const token: any = authContext?.token;
+  onClose
+}: SessionExpiryWarningDialogProps) {
+  const authContext = React.useContext(AuthContext);
+  const navigate = useNavigate();
 
-  const handleSubmit = async () => {
-    const response = await changeUserStatus(row.id, 'REMOVED', token);
-    if (response?.data) {
-      onClose(response.data);
-    } else {
-      onClose();
-    }
+  const handelSubmitButton = () => {
+    authContext?.setIsLoading(true);
+
+    setTimeout(() => {
+      authContext?.setIsLoading(false);
+      navigate('/');
+    }, 1000);
   };
 
   return (
     <Dialog
       open={open}
-      onClose={() => onClose()}
+      onClose={onClose}
       PaperProps={{
         style: {
           width: '500px',
@@ -53,7 +51,7 @@ export default function RemoveUserConfirmation({
             pb: 2
           }}
         >
-          <WarningAmberIcon sx={{color: 'red', fontSize: 60}} />
+          <CheckCircleOutlineIcon sx={{color: 'green', fontSize: 60}} />
         </Box>
         <Typography
           sx={{
@@ -61,24 +59,20 @@ export default function RemoveUserConfirmation({
             alignItems: 'center',
             justifyContent: 'center',
             fontWeight: 'bold',
-            fontSize: 18
+            fontSize: 19
           }}
         >
-          Are you sure you want to remove
+          Your password has been updated successfully!
         </Typography>
         <Typography
           sx={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontWeight: 'bold',
-            fontSize: 18,
-            fontStyle: 'italic',
-            color: 'red',
-            marginTop: '10px'
+            fontSize: 14
           }}
         >
-          {row?.firstName + ' ' + row?.lastName}
+          Please use your new password to sign in next time.
         </Typography>
       </DialogContent>
       <Box
@@ -92,29 +86,16 @@ export default function RemoveUserConfirmation({
       >
         <Button
           variant="contained"
-          onClick={() => onClose()}
+          onClick={handelSubmitButton}
           sx={{
             fontWeight: 'bold',
             borderRadius: 2,
             width: 100,
-            height: 35,
-            backgroundColor: '#617E8C'
-          }}
-        >
-          No
-        </Button>
-        <Button
-          variant="contained"
-          onClick={handleSubmit}
-          sx={{
-            fontWeight: 'bold',
-            borderRadius: 2,
-            width: 100,
-            height: 35,
+            height: 45,
             backgroundColor: '#102D4D'
           }}
         >
-          Yes
+          Ok
         </Button>
       </Box>
     </Dialog>

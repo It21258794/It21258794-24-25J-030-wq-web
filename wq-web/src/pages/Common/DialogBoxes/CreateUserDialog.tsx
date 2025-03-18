@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, {useContext, useState} from 'react';
 import {
   Dialog,
   DialogActions,
@@ -9,42 +9,50 @@ import {
   Select,
   MenuItem,
   Button,
-  SelectChangeEvent,
-} from "@mui/material";
-import { registerUser } from "../Services/api";
-import { AuthContext } from "../../../components/auth/AuthProvider";
+  SelectChangeEvent
+} from '@mui/material';
+import {registerUser} from '../Services/api';
+import {AuthContext} from '../../../components/auth/AuthProvider';
 
-const CreateUserDialog = ({ open, onClose }: { open: boolean; onClose: (user?: any) => void }) => {
+const CreateUserDialog = ({
+  open,
+  onClose
+}: {
+  open: boolean;
+  onClose: (user?: any) => void;
+}) => {
   const authContext = useContext(AuthContext);
   const token: any = authContext?.token;
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    role: "",
-    status: "PENDING_VERIFICATION",
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    role: '',
+    status: 'PENDING_VERIFICATION'
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }> | SelectChangeEvent<string>
+    e:
+      | React.ChangeEvent<HTMLInputElement | {name?: string; value: unknown}>
+      | SelectChangeEvent<string>
   ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name!]: value }));
+    const {name, value} = e.target;
+    setFormData((prev) => ({...prev, [name!]: value}));
   };
 
   const handleSubmit = async () => {
-    console.log("User Created:", formData);
+    console.log('User Created:', formData);
     const response = await registerUser(formData, token);
     console.log(response);
     setFormData({
-      firstName: "",
-      lastName: "",
-      email: "",
-      phone: "",
-      role: "",
-      status: "PENDING_VERIFICATION",
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      role: '',
+      status: 'PENDING_VERIFICATION'
     });
     setIsSubmitted(true);
     if (response?.data) {
@@ -54,7 +62,7 @@ const CreateUserDialog = ({ open, onClose }: { open: boolean; onClose: (user?: a
 
   const handleCloseDialog = (e: React.SyntheticEvent, reason: string) => {
     console.log(e);
-    if (reason !== "backdropClick" && isSubmitted) {
+    if (reason !== 'backdropClick' && isSubmitted) {
       onClose();
     } else {
       onClose();
@@ -66,20 +74,22 @@ const CreateUserDialog = ({ open, onClose }: { open: boolean; onClose: (user?: a
       open={open}
       onClose={handleCloseDialog}
       sx={{
-        "& .MuiDialog-paper": {
-          borderRadius: 4,
+        '& .MuiDialog-paper': {
+          borderRadius: 4
         },
-        "& .MuiDialogContent-root": {
-          minHeight: "450px",
-          paddingLeft: "24px",
-          paddingRight: "24px",
-          width: "400px",
-        },
+        '& .MuiDialogContent-root': {
+          minHeight: '450px',
+          paddingLeft: '24px',
+          paddingRight: '24px',
+          width: '400px'
+        }
       }}
     >
-      <DialogTitle sx={{ marginLeft: "50px", marginTop: "20px" }}>User Registration</DialogTitle>
-      <DialogContent sx={{ marginLeft: "50px", marginRight: "50px" }}>
-        <Grid container spacing={2} sx={{ mt: 1 }}>
+      <DialogTitle sx={{marginLeft: '50px', marginTop: '20px'}}>
+        User Registration
+      </DialogTitle>
+      <DialogContent sx={{marginLeft: '50px', marginRight: '50px'}}>
+        <Grid container spacing={2} sx={{mt: 1}}>
           <Grid item xs={12}>
             <TextField
               label="First Name"
@@ -92,19 +102,19 @@ const CreateUserDialog = ({ open, onClose }: { open: boolean; onClose: (user?: a
                 sx: {
                   borderRadius: 3,
                   height: 40,
-                  textAlign: "center",
-                  fontWeight: "bold",
-                  fontSize: "13px",
-                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#757575",
-                  },
-                },
+                  textAlign: 'center',
+                  fontWeight: 'bold',
+                  fontSize: '13px',
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                    borderColor: '#757575'
+                  }
+                }
               }}
               InputLabelProps={{
                 sx: {
-                  fontSize: "12px",
-                  top: "-7px",
-                },
+                  fontSize: '12px',
+                  top: '-7px'
+                }
               }}
             />
           </Grid>
@@ -120,19 +130,19 @@ const CreateUserDialog = ({ open, onClose }: { open: boolean; onClose: (user?: a
                 sx: {
                   borderRadius: 3,
                   height: 40,
-                  textAlign: "center",
-                  fontWeight: "bold",
-                  fontSize: "13px",
-                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#757575",
-                  },
-                },
+                  textAlign: 'center',
+                  fontWeight: 'bold',
+                  fontSize: '13px',
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                    borderColor: '#757575'
+                  }
+                }
               }}
               InputLabelProps={{
                 sx: {
-                  fontSize: "12px",
-                  top: "-7px",
-                },
+                  fontSize: '12px',
+                  top: '-7px'
+                }
               }}
             />
           </Grid>
@@ -149,19 +159,19 @@ const CreateUserDialog = ({ open, onClose }: { open: boolean; onClose: (user?: a
                 sx: {
                   borderRadius: 3,
                   height: 40,
-                  textAlign: "center",
-                  fontWeight: "bold",
-                  fontSize: "13px",
-                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#757575",
-                  },
-                },
+                  textAlign: 'center',
+                  fontWeight: 'bold',
+                  fontSize: '13px',
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                    borderColor: '#757575'
+                  }
+                }
               }}
               InputLabelProps={{
                 sx: {
-                  fontSize: "12px",
-                  top: "-7px",
-                },
+                  fontSize: '12px',
+                  top: '-7px'
+                }
               }}
             />
           </Grid>
@@ -178,19 +188,19 @@ const CreateUserDialog = ({ open, onClose }: { open: boolean; onClose: (user?: a
                 sx: {
                   borderRadius: 3,
                   height: 40,
-                  textAlign: "center",
-                  fontWeight: "bold",
-                  fontSize: "13px",
-                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#757575",
-                  },
-                },
+                  textAlign: 'center',
+                  fontWeight: 'bold',
+                  fontSize: '13px',
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                    borderColor: '#757575'
+                  }
+                }
               }}
               InputLabelProps={{
                 sx: {
-                  fontSize: "12px",
-                  top: "-7px",
-                },
+                  fontSize: '12px',
+                  top: '-7px'
+                }
               }}
             />
           </Grid>
@@ -203,11 +213,11 @@ const CreateUserDialog = ({ open, onClose }: { open: boolean; onClose: (user?: a
               fullWidth
               sx={{
                 height: 40,
-                fontSize: "12px",
+                fontSize: '12px',
                 borderRadius: 3,
-                "& .MuiSelect-select": {
-                  padding: "10px",
-                },
+                '& .MuiSelect-select': {
+                  padding: '10px'
+                }
               }}
             >
               <MenuItem value="">Select Role</MenuItem>
@@ -224,11 +234,11 @@ const CreateUserDialog = ({ open, onClose }: { open: boolean; onClose: (user?: a
               fullWidth
               sx={{
                 height: 40,
-                fontSize: "12px",
+                fontSize: '12px',
                 borderRadius: 3,
-                "& .MuiSelect-select": {
-                  padding: "10px",
-                },
+                '& .MuiSelect-select': {
+                  padding: '10px'
+                }
               }}
             >
               <MenuItem value="ACTIVE">Active</MenuItem>
@@ -237,16 +247,16 @@ const CreateUserDialog = ({ open, onClose }: { open: boolean; onClose: (user?: a
             </Select>
           </Grid>
         </Grid>
-        <DialogActions sx={{ marginTop: "30px" }}>
+        <DialogActions sx={{marginTop: '30px'}}>
           <Button
             variant="contained"
             onClick={() => onClose()}
             sx={{
-              fontWeight: "bold",
+              fontWeight: 'bold',
               borderRadius: 2,
               width: 100,
               height: 35,
-              backgroundColor: "#617E8C",
+              backgroundColor: '#617E8C'
             }}
           >
             Cancel
@@ -255,11 +265,11 @@ const CreateUserDialog = ({ open, onClose }: { open: boolean; onClose: (user?: a
             onClick={handleSubmit}
             variant="contained"
             sx={{
-              fontWeight: "bold",
+              fontWeight: 'bold',
               borderRadius: 2,
               width: 100,
               height: 35,
-              backgroundColor: "#102D4D",
+              backgroundColor: '#102D4D'
             }}
           >
             Create

@@ -34,7 +34,6 @@ const Sensors = (): JSX.Element => {
   const handleChange = (event: SelectChangeEvent) => {
     setAge(event.target.value as string);
   };
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -101,22 +100,19 @@ const Sensors = (): JSX.Element => {
     <>
       <TableContainer
         component={Paper}
-        sx={{ padding: "50px", borderRadius: "20px" }}
+        sx={{padding: '50px', borderRadius: '20px'}}
       >
         <Box
           sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: "16px",
-            marginBottom: "20px",
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '16px',
+            marginBottom: '20px'
           }}
         >
           <FormControl>
-            <InputLabel
-              id="demo-simple-select-label"
-              sx={{ fontSize: "0.8rem" }}
-            >
+            <InputLabel id="demo-simple-select-label" sx={{fontSize: '0.8rem'}}>
               Location
             </InputLabel>
             <Select
@@ -125,7 +121,7 @@ const Sensors = (): JSX.Element => {
               value={age}
               label="Age"
               onChange={handleChange}
-              sx={{ height: 50, width: 200 }}
+              sx={{height: 50, width: 200}}
             >
               <MenuItem value={10}>Western - Production</MenuItem>
               <MenuItem value={20}>Western - Central</MenuItem>
@@ -134,7 +130,7 @@ const Sensors = (): JSX.Element => {
           </FormControl>
 
           <Button
-            sx={{ height: 30, fontSize: "0.7rem" }}
+            sx={{height: 30, fontSize: '0.7rem'}}
             variant="contained"
             onClick={() => navigate("/user/sensorsDashboard/compare")}
           >
@@ -145,24 +141,23 @@ const Sensors = (): JSX.Element => {
         <Table sx={{ minWidth: 500 }} aria-label="custom pagination table">
           <TableHead>
             <TableRow>
-              <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem" }}>
+              <TableCell sx={{fontWeight: 'bold', fontSize: '0.9rem'}}>
                 Sensor
               </TableCell>
-
               <TableCell
-                sx={{ fontWeight: "bold", fontSize: "0.9rem" }}
+                sx={{fontWeight: 'bold', fontSize: '0.9rem'}}
                 align="center"
               >
                 Current Reading
               </TableCell>
               <TableCell
-                sx={{ fontWeight: "bold", fontSize: "0.9rem" }}
+                sx={{fontWeight: 'bold', fontSize: '0.9rem'}}
                 align="center"
               >
                 Unit
               </TableCell>
               <TableCell
-                sx={{ fontWeight: "bold", fontSize: "0.9rem" }}
+                sx={{fontWeight: 'bold', fontSize: '0.9rem'}}
                 align="center"
               >
                 Status
@@ -198,32 +193,29 @@ const Sensors = (): JSX.Element => {
                 >
                   {row.unit}
                 </TableCell>
-                <TableCell
-                  sx={{ fontSize: "0.8rem", width: 160 }}
-                  align="center"
-                >
+                <TableCell sx={{fontSize: '0.8rem', width: 160}} align="center">
                   <Chip
                     label={row.status}
                     sx={{
-                      fontSize: "0.6rem",
-                      height: "20px",
-                      width: "80px",
+                      fontSize: '0.6rem',
+                      height: '20px',
+                      width: '80px',
                       backgroundColor:
-                        row.status === "Active" ? "#a8f1d4" : "#fdd5d5",
-                      color: row.status === "Active" ? "#008000" : "#ff0000",
+                        row.status === 'Active' ? '#a8f1d4' : '#fdd5d5',
+                      color: row.status === 'Active' ? '#008000' : '#ff0000',
                       border: `1px solid ${
-                        row.status === "Active" ? "#008000" : "#ff0000"
+                        row.status === 'Active' ? '#008000' : '#ff0000'
                       }`,
-                      borderRadius: "5px",
-                      textAlign: "center",
-                      fontWeight: "bold",
+                      borderRadius: '5px',
+                      textAlign: 'center',
+                      fontWeight: 'bold'
                     }}
                   />
                 </TableCell>
               </TableRow>
             ))}
             {emptyRows > 0 && (
-              <TableRow style={{ height: 53 * emptyRows }}>
+              <TableRow style={{height: 53 * emptyRows}}>
                 <TableCell colSpan={5} />
               </TableRow>
             )}
@@ -232,18 +224,18 @@ const Sensors = (): JSX.Element => {
             <TableRow>
               <TablePagination
                 sx={{
-                  ".MuiTablePagination-toolbar": { fontSize: "0.7rem" },
-                  ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows":
+                  '.MuiTablePagination-toolbar': {fontSize: '0.7rem'},
+                  '.MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows':
                     {
-                      fontSize: "0.7rem",
+                      fontSize: '0.7rem',
                       fontWeight: 700,
-                      color: "grey",
+                      color: 'grey'
                     },
-                  ".MuiTablePagination-select": {
-                    fontSize: "0.7rem",
+                  '.MuiTablePagination-select': {
+                    fontSize: '0.7rem',
                     fontWeight: 700,
-                    color: "grey",
-                  },
+                    color: 'grey'
+                  }
                 }}
                 rowsPerPageOptions={[3, 6, 9, { label: "All", value: -1 }]}
                 colSpan={5}
