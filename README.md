@@ -130,8 +130,40 @@ For more details, refer to the [Conventional Commits Specification](https://www.
 > [!TIP]
 >https://github.com/It21258794/It21258794-24-25J-030-wq-web/pull/6
 > 
-> Feature/user management 
+> user management 
 > 
 >- feat(water-quality): water quality predictions are added to dashboard
 >- feat(user-management): login, logout, reset password, change password implemented admin dashboard implemented to manage users
 >- fix(all module) -unused imports removed
+
+> [!TIP]
+>https://github.com/It21258794/It21258794-24-25J-030-wq-web/pull/7
+>
+> chemical-consumption
+> 
+>- feat(chemical-consumption): implement chemical consumption prediction dashboard with graphs and data table
+>- feat(Chemical Consumption): enhance layout and styling, adjust chart heights, and add dividers for better visual separation
+>- feat(Chemical Consumption): add margin to typography for improved spacing
+
+> [!TIP]
+>https://github.com/It21258794/It21258794-24-25J-030-wq-web/pull/8
+> 
+> dashboard
+> 
+>- feat(dashboard): customizations option for dashboard 
+>- UI enhancements to related areas
+>- New introductions such as UI customizations introduced to the dashboard.
+
+
+> [!TIP]
+>https://github.com/It21258794/It21258794-24-25J-030-wq-web/pull/9
+>https://github.com/It21258794/It21258794-24-25J-030-wq-web/pull/10
+>
+> user-management
+> 
+>- feat(user-management): settings page added with profile, security options
+>- fix(water-quality-prediction):new graph added to show past predictions
+>- ui enhanced in user management and water quality prediction parts
+
+
+
