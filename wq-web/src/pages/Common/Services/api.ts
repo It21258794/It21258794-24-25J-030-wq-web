@@ -175,9 +175,9 @@ export const forgetPassword = async <T>(
 };
 
 export const changeCurrentPass = async <T>(
-  email: string,
-  password: any,
-  currentPassword: string
+  email?: string,
+  password?: any,
+  currentPassword?: string
 ) => {
   const data = {email, password, currentPassword};
   return await changePassword<T>('/user/password-change', data);
