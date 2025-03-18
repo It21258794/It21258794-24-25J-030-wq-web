@@ -44,15 +44,20 @@ export default function SettingsScreen() {
 
   const fetchUser = async () => {
     try {
+      authContext?.setIsLoading(true);
       const result = await getUser(token);
+
       if (result.data) {
-        setUser(result.data);
-        setFormData({
-          firstName: result?.data?.firstName,
-          lastName: result?.data?.lastName,
-          phone: result?.data?.phone,
-          email: result?.data?.email
-        });
+        setTimeout(async () => {
+          setUser(result.data);
+          setFormData({
+            firstName: result?.data?.firstName,
+            lastName: result?.data?.lastName,
+            phone: result?.data?.phone,
+            email: result?.data?.email
+          });
+          authContext?.setIsLoading(false);
+        }, 1000);
       }
     } catch (err) {
       console.log('Failed to fetch predictions');
@@ -121,7 +126,9 @@ export default function SettingsScreen() {
       );
     }
 
-    const initials = `${formData.firstName.charAt(0)}${formData.lastName.charAt(0)}`;
+    const initials = `${formData.firstName.charAt(0)}${formData.lastName.charAt(
+      0
+    )}`;
     return (
       <Box
         sx={{
