@@ -65,7 +65,7 @@ const Chemical_Consumption = () => {
   const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedDate(event.target.value);
   };
-
+  console.log(weatherData);
   const fetchWeatherData = () => {
     if (!selectedDate) return;
     const apiKey = import.meta.env.VITE_APP_WEATHER_API_KEY;
