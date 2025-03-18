@@ -21,11 +21,13 @@ import TablePaginationActions from "@mui/material/TablePagination/TablePaginatio
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../components/auth/AuthProvider";
+import { apiRequest } from "../Dashboard/services/api";
+import DASHBOARD_API_ENDPOINTS from "../Dashboard/services/config";
 
 const Sensors = (): JSX.Element => {
   const navigate = useNavigate();
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(3);
+  const [rowsPerPage, setRowsPerPage] = useState(6);
   const [age, setAge] = useState("");
   const [sensorData, setSensorData] = useState<any[]>([]);
   const authContext = useContext(AuthContext);
@@ -37,17 +39,11 @@ const Sensors = (): JSX.Element => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(
-          "http://localhost:8090/api/dashboard/fetchModbusData",
-          {
-            method: "GET",
-            headers: {
-              Authorization: `${token}`,
-              "Content-Type": "application/json",
-            },
-          }
+        const data = await apiRequest<Record<number, number>>(
+          "GET",
+          DASHBOARD_API_ENDPOINTS.FETCH_MODBUS_DATA,
+          token
         );
-        const data = await response.json();
 
         if (data) {
           const formattedData = [
@@ -69,6 +65,24 @@ const Sensors = (): JSX.Element => {
               unit: "µS/cm",
               status: "Active",
             },
+            {
+              name: "Chlorine Usage",
+              value: data[5004] || 0,
+              unit: "mg/L",
+              status: "Active",
+            },
+            {
+              name: "PAC Usage",
+              value: data[505] || 0,
+              unit: "mg/L",
+              status: "Active",
+            },
+            {
+              name: "Lime Usage",
+              value: data[5006] || 0,
+              unit: "kg/m³",
+              status: "Active",
+            },
           ];
           setSensorData(formattedData);
         }
@@ -78,10 +92,10 @@ const Sensors = (): JSX.Element => {
     };
 
     fetchData();
-    const interval = setInterval(fetchData, 5000);
+    const interval = setInterval(fetchData, 3000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [token]);
 
   const handleChangePage = (_: unknown, newPage: number) => {
     setPage(newPage);
@@ -237,10 +251,10 @@ const Sensors = (): JSX.Element => {
                     color: 'grey'
                   }
                 }}
-                rowsPerPageOptions={[3, 6, 9, { label: "All", value: -1 }]}
+                rowsPerPageOptions={[6, 12, 18, { label: "All", value: -1 }]}
                 colSpan={5}
                 count={sensorData.length}
-                rowsPerPage={3}
+                rowsPerPage={6}
                 page={page}
                 onPageChange={handleChangePage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
