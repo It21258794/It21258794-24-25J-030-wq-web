@@ -1,6 +1,6 @@
-import axios from "axios";
+import axios from 'axios';
 
-const BASE_URL = "http://localhost:8080/api";
+const BASE_URL = 'http://localhost:8080/api';
 
 const login = async <T>(
   endpoint: string,
@@ -10,26 +10,26 @@ const login = async <T>(
   try {
     const response = await axios.post<T>(`${BASE_URL}${endpoint}`, data, {
       headers: {
-        Authorization: token ? token : "",
-        "Content-Type": "application/json",
-      },
+        Authorization: token ? token : '',
+        'Content-Type': 'application/json'
+      }
     });
 
     const keepAliveValue =
-      response.headers["keep-alive"] ||
-      response.headers["Keep-Alive"] ||
-      response.headers["KEEP-ALIVE"];
+      response.headers['keep-alive'] ||
+      response.headers['Keep-Alive'] ||
+      response.headers['KEEP-ALIVE'];
 
     let timeoutValue = null;
     if (keepAliveValue) {
-      const timeoutString = keepAliveValue.split("=")[1];
+      const timeoutString = keepAliveValue.split('=')[1];
       timeoutValue = parseInt(timeoutString, 10);
     }
 
     return {
       data: response.data,
-      authToken: response.headers["authorization"],
-      timeout: timeoutValue,
+      authToken: response.headers['authorization'],
+      timeout: timeoutValue
     };
   } catch (error) {
     console.error(`Error in POST ${endpoint}:`, error);
@@ -44,8 +44,8 @@ const resetPasswordOtp = async <T>(
   try {
     const response = await axios.post<T>(`${BASE_URL}${endpoint}`, data, {
       headers: {
-        "Content-Type": "application/json",
-      },
+        'Content-Type': 'application/json'
+      }
     });
 
     return response;
@@ -66,8 +66,8 @@ const resetPassword = async <T>(
       data,
       {
         headers: {
-          "Content-Type": "application/json",
-        },
+          'Content-Type': 'application/json'
+        }
       }
     );
 
@@ -85,8 +85,8 @@ const resetPasswordToken = async <T>(
   try {
     const response = await axios.post<T>(`${BASE_URL}${endpoint}`, data, {
       headers: {
-        "Content-Type": "application/json",
-      },
+        'Content-Type': 'application/json'
+      }
     });
 
     return response;
@@ -103,8 +103,8 @@ const changePassword = async <T>(
   try {
     const response = await axios.post<T>(`${BASE_URL}${endpoint}`, data, {
       headers: {
-        "Content-Type": "application/json",
-      },
+        'Content-Type': 'application/json'
+      }
     });
 
     return response;
@@ -122,8 +122,8 @@ const createUser = async <T>(
   try {
     const response = await axios.post<T>(`${BASE_URL}${endpoint}`, data, {
       headers: {
-        Authorization: token,
-      },
+        Authorization: token
+      }
     });
 
     return response;
@@ -143,8 +143,8 @@ const changeStatus = async <T>(
       {},
       {
         headers: {
-          Authorization: token,
-        },
+          Authorization: token
+        }
       }
     );
 
@@ -156,13 +156,13 @@ const changeStatus = async <T>(
 };
 
 export const forgetPasswordSendOtp = async <T>(email: string) => {
-  const data = { email };
-  return resetPasswordOtp<T>("/user/password-reset/otp", data);
+  const data = {email};
+  return resetPasswordOtp<T>('/user/password-reset/otp', data);
 };
 
 export const forgetPasswordToken = async <T>(serverRef: any, otp: string) => {
-  const data = { serverRef, otp };
-  return await resetPasswordToken<T>("/user/password-reset/token", data);
+  const data = {serverRef, otp};
+  return await resetPasswordToken<T>('/user/password-reset/token', data);
 };
 
 export const forgetPassword = async <T>(
@@ -170,8 +170,8 @@ export const forgetPassword = async <T>(
   password: string,
   token: string
 ) => {
-  const data = { email, password };
-  return resetPassword<T>("/user/password-reset", data, token);
+  const data = {email, password};
+  return resetPassword<T>('/user/password-reset', data, token);
 };
 
 export const changeCurrentPass = async <T>(
@@ -179,18 +179,18 @@ export const changeCurrentPass = async <T>(
   password: any,
   currentPassword: string
 ) => {
-  const data = { email, password, currentPassword };
-  return await changePassword<T>("/user/password-change", data);
+  const data = {email, password, currentPassword};
+  return await changePassword<T>('/user/password-change', data);
 };
 
 export const signIn = async <T>(email: string, password: string) => {
-  const data = { email, password };
-  return await login<T>("/user/login", data);
+  const data = {email, password};
+  return await login<T>('/user/login', data);
 };
 
 export const registerUser = async <T>(user: any, token: string) => {
   const data = user;
-  return await createUser<T>("/user", data, token);
+  return await createUser<T>('/user', data, token);
 };
 
 export const changeUserStatus = async <T>(
