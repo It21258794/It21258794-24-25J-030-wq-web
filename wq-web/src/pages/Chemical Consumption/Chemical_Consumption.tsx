@@ -62,8 +62,9 @@ const Chemical_Consumption = () => {
 
   const fetchWeatherData = () => {
     if (!selectedDate) return;
-    const apiKey = "878c525f5a014e85a12145802242511";
-    const location = "7.8731,80.7718"; // Example coordinates (Paris)
+    const apiKey = import.meta.env.VITE_APP_WEATHER_API_KEY;
+
+    const location = import.meta.env.VITE_LOCATION; // Example coordinates (Paris)
     const url = `https://api.weatherapi.com/v1/forecast.json?key=${apiKey}&q=${location}&dt=${selectedDate}`;
 
     axios
