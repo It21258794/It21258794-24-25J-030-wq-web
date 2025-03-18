@@ -328,12 +328,22 @@ const conductivity  =[58.6, 58.6, 58.3, 56.1, 54.3, 54.3, 54.3, 54.3, 56.1, 54.3
       <LineChart
         xAxis={[{ scaleType: 'point', data: pastDates }]}
         series={[
-          { color: 'blue', data: pastPredictions },
-          { color: 'green', data: realData },
+          { color: '#A294F9', data: pastPredictions },
+          { color: '#EB5B00', data: realData },
         ]}
         width={450}
         height={300}
       />
+       <Box display="flex" justifyContent="center" gap={2} mt={1}>
+    <Box display="flex" alignItems="center">
+      <Box sx={{ width: 12, height: 12, backgroundColor: '#A294F9', borderRadius: '50%', mr: 1 }} />
+      <Typography variant="body2">Predicted Data</Typography>
+    </Box>
+    <Box display="flex" alignItems="center">
+      <Box sx={{ width: 12, height: 12, backgroundColor: '#EB5B00', borderRadius: '50%', mr: 1 }} />
+      <Typography variant="body2">Actual Data</Typography>
+    </Box>
+  </Box>
     </Card>
         <Card className="cardContainer">
           <Box
