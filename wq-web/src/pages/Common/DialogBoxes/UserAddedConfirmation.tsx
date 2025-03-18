@@ -3,9 +3,6 @@ import DialogContent from '@mui/material/DialogContent';
 import Button from '@mui/material/Button';
 import {Box, Typography} from '@mui/material';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import {changeUserStatus} from '../Services/api';
-import {useContext} from 'react';
-import {AuthContext} from '../../../components/auth/AuthProvider';
 
 interface RemoveUserDialogProps {
   open: boolean;
@@ -18,16 +15,10 @@ export default function UserAddedConfirmation({
   onClose,
   row
 }: RemoveUserDialogProps) {
-  const authContext = useContext(AuthContext);
-  const token: any = authContext?.token;
 
   const handleSubmit = async () => {
-    const response = await changeUserStatus(row.id, 'REMOVED', token);
-    if (response?.data) {
-      onClose(response.data);
-    } else {
-      onClose();
-    }
+    onClose();
+
   };
 
   return (
