@@ -71,7 +71,6 @@ const conductivity  =[58.6, 58.6, 58.3, 56.1, 54.3, 54.3, 54.3, 54.3, 56.1, 54.3
     try {
       
       setTimeout(async () => {
-        authContext?.setIsLoading(false);
         const result = await getPredictions(days, parameter, isPast, token);
       const formattedDates = result.dates.map((dateString: string) => {
         const date = new Date(dateString);
@@ -80,6 +79,7 @@ const conductivity  =[58.6, 58.6, 58.3, 56.1, 54.3, 54.3, 54.3, 54.3, 56.1, 54.3
       setPredictions(result.values);
       setDates(formattedDates);
       }, 1000);
+      authContext?.setIsLoading(false);
     } catch (err) {
       setError('Failed to fetch predictions');
     } finally {
@@ -127,6 +127,7 @@ const conductivity  =[58.6, 58.6, 58.3, 56.1, 54.3, 54.3, 54.3, 54.3, 56.1, 54.3
     parameter: PredictionParameter,
     page: number
   ) => {
+    authContext?.setIsLoading(true);
     // setLoading(true);
     setError(null);
     try {
@@ -138,13 +139,18 @@ const conductivity  =[58.6, 58.6, 58.3, 56.1, 54.3, 54.3, 54.3, 54.3, 56.1, 54.3
         token
       );
       console.log(result);
-      if (result && Array.isArray(result.content)) {
-        setRows(result.content);
-        setTotalPages(result.pagination.totalPages);
-      } else {
-        setRows([]);
-        setError('No valid data found');
-      }
+      
+      setTimeout(async () => {
+        authContext?.setIsLoading(false);
+        if (result && Array.isArray(result.content)) {
+          setRows(result.content);
+          setTotalPages(result.pagination.totalPages);
+        } else {
+          setRows([]);
+          setError('No valid data found');
+        }
+      }, 1000);
+      
     } catch (err) {
       setError('Failed to fetch predictions');
     } finally {
