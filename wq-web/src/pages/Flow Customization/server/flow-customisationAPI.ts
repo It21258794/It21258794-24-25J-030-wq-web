@@ -1,9 +1,9 @@
 // api.ts
 import axios from "axios";
-import { AuthContext } from "../../components/auth/AuthProvider";
+import { AuthContext } from "../../../components/auth/AuthProvider";
 import React from "react";
 // Base API URL
-const BASE_URL = "http://localhost:8085/api";
+const BASE_URL = "http://localhost:8080/api";
 
 // Function to add a step
 export const createStep = async (

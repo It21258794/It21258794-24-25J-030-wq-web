@@ -2,7 +2,7 @@ import React, { useState, useContext } from "react";
 import { TextField, Button, Card, CardContent, Typography, Grid, Box, Snackbar, Alert } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import "@fontsource/poppins"; // Import Poppins font
-import { predictTreatedWater } from "../../server/flow-customisation/flow-customisationAPI";// Import the API function
+import { predictTreatedWater } from "./server/flow-customisationAPI";// Import the API function
 import { AuthContext } from "../../components/auth/AuthProvider";
 
 const PredictionForm: React.FC = () => {

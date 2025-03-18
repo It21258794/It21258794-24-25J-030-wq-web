@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, TextField, Button, Typography, Paper, Snackbar, Alert } from "@mui/material";
-import { createStep, getSteps } from "../../server/flow-customisation/flow-customisationAPI"; // Adjust the path as needed
+import { createStep, getSteps } from "./server/flow-customisationAPI"; // Adjust the path as needed
 import "@fontsource/poppins";
 import { AxiosError } from 'axios'; // Import AxiosError if you're using Axios
 import { AuthContext } from "../../components/auth/AuthProvider";

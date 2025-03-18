@@ -12,7 +12,7 @@ import {
   getSteps,
   updateStepOrder,
   createStepValue,
-} from "../../server/flow-customisation/flow-customisationAPI";
+} from "./server/flow-customisationAPI";
 import { AuthContext } from "../../components/auth/AuthProvider";
 
 enum ItemType {

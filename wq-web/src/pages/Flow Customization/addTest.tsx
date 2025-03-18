@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, TextField, Button, Typography, Paper, Snackbar, Alert } from "@mui/material";
 import "@fontsource/poppins"; // Import Poppins font
-import { addTest } from "../../server/flow-customisation/flow-customisationAPI"; // Import the addTest function
+import { addTest } from "./server/flow-customisationAPI"; // Import the addTest function
 import { AuthContext } from "../../components/auth/AuthProvider";
 
 const AddTest: React.FC = (): JSX.Element => {

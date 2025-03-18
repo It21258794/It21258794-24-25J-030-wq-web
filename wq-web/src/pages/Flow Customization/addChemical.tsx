@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, TextField, Button, Paper, Snackbar, Alert } from "@mui/material";
-import { createChemical } from "../../server/flow-customisation/flow-customisationAPI"; // Import the addChemical API function
+import { createChemical } from "./server/flow-customisationAPI"; // Import the addChemical API function
 import "@fontsource/poppins"; // Import Poppins font
 import { AuthContext } from "../../components/auth/AuthProvider";
 
