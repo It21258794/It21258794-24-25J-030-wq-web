@@ -29,7 +29,17 @@ const Chemical_Consumption = () => {
   const [humidity, sethumidity] = useState(0);
   const [precip_mm, setprecip_mm] = useState(0);
   const [cloud, setcloud] = useState(0);
-  const [futurePrediction, setfuturePrediction] = useState(0);
+  interface FuturePredictionData {
+    predicted_water_production: number;
+    predicted_conductivity: number;
+    predicted_ph: number;
+    predicted_turbidity: number;
+    chlorine_usage: number;
+    pac_usage: number;
+    lime_usage: number;
+  }
+
+  const [futurePrediction, setfuturePrediction] = useState<FuturePredictionData | null>(null);
   const [viewbtn, setviewbtn] = useState(false);
   const [futureview, setfutureview] = useState(false);
 
@@ -484,8 +494,8 @@ const Chemical_Consumption = () => {
             >
               <Grid item xs={3}>
                 <Typography
-                  variant="h3"
-                  sx={{ fontSize: 13, fontWeight: "bold", color: "black" }}
+                variant="h3"
+                sx={{ fontSize: 13, fontWeight: "bold", color: "black" }}
                 >
                   Predicted Water Production
                 </Typography>
@@ -493,7 +503,7 @@ const Chemical_Consumption = () => {
                   variant="h5"
                   sx={{ fontSize: 15, fontWeight: "bold", color: "black" }}
                 >
-                  {futurePrediction.predicted_water_production.toFixed(2)}
+                  {futurePrediction && futurePrediction.predicted_water_production.toFixed(2)}
                 </Typography>
               </Grid>
 
@@ -508,7 +518,7 @@ const Chemical_Consumption = () => {
                   variant="h5"
                   sx={{ fontSize: 15, fontWeight: "bold", color: "black" }}
                 >
-                  {futurePrediction.predicted_conductivity.toFixed(2)}
+                  {futurePrediction ? futurePrediction.predicted_conductivity.toFixed(2) : 'N/A'}
                 </Typography>
               </Grid>
 
@@ -523,7 +533,7 @@ const Chemical_Consumption = () => {
                   variant="h5"
                   sx={{ fontSize: 15, fontWeight: "bold", color: "black" }}
                 >
-                  {futurePrediction.predicted_ph.toFixed(2)}
+                  {futurePrediction ? futurePrediction.predicted_ph.toFixed(2) : 'N/A'}
                 </Typography>
               </Grid>
 
@@ -538,7 +548,7 @@ const Chemical_Consumption = () => {
                   variant="h5"
                   sx={{ fontSize: 15, fontWeight: "bold", color: "black" }}
                 >
-                  {futurePrediction.predicted_turbidity.toFixed(2)}
+                  {futurePrediction ? futurePrediction.predicted_turbidity.toFixed(2) : 'N/A'}
                 </Typography>
               </Grid>
             </Grid>
@@ -570,7 +580,7 @@ const Chemical_Consumption = () => {
                   variant="h5"
                   sx={{ fontSize: 15, fontWeight: "bold", color: "#efcc00" }}
                 >
-                  {futurePrediction.chlorine_usage.toFixed(4)}
+                  {futurePrediction ? futurePrediction.chlorine_usage.toFixed(4) : 'N/A'}
                 </Typography>
               </Grid>
 
@@ -585,7 +595,7 @@ const Chemical_Consumption = () => {
                   variant="h5"
                   sx={{ fontSize: 15, fontWeight: "bold", color: "#c71585" }}
                 >
-                  {futurePrediction.pac_usage.toFixed(4)}
+                  {futurePrediction ? futurePrediction.pac_usage.toFixed(4) : 'N/A'}
                 </Typography>
               </Grid>
 
@@ -600,7 +610,7 @@ const Chemical_Consumption = () => {
                   variant="h5"
                   sx={{ fontSize: 15, fontWeight: "bold", color: "#4169e1" }}
                 >
-                  {futurePrediction.lime_usage.toFixed(4)}
+                  {futurePrediction ? futurePrediction.lime_usage.toFixed(4) : 'N/A'}
                 </Typography>
               </Grid>
             </Grid>
