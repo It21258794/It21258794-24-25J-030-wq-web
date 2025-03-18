@@ -2,7 +2,7 @@ import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import Button from '@mui/material/Button';
 import {Box, Typography} from '@mui/material';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import {changeUserStatus} from '../Services/api';
 import {useContext} from 'react';
 import {AuthContext} from '../../../components/auth/AuthProvider';
@@ -13,7 +13,7 @@ interface RemoveUserDialogProps {
   row: any;
 }
 
-export default function RemoveUserConfirmation({
+export default function UserAddedConfirmation({
   open,
   onClose,
   row
@@ -53,7 +53,7 @@ export default function RemoveUserConfirmation({
             pb: 2
           }}
         >
-          <WarningAmberIcon sx={{color: 'red', fontSize: 60}} />
+          <CheckCircleOutlineIcon sx={{color: 'green', fontSize: 60}} />
         </Box>
         <Typography
           sx={{
@@ -61,10 +61,11 @@ export default function RemoveUserConfirmation({
             alignItems: 'center',
             justifyContent: 'center',
             fontWeight: 'bold',
-            fontSize: 18
+            fontSize: 18,
+            color: '#102D4D'
           }}
         >
-          Are you sure you want to remove
+          {row?.firstName + ' ' + row?.lastName}
         </Typography>
         <Typography
           sx={{
@@ -74,12 +75,15 @@ export default function RemoveUserConfirmation({
             fontWeight: 'bold',
             fontSize: 18,
             fontStyle: 'italic',
-            color: 'red',
+            color: '#',
             marginTop: '10px'
           }}
         >
-          {row?.firstName + ' ' + row?.lastName}
+          Successfully added and sent an invitation.
         </Typography>
+        {/* <Typography sx={{display:'flex', alignItems:'center' , justifyContent:'center',fontSize:14}} >
+            Please check above.
+        </Typography> */}
       </DialogContent>
       <Box
         sx={{
@@ -92,19 +96,6 @@ export default function RemoveUserConfirmation({
       >
         <Button
           variant="contained"
-          onClick={() => onClose()}
-          sx={{
-            fontWeight: 'bold',
-            borderRadius: 2,
-            width: 100,
-            height: 35,
-            backgroundColor: '#617E8C'
-          }}
-        >
-          No
-        </Button>
-        <Button
-          variant="contained"
           onClick={handleSubmit}
           sx={{
             fontWeight: 'bold',
@@ -114,7 +105,7 @@ export default function RemoveUserConfirmation({
             backgroundColor: '#102D4D'
           }}
         >
-          Yes
+          Ok
         </Button>
       </Box>
     </Dialog>

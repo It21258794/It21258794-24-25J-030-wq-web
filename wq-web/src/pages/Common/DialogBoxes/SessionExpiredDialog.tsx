@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  Dialog,
-  DialogContent,
-  Button,
-  Box,
-  Typography
-} from '@mui/material';
+import {Dialog, DialogContent, Button, Box, Typography} from '@mui/material';
 import timeout from '../../../assets/timeOut.jpg';
 
 interface SessionExpiredDialogProps {
@@ -63,7 +57,7 @@ const SessionExpiredDialog: React.FC<SessionExpiredDialogProps> = ({
               width: 100,
               borderRadius: 3,
               fontWeight: 'bold',
-              backgroundColor: "#102D4D",
+              backgroundColor: '#102D4D'
             }}
           >
             OK

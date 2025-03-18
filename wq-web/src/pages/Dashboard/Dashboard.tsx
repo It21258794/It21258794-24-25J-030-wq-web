@@ -267,18 +267,18 @@ const Dashboard = (): JSX.Element => {
         onChange={handleChange}
         aria-label="Platform"
         sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          fontSize: "0.875rem",
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          fontSize: '0.875rem'
         }}
       >
         <ToggleButton
           value="rawWater"
           sx={{
-            fontSize: "0.6rem",
-            textAlign: "center",
-            fontWeight: 800,
+            fontSize: '0.6rem',
+            textAlign: 'center',
+            fontWeight: 800
           }}
         >
           Raw Water
@@ -286,9 +286,9 @@ const Dashboard = (): JSX.Element => {
         <ToggleButton
           value="treatedWater"
           sx={{
-            fontSize: "0.6rem",
-            textAlign: "center",
-            fontWeight: 800,
+            fontSize: '0.6rem',
+            textAlign: 'center',
+            fontWeight: 800
           }}
         >
           Treated Water
@@ -306,7 +306,7 @@ const Dashboard = (): JSX.Element => {
         container
         spacing={2}
         justifyContent="center"
-        sx={{ marginTop: "20px" }}
+        sx={{marginTop: '20px'}}
       >
         {selectedOptions.turbidity && (
           <Grow in={selectedOptionsTimeout.turbidity} timeout={500}>

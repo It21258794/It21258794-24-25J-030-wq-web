@@ -1,7 +1,7 @@
 import axios from "axios";
 import { PredictionResult, PredictionParameter } from "../types/api";
 
-const BASE_URL = "http://localhost:8090/api";
+const BASE_URL = "http://localhost:8080/api";
 
 const getPredcitions = async <T>(
   endpoint: string,

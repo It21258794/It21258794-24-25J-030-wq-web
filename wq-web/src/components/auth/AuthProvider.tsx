@@ -1,6 +1,6 @@
 import React, {createContext, useEffect, useState} from 'react';
-import { User } from './types/User';
-import { AuthContextType } from './types/AuthContextType';
+import {User} from './types/User';
+import {AuthContextType} from './types/AuthContextType';
 import {AuthProviderProps} from './types/AuthProviderProps.ts';
 import SessionExpiredDialog from '../../pages/Common/DialogBoxes/SessionExpiredDialog.tsx';
 
@@ -71,7 +71,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
   }, [isUserLoggedIn]);
 
   const login = (userData: User, headerToken: string, timeout: number) => {
-    console.log("here at auth provider")
+    console.log('here at auth provider');
     const expirationTime = Date.now() + timeout * 60 * 1000;
     setUser(userData);
     setToken(headerToken);
@@ -87,8 +87,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     localStorage.setItem('token', headerToken);
     console.log('Token set:', headerToken);
   };
-
-
 
   const logout = (reason: string | null = null, showDialog: boolean = true) => {
     setUser(null);
@@ -110,7 +108,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     setLogoutReason(null);
     setDialogOpen(false);
     setIsUserLoggedIn(false);
-    console.log(logoutReason)
+    console.log(logoutReason);
   };
 
   return (
