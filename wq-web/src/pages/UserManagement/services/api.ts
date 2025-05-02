@@ -2,11 +2,15 @@ import axios from "axios";
 
 const BASE_URL = "http://localhost:8080/api";
 
-const searchUsers = async <T>(endpoint: string, params: Record<string, unknown>, token: string): Promise<T> => {
+const searchUsers = async <T>(
+  endpoint: string,
+  params: Record<string, unknown>,
+  token: string
+): Promise<T> => {
   try {
     const response = await axios.get<T>(`${BASE_URL}${endpoint}`, {
       headers: {
-        Authorization:token,
+        Authorization: token,
       },
       params: params,
     });
@@ -17,15 +21,23 @@ const searchUsers = async <T>(endpoint: string, params: Record<string, unknown>,
   }
 };
 
-export const getUsers = async (page:number,size:number,query: string, startDate:any, endDate:any, userStatus:string, token:string): Promise<any> => {
-  const params: Record<string, any> = { page, size, startDate, endDate};
+export const getUsers = async (
+  page: number,
+  size: number,
+  query: string,
+  startDate: any,
+  endDate: any,
+  userStatus: string,
+  token: string
+): Promise<any> => {
+  const params: Record<string, any> = { page, size, startDate, endDate };
 
   if (query) {
     params.query = query;
   }
-  if(userStatus){
+  if (userStatus) {
     params.status = userStatus;
   }
 
-  return searchUsers<any>("/user/users", params,token);
+  return searchUsers<any>("/user/users", params, token);
 };

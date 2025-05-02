@@ -1,5 +1,5 @@
-import React from 'react';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
+import React, {useContext} from 'react';
+import {createTheme, ThemeProvider} from '@mui/material/styles';
 import {
   Box,
   Button,
@@ -7,14 +7,16 @@ import {
   FormHelperText,
   TextField,
   Typography,
-  Grid,
+  Grid
 } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
 import OtpSendConfirmation from './DialogBoxes/OtpSendConfirmation';
-import { forgetPasswordSendOtp, forgetPasswordToken } from './Services/api';
+import {forgetPasswordSendOtp, forgetPasswordToken} from './Services/api';
+import {AuthContext} from '../../components/auth/AuthProvider';
 
 const defaultTheme = createTheme();
 export default function SendOtpScreen() {
+  const authContext = useContext(AuthContext);
   const [email, setEmail] = React.useState('');
   const [emailError, setEmailError] = React.useState('');
   const [showOtpText, setshowOtpText] = React.useState(false);
@@ -44,14 +46,18 @@ export default function SendOtpScreen() {
       setEmailError('Email is required');
     } else {
       try {
-        const res :any = await forgetPasswordSendOtp(email);
+        authContext?.setIsLoading(true);
+        const res: any = await forgetPasswordSendOtp(email);
         console.log(res);
         if (res.data.serverRef) {
-          setServerRef(res.data.serverRef);
-          setshowOtpText(true);
-          setDialogOpen(true);
-          setShowResend(false);
-          setCountdown(60);
+          setTimeout(() => {
+            authContext?.setIsLoading(false);
+            setServerRef(res.data.serverRef);
+            setshowOtpText(true);
+            setDialogOpen(true);
+            setShowResend(false);
+            setCountdown(60);
+          }, 1000);
         }
       } catch (err: any) {
         console.log(err);
@@ -62,14 +68,14 @@ export default function SendOtpScreen() {
 
   const handleResend = async () => {
     try {
-        const res = await forgetPasswordSendOtp(email);
-        console.log(res);
-        if (res.data.serverRef) {
-            setServerRef(res.data.serverRef);
-            setDialogOpen(true);
-            setShowResend(false);
-            setCountdown(60);
-        }
+      const res = await forgetPasswordSendOtp(email);
+      console.log(res);
+      if (res.data.serverRef) {
+        setServerRef(res.data.serverRef);
+        setDialogOpen(true);
+        setShowResend(false);
+        setCountdown(60);
+      }
     } catch (err: any) {
       if (err.status == 401) {
         setOtpError('OTP sending limit exceeded, please try again later');
@@ -82,16 +88,22 @@ export default function SendOtpScreen() {
       setOtpError('OTP required');
     } else {
       try {
-        const res = await forgetPasswordToken(serverRef,otp);
-        console.log(res.data.passwordResetToken);
-
-        sessionStorage.setItem('passwordResetEmail', email);
-        sessionStorage.setItem('passwordResetToken', res.data.passwordResetToken);
-        navigate('/reset-password');
+        authContext?.setIsLoading(true);
+        const res = await forgetPasswordToken(serverRef, otp);
+        if (res) {
+          setTimeout(() => {
+            authContext?.setIsLoading(false);
+            sessionStorage.setItem('passwordResetEmail', email);
+            sessionStorage.setItem(
+              'passwordResetToken',
+              res.data.passwordResetToken
+            );
+            navigate('/reset-password');
+          }, 1000);
+        }
       } catch (err: any) {
         console.log(err);
         setOtpError(err.response?.data?.message);
-        
       }
     }
   };
@@ -122,16 +134,21 @@ export default function SendOtpScreen() {
 
   return (
     <ThemeProvider theme={defaultTheme}>
-      <Box sx={{ backgroundColor: '#F3F3F4', height: '100vh', width: '100%' }}>
-        <Grid container justifyContent="center" alignItems="center" sx={{ pt: 15 }}>
+      <Box sx={{backgroundColor: '#F3F3F4', height: '100vh', width: '100%'}}>
+        <Grid
+          container
+          justifyContent="center"
+          alignItems="center"
+          sx={{pt: 15}}
+        >
           <Grid item xs={12} sm={8} md={6} lg={4}>
-            <Box sx={{ textAlign: 'center', pb: 4 }}>
+            <Box sx={{textAlign: 'center', pb: 4}}>
               <Typography
                 variant="h6"
                 sx={{
                   fontSize: '22px',
                   fontWeight: 'bold',
-                  textAlign: 'center',
+                  textAlign: 'center'
                 }}
               >
                 Forgot your password?
@@ -142,13 +159,19 @@ export default function SendOtpScreen() {
                   fontSize: '13px',
                   color: '#9C9C9C',
                   textAlign: 'center',
+                  marginTop: '10px'
                 }}
               >
                 Enter your email address below to receive an OTP.
               </Typography>
             </Box>
-            <Box sx={{ pt: 4, ml:7, mr:7 }}>
-              <FormControl variant="outlined" fullWidth margin="normal" error={!!emailError}>
+            <Box sx={{pt: 4, ml: 7, mr: 7}}>
+              <FormControl
+                variant="outlined"
+                fullWidth
+                margin="normal"
+                error={!!emailError}
+              >
                 <TextField
                   required
                   autoComplete="off"
@@ -169,23 +192,30 @@ export default function SendOtpScreen() {
                       paddingBottom: '8px',
                       borderRadius: 3,
                       '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                        borderColor: '#757575',
+                        borderColor: '#757575'
                       },
-                      backgroundColor: showOtpText ? '#E6E6E6' : 'white',
-                    },
+                      backgroundColor: showOtpText ? '#E6E6E6' : 'white'
+                    }
                   }}
                   InputLabelProps={{
-                    shrink: true,
+                    shrink: true
                   }}
                 />
                 <FormHelperText>
                   {' '}
-                  <span style={{ fontWeight: 'bold' }}>{emailError}</span>
+                  <span style={{fontWeight: 'bold'}}>{emailError}</span>
                 </FormHelperText>
               </FormControl>
               {showOtpText ? (
-                <FormControl variant="outlined" fullWidth margin="normal" error={!!otpError}>
-                  <Typography sx={{ pb: 1, pt: 3, fontSize: 13 }}>Enter Your OTP here</Typography>
+                <FormControl
+                  variant="outlined"
+                  fullWidth
+                  margin="normal"
+                  error={!!otpError}
+                >
+                  <Typography sx={{pb: 1, pt: 3, fontSize: 13}}>
+                    Enter Your OTP here
+                  </Typography>
                   <TextField
                     required
                     placeholder="55555"
@@ -204,42 +234,48 @@ export default function SendOtpScreen() {
                         paddingBottom: '8px',
                         borderRadius: 3,
                         '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#757575',
-                        },
-                      },
+                          borderColor: '#757575'
+                        }
+                      }
                     }}
                     InputLabelProps={{
-                      shrink: true,
+                      shrink: true
                     }}
                   />
                   <FormHelperText>
                     {' '}
-                    <span style={{ fontWeight: 'bold' }}>{otpError}</span>
+                    <span style={{fontWeight: 'bold'}}>{otpError}</span>
                   </FormHelperText>
                   <Button
                     type="submit"
                     fullWidth
                     variant="contained"
-                    sx={{ mt: 3, mb: 2, borderRadius: 4, fontWeight: 'bold', backgroundColor:"#102D4D" }}
+                    sx={{
+                      mt: 3,
+                      mb: 2,
+                      borderRadius: 4,
+                      fontWeight: 'bold',
+                      backgroundColor: '#102D4D'
+                    }}
                     onClick={handleOtpConfirm}
                   >
                     Confirm
                   </Button>
-                  <Typography sx={{ fontSize: '12px', color: '#9C9C9C' }}>
-                    Your OTP will expire in 10 minutes. If you haven't received it
-                    or need a new one.{' '}
+                  <Typography sx={{fontSize: '12px', color: '#9C9C9C'}}>
+                    Your OTP will expire in 10 minutes. If you haven't received
+                    it or need a new one.{' '}
                     {showResend ? (
                       <span
                         style={{
                           color: '#3874CE',
-                          cursor: 'pointer',
+                          cursor: 'pointer'
                         }}
                         onClick={handleResend}
                       >
                         send again
                       </span>
                     ) : (
-                      <span style={{ color: '#9C9C9C' }}>
+                      <span style={{color: '#9C9C9C'}}>
                         {`Resend in ${countdown} seconds`}
                       </span>
                     )}
@@ -250,17 +286,23 @@ export default function SendOtpScreen() {
                   type="submit"
                   fullWidth
                   variant="contained"
-                  sx={{ mt: 3, mb: 2, borderRadius: 4, fontWeight: 'bold', backgroundColor:"#102D4D" }}
+                  sx={{
+                    mt: 3,
+                    mb: 2,
+                    borderRadius: 4,
+                    fontWeight: 'bold',
+                    backgroundColor: '#102D4D'
+                  }}
                   onClick={handleSubmit}
                 >
                   Send OTP
                 </Button>
               )}
-              <Typography sx={{ fontSize: '12px', color: '#9C9C9C' }}>
+              <Typography sx={{fontSize: '12px', color: '#9C9C9C'}}>
                 Remember your password?{' '}
                 <span
                   onClick={handleGoBack}
-                  style={{ color: '#102D4D', cursor: 'pointer' }}
+                  style={{color: '#102D4D', cursor: 'pointer'}}
                 >
                   Back to Login
                 </span>

@@ -11,24 +11,28 @@ import {
   FormHelperText
 } from '@mui/material';
 import {Visibility, VisibilityOff} from '@mui/icons-material';
-import { changeCurrentPass } from './Services/api';
-import { useLocation, useNavigate } from 'react-router-dom';
+import {changeCurrentPass} from './Services/api';
+import {useLocation, useNavigate} from 'react-router-dom';
+import {AuthContext} from '../../components/auth/AuthProvider';
+import PasswordResetConfirmation from './DialogBoxes/PasswordResetConfirmation.tsx';
 
 export default function PasswordChangePage() {
+  const authContext = React.useContext(AuthContext);
   const [showPassword, setShowPassword] = React.useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
   const [showCurrentPassword, setShowCurrentPassword] = React.useState(false);
   const [newPassword, setNewPassword] = React.useState('');
   const [confirmPassword, setConfirmPassword] = React.useState('');
   const [currentPassword, setCurrentPassword] = React.useState('');
+  const [dialogOpen, setDialogOpen] = React.useState(false);
 
   const [newPasswordError, setNewPasswordError] = React.useState('');
   const [confirmPasswordError, setConfirmPasswordError] = React.useState('');
   const location = useLocation();
-    const navigate = useNavigate();
-    const email = location.state?.email || "";
+  const navigate = useNavigate();
+  const email = location.state?.email || '';
 
-    console.log(email);
+  console.log(email);
 
   const handleShowPasswordToggle = () => {
     setShowPassword((prev) => !prev);
@@ -78,17 +82,28 @@ export default function PasswordChangePage() {
 
   const handleConfirm = async () => {
     if (!newPasswordError && !confirmPasswordError) {
-        const response :any = await changeCurrentPass(email,newPassword,currentPassword);
-        console.log('Password change confirmed');
-
-        if(response.status == 200){
-            navigate("/");
+      authContext?.setIsLoading(true);
+      const response: any = await changeCurrentPass(
+        email,
+        newPassword,
+        currentPassword
+      );
+      console.log('Password change confirmed');
+      setTimeout(() => {
+        authContext?.setIsLoading(false);
+        if (response?.status === 200) {
+          setDialogOpen(true);
         }
+      }, 1000);
     }
   };
 
   const handleCancel = async () => {
-    navigate("/");
+    navigate('/');
+  };
+
+  const onClose = () => {
+    setDialogOpen(false);
   };
 
   return (
@@ -244,7 +259,7 @@ export default function PasswordChangePage() {
             borderRadius: 2,
             width: 100,
             height: 45,
-            backgroundColor: "#617E8C",
+            backgroundColor: '#617E8C'
           }}
         >
           Cancel
@@ -258,11 +273,12 @@ export default function PasswordChangePage() {
             borderRadius: 2,
             width: 'auto',
             height: 45,
-            backgroundColor:"#102D4D"
+            backgroundColor: '#102D4D'
           }}
         >
           Change
         </Button>
+        <PasswordResetConfirmation open={dialogOpen} onClose={onClose} />
       </Box>
     </Box>
   );

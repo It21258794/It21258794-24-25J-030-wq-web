@@ -6,15 +6,15 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
+import {createTheme, ThemeProvider} from '@mui/material/styles';
 import backgroundImage from '../../assets/edit.png';
 import InputAdornment from '@mui/material/InputAdornment';
 import IconButton from '@mui/material/IconButton';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import { AuthContext } from '../../components/auth/AuthProvider';
-import { useNavigate } from 'react-router-dom';
-import { signIn } from './Services/api';
+import {AuthContext} from '../../components/auth/AuthProvider';
+import {useNavigate} from 'react-router-dom';
+import {signIn} from './Services/api';
 
 const defaultTheme = createTheme();
 
@@ -46,11 +46,11 @@ export default function SignIn() {
     if (!password) setPasswordError('Password is required');
     if (!email || !password) valid = false;
 
-    const emailPattern = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
-    if (email && !emailPattern.test(email)) {
-      setEmailError('Invalid email. Please use a valid email address');
-      valid = false;
-    }
+    // const emailPattern = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+    // if (email && !emailPattern.test(email)) {
+    //   setEmailError('Invalid email. Please use a valid email address');
+    //   valid = false;
+    // }
     if (password.length < 8) {
       setPasswordError('Password must be at least 8 characters long');
       valid = false;
@@ -61,10 +61,10 @@ export default function SignIn() {
     try {
       const response: any = await signIn(email, password);
       authContext?.login(response.data, response.authToken, response.timeout);
-      navigate("/user");
+      navigate('/user');
     } catch (err: any) {
-      if (err.response?.data?.type === "TEMP_USER_ACCOUNT") {
-        navigate("/change-password", { state: { email } });
+      if (err.response?.data?.type === 'TEMP_USER_ACCOUNT') {
+        navigate('/change-password', {state: {email}});
       } else {
         setEmailError(err.response?.data?.message);
       }
@@ -83,27 +83,39 @@ export default function SignIn() {
           backgroundPosition: 'center',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
+          justifyContent: 'center'
         }}
       >
         <Card
           sx={{
-            width: { xs: '90%', sm: 400 },
+            width: {xs: '90%', sm: 400},
             backgroundColor: 'rgba(255, 255, 255, 0.7)',
             backdropFilter: 'blur(10px)',
             borderRadius: 4,
             boxShadow: '0px 8px 24px rgba(0,0,0,0.2)',
-            padding: { xs: 2, sm: 3 },
+            padding: {xs: 2, sm: 3},
             display: 'flex',
             flexDirection: 'column',
-            alignItems: 'center',
+            alignItems: 'center'
           }}
         >
-          <CardContent sx={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <Typography component="h1" variant="h4" fontWeight="bold" paddingBottom="10px">
+          <CardContent
+            sx={{
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center'
+            }}
+          >
+            <Typography
+              component="h1"
+              variant="h4"
+              fontWeight="bold"
+              paddingBottom="10px"
+            >
               Sign in
             </Typography>
-            <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
+            <Box component="form" onSubmit={handleSubmit} sx={{width: '100%'}}>
               <TextField
                 margin="normal"
                 required
@@ -118,12 +130,12 @@ export default function SignIn() {
                 error={!!emailError}
                 helperText={emailError}
                 sx={{
-                  "& .MuiOutlinedInput-root": {
+                  '& .MuiOutlinedInput-root': {
                     borderRadius: 4,
-                    "&.Mui-focused fieldset": {
-                      borderColor: "#102D4D",
-                    },
-                  },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#102D4D'
+                    }
+                  }
                 }}
               />
               <TextField
@@ -146,29 +158,35 @@ export default function SignIn() {
                         {showPassword ? <Visibility /> : <VisibilityOff />}
                       </IconButton>
                     </InputAdornment>
-                  ),
+                  )
                 }}
                 sx={{
-                  "& .MuiOutlinedInput-root": {
+                  '& .MuiOutlinedInput-root': {
                     borderRadius: 4,
-                    "&.Mui-focused fieldset": {
-                      borderColor: "#102D4D",
-                    },
-                  },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#102D4D'
+                    }
+                  }
                 }}
               />
               <Button
                 type="submit"
                 fullWidth
                 variant="contained"
-                sx={{ mt: 3, mb: 2, borderRadius: 4, fontWeight: 'bold', backgroundColor: "#102D4D" }}
+                sx={{
+                  mt: 3,
+                  mb: 2,
+                  borderRadius: 4,
+                  fontWeight: 'bold',
+                  backgroundColor: '#102D4D'
+                }}
               >
                 Sign In
               </Button>
-              <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+              <Box sx={{display: 'flex', justifyContent: 'center'}}>
                 <Typography
                   onClick={handleClickOpen}
-                  sx={{ cursor: 'pointer', fontSize: 13, color: "#102D4D" }}
+                  sx={{cursor: 'pointer', fontSize: 13, color: '#102D4D'}}
                 >
                   Forgot Password?
                 </Typography>

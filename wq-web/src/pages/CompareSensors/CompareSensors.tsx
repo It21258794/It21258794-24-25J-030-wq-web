@@ -17,24 +17,91 @@ import {
   Box,
 } from "@mui/material";
 import TablePaginationActions from "@mui/material/TablePagination/TablePaginationActions";
-import React from "react";
+import React, { useContext, useEffect } from "react";
 import { useState } from "react";
+import { apiRequest } from "../Dashboard/services/api";
+import DASHBOARD_API_ENDPOINTS from "../Dashboard/services/config";
+import { AuthContext } from "../../components/auth/AuthProvider";
 
 const CompareSensors = (): JSX.Element => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [age, setAge] = React.useState("");
+  const [dropdownValue, setDropdownValue] = React.useState("meewatura");
+  const [sensorData, setSensorData] = useState<any[]>([]);
+  const authContext = useContext(AuthContext);
+  const token: string | undefined = authContext?.token;
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await apiRequest<Record<number, number>>(
+          "GET",
+          DASHBOARD_API_ENDPOINTS.FETCH_MODBUS_DATA,
+          token
+        );
+
+        if (data) {
+          const formattedData = [
+            {
+              name: "Turbidity",
+              value: data[5001] || 0,
+              unit: "NTU",
+              status: "Active",
+            },
+            {
+              name: "pH",
+              value: data[5002] || 0,
+              unit: "pH",
+              status: "Active",
+            },
+            {
+              name: "Conductivity",
+              value: data[5003] || 0,
+              unit: "µS/cm",
+              status: "Active",
+            },
+            {
+              name: "Chlorine Usage",
+              value: data[5004] || 0,
+              unit: "mg/L",
+              status: "Active",
+            },
+            {
+              name: "PAC Usage",
+              value: data[505] || 0,
+              unit: "mg/L",
+              status: "Active",
+            },
+            {
+              name: "Lime Usage",
+              value: data[5006] || 0,
+              unit: "kg/m³",
+              status: "Active",
+            },
+          ];
+          setSensorData(formattedData);
+        }
+      } catch (error) {
+        console.error("Error fetching Modbus data:", error);
+      }
+    };
+
+    fetchData();
+    const interval = setInterval(fetchData, 3000);
+
+    return () => clearInterval(interval);
+  }, [token]);
 
   const handleChange = (event: SelectChangeEvent) => {
-    setAge(event.target.value as string);
+    setDropdownValue(event.target.value as string);
   };
 
   const rows = [
-    { name: "Sensor A", calories: 100, fat: 10, status: "Active" },
-    { name: "Sensor B", calories: 200, fat: 20, status: "Inactive" },
-    { name: "Sensor C", calories: 300, fat: 30, status: "Active" },
-    { name: "Sensor D", calories: 400, fat: 40, status: "Inactive" },
-    { name: "Sensor E", calories: 500, fat: 50, status: "Active" },
+    {name: 'Sensor A', calories: 100, fat: 10, status: 'Active'},
+    {name: 'Sensor B', calories: 200, fat: 20, status: 'Inactive'},
+    {name: 'Sensor C', calories: 300, fat: 30, status: 'Active'},
+    {name: 'Sensor D', calories: 400, fat: 40, status: 'Inactive'},
+    {name: 'Sensor E', calories: 500, fat: 50, status: 'Active'}
   ];
 
   const handleChangePage = (_: unknown, newPage: number) => {
@@ -52,68 +119,62 @@ const CompareSensors = (): JSX.Element => {
 
   return (
     <>
-      <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+      <Box sx={{display: 'flex', justifyContent: 'space-between'}}>
         <TableContainer
           component={Paper}
-          sx={{ width: "48%", padding: "30px", borderRadius: "20px" }}
+          sx={{width: '48%', padding: '30px', borderRadius: '20px'}}
         >
-          {" "}
+          {' '}
           <Box
             sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: "16px",
-              marginBottom: "20px",
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '16px',
+              marginBottom: '20px'
             }}
           >
             <FormControl>
               <InputLabel
                 id="demo-simple-select-label"
-                sx={{ fontSize: "0.8rem" }}
+                sx={{fontSize: '0.8rem'}}
               >
                 Location
               </InputLabel>
               <Select
                 labelId="demo-simple-select-label"
                 id="demo-simple-select"
-                value={age}
+                value={dropdownValue}
                 label="Age"
                 onChange={handleChange}
-                sx={{ height: 50, width: 200 }}
+                sx={{height: 50, width: 200}}
               >
-                <MenuItem value={10}>Western - Production</MenuItem>
-                <MenuItem value={20}>Western - Central</MenuItem>
-                <MenuItem value={30}>Sabaragamuwa</MenuItem>
+                <MenuItem value={"meewatura"}>
+                  Meewatura Water Treatment Plant
+                </MenuItem>
               </Select>
             </FormControl>
           </Box>
-          <Table sx={{ width: "100%" }} aria-label="custom pagination table">
+          <Table sx={{width: '100%'}} aria-label="custom pagination table">
             <TableHead>
               <TableRow>
-                <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem" }}>
+                <TableCell sx={{fontWeight: 'bold', fontSize: '0.9rem'}}>
                   Sensor
                 </TableCell>
                 <TableCell
-                  sx={{ fontWeight: "bold", fontSize: "0.9rem" }}
-                  align="center"
-                >
-                  Type
-                </TableCell>
-                <TableCell
-                  sx={{ fontWeight: "bold", fontSize: "0.9rem" }}
+                  sx={{fontWeight: 'bold', fontSize: '0.9rem'}}
                   align="center"
                 >
                   Current Reading
                 </TableCell>
                 <TableCell
-                  sx={{ fontWeight: "bold", fontSize: "0.9rem" }}
+                  sx={{fontWeight: 'bold', fontSize: '0.9rem'}}
                   align="center"
                 >
                   Unit
                 </TableCell>
                 <TableCell
-                  sx={{ fontWeight: "bold", fontSize: "0.9rem" }}
+                  sx={{fontWeight: 'bold', fontSize: '0.9rem'}}
                   align="center"
                 >
                   Status
@@ -122,64 +183,59 @@ const CompareSensors = (): JSX.Element => {
             </TableHead>
             <TableBody>
               {(rowsPerPage > 0
-                ? rows.slice(
+                ? sensorData.slice(
                     page * rowsPerPage,
                     page * rowsPerPage + rowsPerPage
                   )
-                : rows
-              ).map((row) => (
-                <TableRow key={row.name}>
+                : sensorData
+              ).map((row, index) => (
+                <TableRow key={index}>
                   <TableCell
                     component="th"
                     scope="row"
-                    sx={{ fontSize: "0.8rem" }}
+                    sx={{fontSize: '0.8rem'}}
                   >
                     {row.name}
                   </TableCell>
+
                   <TableCell
-                    sx={{ fontSize: "0.8rem", width: 160 }}
+                    sx={{fontSize: '0.8rem', width: 160}}
                     align="center"
                   >
-                    {row.calories}
+                    {row.value}
                   </TableCell>
                   <TableCell
-                    sx={{ fontSize: "0.8rem", width: 160 }}
+                    sx={{fontSize: '0.8rem', width: 160}}
                     align="center"
                   >
-                    {row.fat}
+                    {row.unit}
                   </TableCell>
                   <TableCell
-                    sx={{ fontSize: "0.8rem", width: 160 }}
-                    align="center"
-                  >
-                    {row.fat}
-                  </TableCell>
-                  <TableCell
-                    sx={{ fontSize: "0.8rem", width: 160 }}
+                    sx={{fontSize: '0.8rem', width: 160}}
                     align="center"
                   >
                     <Chip
                       label={row.status}
                       sx={{
-                        fontSize: "0.6rem",
-                        height: "20px",
-                        width: "80px",
+                        fontSize: '0.6rem',
+                        height: '20px',
+                        width: '80px',
                         backgroundColor:
-                          row.status === "Active" ? "#a8f1d4" : "#fdd5d5",
-                        color: row.status === "Active" ? "#008000" : "#ff0000",
+                          row.status === 'Active' ? '#a8f1d4' : '#fdd5d5',
+                        color: row.status === 'Active' ? '#008000' : '#ff0000',
                         border: `1px solid ${
-                          row.status === "Active" ? "#008000" : "#ff0000"
+                          row.status === 'Active' ? '#008000' : '#ff0000'
                         }`,
-                        borderRadius: "5px",
-                        textAlign: "center",
-                        fontWeight: "bold",
+                        borderRadius: '5px',
+                        textAlign: 'center',
+                        fontWeight: 'bold'
                       }}
                     />
                   </TableCell>
                 </TableRow>
               ))}
               {emptyRows > 0 && (
-                <TableRow style={{ height: 53 * emptyRows }}>
+                <TableRow style={{height: 53 * emptyRows}}>
                   <TableCell colSpan={5} />
                 </TableRow>
               )}
@@ -188,20 +244,20 @@ const CompareSensors = (): JSX.Element => {
               <TableRow>
                 <TablePagination
                   sx={{
-                    ".MuiTablePagination-toolbar": { fontSize: "0.7rem" },
-                    ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows":
+                    '.MuiTablePagination-toolbar': {fontSize: '0.7rem'},
+                    '.MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows':
                       {
-                        fontSize: "0.7rem",
+                        fontSize: '0.7rem',
                         fontWeight: 700,
-                        color: "grey",
+                        color: 'grey'
                       },
-                    ".MuiTablePagination-select": {
-                      fontSize: "0.7rem",
+                    '.MuiTablePagination-select': {
+                      fontSize: '0.7rem',
                       fontWeight: 700,
-                      color: "grey",
-                    },
+                      color: 'grey'
+                    }
                   }}
-                  rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
+                  rowsPerPageOptions={[5, 10, 25, {label: 'All', value: -1}]}
                   colSpan={5}
                   count={rows.length}
                   rowsPerPage={rowsPerPage}
@@ -216,65 +272,59 @@ const CompareSensors = (): JSX.Element => {
         </TableContainer>
         <TableContainer
           component={Paper}
-          sx={{ width: "48%", padding: "30px", borderRadius: "20px" }}
+          sx={{width: '48%', padding: '30px', borderRadius: '20px'}}
         >
-          {" "}
+          {' '}
           <Box
             sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: "16px",
-              marginBottom: "20px",
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '16px',
+              marginBottom: '20px'
             }}
           >
             <FormControl>
               <InputLabel
                 id="demo-simple-select-label"
-                sx={{ fontSize: "0.8rem" }}
+                sx={{fontSize: '0.8rem'}}
               >
                 Location
               </InputLabel>
               <Select
                 labelId="demo-simple-select-label"
                 id="demo-simple-select"
-                value={age}
+                value={dropdownValue}
                 label="Age"
                 onChange={handleChange}
-                sx={{ height: 50, width: 200 }}
+                sx={{height: 50, width: 200}}
               >
-                <MenuItem value={10}>Western - Production</MenuItem>
-                <MenuItem value={20}>Western - Central</MenuItem>
-                <MenuItem value={30}>Sabaragamuwa</MenuItem>
+                <MenuItem value={"meewatura"}>
+                  Meewatura Water Treatment Plant
+                </MenuItem>
               </Select>
             </FormControl>
           </Box>
-          <Table sx={{ width: "100%" }} aria-label="custom pagination table">
+          <Table sx={{width: '100%'}} aria-label="custom pagination table">
             <TableHead>
               <TableRow>
-                <TableCell sx={{ fontWeight: "bold", fontSize: "0.8rem" }}>
+                <TableCell sx={{fontWeight: 'bold', fontSize: '0.8rem'}}>
                   Sensor
                 </TableCell>
                 <TableCell
-                  sx={{ fontWeight: "bold", fontSize: "0.8rem" }}
-                  align="center"
-                >
-                  Type
-                </TableCell>
-                <TableCell
-                  sx={{ fontWeight: "bold", fontSize: "0.8rem" }}
+                  sx={{fontWeight: 'bold', fontSize: '0.8rem'}}
                   align="center"
                 >
                   Current Reading
                 </TableCell>
                 <TableCell
-                  sx={{ fontWeight: "bold", fontSize: "0.8rem" }}
+                  sx={{fontWeight: 'bold', fontSize: '0.8rem'}}
                   align="center"
                 >
                   Unit
                 </TableCell>
                 <TableCell
-                  sx={{ fontWeight: "bold", fontSize: "0.8rem" }}
+                  sx={{fontWeight: 'bold', fontSize: '0.8rem'}}
                   align="center"
                 >
                   Status
@@ -283,64 +333,59 @@ const CompareSensors = (): JSX.Element => {
             </TableHead>
             <TableBody>
               {(rowsPerPage > 0
-                ? rows.slice(
+                ? sensorData.slice(
                     page * rowsPerPage,
                     page * rowsPerPage + rowsPerPage
                   )
-                : rows
-              ).map((row) => (
-                <TableRow key={row.name}>
+                : sensorData
+              ).map((row, index) => (
+                <TableRow key={index}>
                   <TableCell
                     component="th"
                     scope="row"
-                    sx={{ fontSize: "0.8rem" }}
+                    sx={{fontSize: '0.8rem'}}
                   >
                     {row.name}
                   </TableCell>
+
                   <TableCell
-                    sx={{ fontSize: "0.8rem", width: 160 }}
+                    sx={{fontSize: '0.8rem', width: 160}}
                     align="center"
                   >
-                    {row.calories}
+                    {row.value}
                   </TableCell>
                   <TableCell
-                    sx={{ fontSize: "0.8rem", width: 160 }}
+                    sx={{fontSize: '0.8rem', width: 160}}
                     align="center"
                   >
-                    {row.fat}
+                    {row.unit}
                   </TableCell>
                   <TableCell
-                    sx={{ fontSize: "0.8rem", width: 160 }}
-                    align="center"
-                  >
-                    {row.fat}
-                  </TableCell>
-                  <TableCell
-                    sx={{ fontSize: "0.8rem", width: 160 }}
+                    sx={{fontSize: '0.8rem', width: 160}}
                     align="center"
                   >
                     <Chip
                       label={row.status}
                       sx={{
-                        fontSize: "0.6rem",
-                        height: "20px",
-                        width: "80px",
+                        fontSize: '0.6rem',
+                        height: '20px',
+                        width: '80px',
                         backgroundColor:
-                          row.status === "Active" ? "#a8f1d4" : "#fdd5d5",
-                        color: row.status === "Active" ? "#008000" : "#ff0000",
+                          row.status === 'Active' ? '#a8f1d4' : '#fdd5d5',
+                        color: row.status === 'Active' ? '#008000' : '#ff0000',
                         border: `1px solid ${
-                          row.status === "Active" ? "#008000" : "#ff0000"
+                          row.status === 'Active' ? '#008000' : '#ff0000'
                         }`,
-                        borderRadius: "5px",
-                        textAlign: "center",
-                        fontWeight: "bold",
+                        borderRadius: '5px',
+                        textAlign: 'center',
+                        fontWeight: 'bold'
                       }}
                     />
                   </TableCell>
                 </TableRow>
               ))}
               {emptyRows > 0 && (
-                <TableRow style={{ height: 53 * emptyRows }}>
+                <TableRow style={{height: 53 * emptyRows}}>
                   <TableCell colSpan={5} />
                 </TableRow>
               )}
@@ -349,20 +394,20 @@ const CompareSensors = (): JSX.Element => {
               <TableRow>
                 <TablePagination
                   sx={{
-                    ".MuiTablePagination-toolbar": { fontSize: "0.7rem" },
-                    ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows":
+                    '.MuiTablePagination-toolbar': {fontSize: '0.7rem'},
+                    '.MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows':
                       {
-                        fontSize: "0.7rem",
+                        fontSize: '0.7rem',
                         fontWeight: 700,
-                        color: "grey",
+                        color: 'grey'
                       },
-                    ".MuiTablePagination-select": {
-                      fontSize: "0.7rem",
+                    '.MuiTablePagination-select': {
+                      fontSize: '0.7rem',
                       fontWeight: 700,
-                      color: "grey",
-                    },
+                      color: 'grey'
+                    }
                   }}
-                  rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
+                  rowsPerPageOptions={[5, 10, 25, {label: 'All', value: -1}]}
                   colSpan={5}
                   count={rows.length}
                   rowsPerPage={rowsPerPage}
