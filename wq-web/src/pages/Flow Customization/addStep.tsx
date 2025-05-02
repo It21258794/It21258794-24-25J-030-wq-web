@@ -1,22 +1,42 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Box, TextField, Button, Typography, Paper, Snackbar, Alert } from "@mui/material";
-import { createStep, getSteps } from "./server/flow-customisationAPI"; // Adjust the path as needed
-import "@fontsource/poppins";
-import { AxiosError } from 'axios'; // Import AxiosError if you're using Axios
+import React, { useState, useEffect, useContext } from "react";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Button,
+  Typography,
+  Snackbar,
+  Alert
+} from "@mui/material";
+import { createStep, getSteps } from "./server/flow-customisationAPI";
 import { AuthContext } from "../../components/auth/AuthProvider";
+import { AxiosError } from 'axios';
 
-const AddStep: React.FC = (): JSX.Element => {
+interface AddStepDialogProps {
+  open: boolean;
+  onClose: () => void;
+  onStepAdded: () => void; // Callback to refresh steps list
+}
+
+const AddStepDialog: React.FC<AddStepDialogProps> = ({ 
+  open, 
+  onClose, 
+  onStepAdded 
+}) => {
   const [stepName, setStepName] = useState<string>("");
-  const [stepOrder, setStepOrder] = useState<number>(0); // Initialize stepOrder as number
+  const [stepOrder, setStepOrder] = useState<number>(0);
   const [stepDescription, setStepDescription] = useState<string>("");
   const [openSnackbar, setOpenSnackbar] = useState<boolean>(false);
   const [alertMessage, setAlertMessage] = useState<string>("");
-  const [alertSeverity, setAlertSeverity] = useState<"error" | "warning" | "info" | "success">();
-  const navigate = useNavigate();
+  const [alertSeverity, setAlertSeverity] = useState<
+    "error" | "warning" | "info" | "success"
+  >("info");
 
-  const authcontext = React.useContext(AuthContext);
+  const authcontext = useContext(AuthContext);
   const token: string | undefined = authcontext?.token;
+
   useEffect(() => {
     const fetchSteps = async () => {
       try {
@@ -29,8 +49,10 @@ const AddStep: React.FC = (): JSX.Element => {
       }
     };
 
-    fetchSteps();
-  }, []);
+    if (open) {
+      fetchSteps();
+    }
+  }, [open, token]);
 
   const handleConfirmClick = async () => {
     if (!stepName || !stepOrder || !stepDescription) {
@@ -45,19 +67,23 @@ const AddStep: React.FC = (): JSX.Element => {
       stepOrder, 
       stepDescription,
     };
- 
+
     try {
-      // Call the API to create the step
       await createStep(token || "", payload);
       setAlertSeverity("success");
       setAlertMessage("Step added successfully.");
       setOpenSnackbar(true);
-      setTimeout(() => navigate(-1), 1500);
+      
+      // Clear form and close dialog after success
+      setStepName("");
+      setStepDescription("");
+      onStepAdded();
+      setTimeout(onClose, 1500);
     } catch (error: unknown) {
       const axiosError = error as AxiosError;
     
-      if (axiosError.response && axiosError.response.data && axiosError.response.data.message) {
-        const backendErrorMessage = axiosError.response.data.message;
+      if (axiosError.response && (axiosError.response as any).data?.message) {
+        const backendErrorMessage = (axiosError.response as any).data.message;
         if (backendErrorMessage.includes("Step order already exists")) {
           setAlertSeverity("error");
           setAlertMessage("Step order already exists.");
@@ -73,107 +99,66 @@ const AddStep: React.FC = (): JSX.Element => {
     }
   };
 
-  const handleCancelClick = () => {
-    navigate(-1);
-  };
-
   const handleSnackbarClose = () => {
     setOpenSnackbar(false);
   };
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        padding: 2,
-        backgroundColor: "#F1F2F7",
-        width: "full",
-        maxWidth: "full",
-        boxSizing: "border-box",
-        fontFamily: "Poppins, sans-serif",
-      }}
-    >
-      <Paper
-        sx={{
-          padding: 4,
-          width: 400,
-          display: "flex",
-          flexDirection: "column",
-          gap: 3,
-          boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
-          borderRadius: 2,
-          fontFamily: "Poppins, sans-serif",
-        }}
-      >
-        <Typography
-          variant="h5"
-          gutterBottom
-          sx={{ textAlign: "center", fontFamily: "Poppins, sans-serif" }}
-        >
-          Add New Stage
-        </Typography>
-
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+      <DialogTitle sx={{ fontFamily: "Poppins, sans-serif", textAlign: "center" }}>
+        Add New Stage
+      </DialogTitle>
+      <DialogContent sx={{ fontFamily: "Poppins, sans-serif" }}>
         <TextField
           label="Step Name"
           variant="outlined"
           fullWidth
+          margin="normal"
           value={stepName}
           onChange={(e) => setStepName(e.target.value)}
-          sx={{ fontFamily: "Poppins, sans-serif" }}
         />
-
         <TextField
           label="Step Order"
           variant="outlined"
           fullWidth
           type="number"
+          margin="normal"
           value={stepOrder}
           onChange={(e) => setStepOrder(parseInt(e.target.value))}
-          sx={{ fontFamily: "Poppins, sans-serif" }}
-          disabled // Disable this field as it is auto-calculated
+          disabled
         />
-
         <TextField
           label="Description"
           variant="outlined"
           fullWidth
           multiline
           rows={4}
+          margin="normal"
           value={stepDescription}
           onChange={(e) => setStepDescription(e.target.value)}
-          sx={{ fontFamily: "Poppins, sans-serif" }}
         />
-
-        <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
-          <Button
-            variant="contained"
-            sx={{
-              backgroundColor: "#102D4D",
-              color: "white",
-              fontFamily: "Poppins, sans-serif",
-              "&:hover": { backgroundColor: "#154273" },
-            }}
-            onClick={handleConfirmClick}
-          >
-            Confirm
-          </Button>
-          <Button
-            variant="outlined"
-            sx={{
-              backgroundColor: "#F1F2F7",
-              color: "#8F8F8F",
-              borderColor: "#8F8F8F",
-              fontFamily: "Poppins, sans-serif",
-              "&:hover": { backgroundColor: "#E0E0E0", borderColor: "#6F6F6F" },
-            }}
-            onClick={handleCancelClick}
-          >
-            Cancel
-          </Button>
-        </Box>
-      </Paper>
+      </DialogContent>
+      <DialogActions sx={{ padding: 3 }}>
+        <Button
+          variant="outlined"
+          onClick={onClose}
+          sx={{
+            color: "#8F8F8F",
+            borderColor: "#8F8F8F",
+          }}
+        >
+          Cancel
+        </Button>
+        <Button
+          variant="contained"
+          onClick={handleConfirmClick}
+          sx={{
+            backgroundColor: "#102D4D",
+          }}
+        >
+          Confirm
+        </Button>
+      </DialogActions>
 
       <Snackbar
         open={openSnackbar}
@@ -189,8 +174,8 @@ const AddStep: React.FC = (): JSX.Element => {
           {alertMessage}
         </Alert>
       </Snackbar>
-    </Box>
+    </Dialog>
   );
 };
 
-export default AddStep;
+export default AddStepDialog;

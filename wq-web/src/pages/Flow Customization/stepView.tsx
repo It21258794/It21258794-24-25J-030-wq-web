@@ -286,43 +286,44 @@ const StepView: React.FC = () => {
   return (
     <Box sx={{ padding: 2, backgroundColor: "#F1F2F7", width: "full", boxSizing: "border-box" }}>
       <Grid item xs={12} md={8}>
-        <Paper sx={{
-          padding: 4,
-          display: "flex",
-          flexDirection: "column",
-          gap: 3,
-          position: "relative",
-          width: "93%",
-          marginLeft: "auto",
-          marginRight: "auto",
-          marginBottom: "2%",
-        }}>
-          <Box sx={{ position: "absolute", top: 16, right: 16 }}>
-            <Button
-              variant="outlined"
-              sx={{ backgroundColor: "#F1F2F7", color: "#8F8F8F" }}
-              onClick={handleCancelClick}
-            >
-              Back
-            </Button>
+           <Paper 
+                      sx={{ 
+                        padding: 2, 
+                        height: "96%",
+                        backgroundColor: "white",
+                        borderRadius: 3,
+                        boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+                      }}
+                    >
+
+
+                
+
+<Typography variant="h5" gutterBottom sx={{ fontWeight: "bold", fontSize: "1.2rem" ,textAlign: "center" }}>
+              Add new values - {stepName}
+            </Typography>
+<Box sx={{ position: "absolute", top: 130, right: 50 }}>
+       <Button
+                      variant="contained"
+                      onClick={handleCancelClick}
+                      sx={{
+                        backgroundColor: "#102D4D",
+                        fontSize: "12px",
+                        height: "30px",
+                      }}
+                    >
+                      Back
+                    </Button>
+           
           </Box>
-
-          <Typography variant="h4" color="black" gutterBottom>
-            {stepName}
-          </Typography>
-
           <Box sx={{
             gap: 2,
-            backgroundColor: "#F1F2F7",
             padding: 2,
             borderRadius: "8px",
             width: "50%",
             margin: "0 auto",
-            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
           }}>
-            <Typography variant="h5" gutterBottom sx={{ textAlign: "center" }}>
-              Add new Values to {stepName}
-            </Typography>
+            
 
             {currentTests.length === 0 ? (
               <Typography variant="body1" sx={{ textAlign: "left" }}>
@@ -363,70 +364,101 @@ const StepView: React.FC = () => {
                       onChange={(e) => handleInputChange(test.id, e.target.value)}
                     />
 
-                    <Button
-                      variant="contained"
-                      size="small"
-                      sx={{
-                        backgroundColor: "#102D4D",
-                        color: "white",
-                        "&:hover": {
-                          backgroundColor: "#154273",
-                          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-                        },
-                        ml: 2,
-                      }}
-                      onClick={() => handleConfirmSingleTest(test.id, test.testName)}
-                      disabled={pendingSubmissions.has(test.id)}
-                    >
-                      Confirm
-                    </Button>
+<Button
+  variant="contained"
+  size="small"
+  onClick={() => handleConfirmSingleTest(test.id, test.testName)}
+  sx={{
+    backgroundColor: "#102D4D",
+    color: "white",
+    fontSize: "12px",
+    height: "30px",
+    ml: 2,
+  }}
+>
+  Confirm
+</Button>
+
                   </Box>
                 ))}
               </Box>
             )}
           </Box>
 
-          <Box sx={{
-            marginTop: 4,
-            backgroundColor: "#F1F2F7",
-            padding: 2,
-            borderRadius: "8px",
-            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-          }}>
-            <Typography variant="h5" gutterBottom sx={{ textAlign: "center" }}>
-              Past Test Values
-            </Typography>
+        </Paper>
+      </Grid>
+      <br></br>
+      <Grid item xs={12} md={8}>
+           <Paper 
+                      sx={{ 
+                        padding: 2, 
+                        height: "96%",
+                        backgroundColor: "white",
+                        borderRadius: 3,
+                        boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+                      }}
+                    >
 
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, marginBottom: 2 }}>
-              <TextField
-                type="date"
-                variant="outlined"
-                size="small"
-                value={searchDate}
-                onChange={handleDateChange}
-                inputProps={{
-                  max: new Date().toISOString().split('T')[0]
-                }}
-                sx={{ width: '200px' }}
-              />
-              {searchDate && (
-                <Button
-                  sx={{ backgroundColor: "#F1F2F7", color: "#8F8F8F", marginLeft: 1 }}
-                  variant="outlined"
-                  size="medium"
-                  onClick={() => setSearchDate("")}
-                >
-                  Clear Filter
-                </Button>
-              )}
-            </Box>
 
-            <TableContainer component={Paper}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: "10px", justifyContent: "space-between" }}>
+  <Typography variant="h5" gutterBottom sx={{ fontWeight: "bold", fontSize: "1rem" }}>
+    Past Test Values
+  </Typography>
+  
+  <Box sx={{ display: "flex", alignItems: "center", gap: "10px" }}>
+    <TextField
+      type="date"
+      variant="outlined"
+      size="small"
+      value={searchDate}
+      onChange={handleDateChange}
+      inputProps={{
+        max: new Date().toISOString().split('T')[0],
+      }}
+      sx={{
+        width: "250px",
+        backgroundColor: "white",
+        borderRadius: "20px",
+      }}
+      InputProps={{
+        sx: {
+          borderRadius: 3,
+          height: 30,
+          textAlign: "center",
+          fontWeight: "bold",
+          fontSize: "13px",
+          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+            borderColor: "#757575",
+          },
+        },
+      }}
+    />
+    {searchDate && (
+      <Button
+      variant="contained"
+      size="small"
+      onClick={() => setSearchDate("")}
+      sx={{
+        backgroundColor: "#102D4D",
+        color: "white",
+        fontSize: "12px",
+        height: "30px",
+        
+        ml: 2,
+      }}
+    >
+      Clear
+    </Button>
+     
+    )}
+  </Box>
+</Box>
+
               <Table sx={{ minWidth: 500 }} aria-label="custom pagination table">
                 <TableHead>
                   <TableRow>
                     <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem" }}>
-                      Step Name
+                      Stage Name
                     </TableCell>
                     <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem" }} align="center">
                       Test/Chemical Name
@@ -457,16 +489,16 @@ const StepView: React.FC = () => {
                         <TableCell sx={{ fontSize: "0.8rem" }}>
                           {stepName}
                         </TableCell>
-                        <TableCell sx={{ fontSize: "0.8rem", width: 160 }} align="center">
+                        <TableCell sx={{ fontSize: "0.8rem", width: 250 }} align="center">
                           {stepValue.testName || stepValue.chemicalName || "Unknown"}
                         </TableCell>
-                        <TableCell sx={{ fontSize: "0.8rem", width: 160 }} align="center">
+                        <TableCell sx={{ fontSize: "0.8rem", width: 250 }} align="center">
                           {displayValue}
                         </TableCell>
-                        <TableCell sx={{ fontSize: "0.8rem", width: 160 }} align="center">
+                        <TableCell sx={{ fontSize: "0.8rem", width: 250 }} align="center">
                           {date}
                         </TableCell>
-                        <TableCell sx={{ fontSize: "0.8rem", width: 160 }} align="center">
+                        <TableCell sx={{ fontSize: "0.8rem", width: 250 }} align="center">
                           {time}
                         </TableCell>
                       </TableRow>
@@ -506,8 +538,6 @@ const StepView: React.FC = () => {
                   </TableRow>
                 </TableFooter>
               </Table>
-            </TableContainer>
-          </Box>
         </Paper>
       </Grid>
 

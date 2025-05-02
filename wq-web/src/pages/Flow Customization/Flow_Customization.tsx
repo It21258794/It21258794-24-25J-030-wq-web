@@ -1,10 +1,21 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useDrag, useDrop, DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import Tooltip from "@mui/material/Tooltip";
-import { FaTrash, FaPlus, FaEdit, FaCheck, FaChartArea } from "react-icons/fa";
-import { Box, Grid, Typography, Paper, IconButton } from "@mui/material";
-import { Snackbar, Alert } from "@mui/material";
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import {
+  Box,
+  Grid,
+  Typography,
+  Paper,
+  IconButton,
+  Tooltip,
+  Snackbar,
+  Alert,
+  Button,
+  Chip,
+  TextField,
+  InputAdornment
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import {
   getTests,
@@ -14,6 +25,15 @@ import {
   createStepValue,
 } from "./server/flow-customisationAPI";
 import { AuthContext } from "../../components/auth/AuthProvider";
+import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import CheckIcon from "@mui/icons-material/Check";
+import InsertChartIcon from "@mui/icons-material/InsertChart";
+import SearchIcon from "@mui/icons-material/Search";
+import AddTestDialog from "../Flow Customization/addTest";
+import AddChemicalDialog from "../Flow Customization/addChemical";
+import AddStepDialog from "../Flow Customization/addStep";
 
 enum ItemType {
   CHEMICAL = "chemical",
@@ -112,7 +132,8 @@ const Step: React.FC<StepProps> = ({ step, onDropItem, onRemoveItem, setSteps })
       isOver: !!monitor.isOver(),
     }),
   });
-  const authcontext = React.useContext(AuthContext);
+
+  const authcontext = useContext(AuthContext);
   const token: string | undefined = authcontext?.token;
   const navigate = useNavigate();
 
@@ -129,14 +150,13 @@ const Step: React.FC<StepProps> = ({ step, onDropItem, onRemoveItem, setSteps })
   };
 
   const handleConfirmClick = async () => {
-    
     if (!token) {
       setAlertSeverity("error");
       setAlertMessage("No authentication token found. Please log in.");
       setOpenSnackbar(true);
       return;
     }
-  
+
     try {
       for (const item of step.items) {
         const payload = {
@@ -144,16 +164,17 @@ const Step: React.FC<StepProps> = ({ step, onDropItem, onRemoveItem, setSteps })
           testId: item.type === ItemType.TEST ? item.id : undefined,
           chemicalId: item.type === ItemType.CHEMICAL ? item.id : undefined,
         };
-  
+
         await createStepValue(token, payload);
       }
-  
+
+      // Clear the step items but keep the step available for new items
       setSteps((prevSteps) =>
         prevSteps.map((s) =>
-          s.id === step.id ? { ...s, confirmed: true, items: [] } : s
+          s.id === step.id ? { ...s, items: [] } : s
         )
       );
-  
+
       setAlertSeverity("success");
       setAlertMessage("Step confirmed and values updated!");
       setOpenSnackbar(true);
@@ -172,16 +193,17 @@ const Step: React.FC<StepProps> = ({ step, onDropItem, onRemoveItem, setSteps })
   const hasItems = (step.items || []).length > 0;
 
   return (
-    <Paper
+    <Box
       ref={dropRef}
       sx={{
         padding: 2,
-        backgroundColor: isOver ? "#d3ffd8" : "#F1F2F7",
-        borderRadius: 1,
-        boxShadow: 1,
+        backgroundColor: isOver ? "#d3ffd8" : "white",
+        borderRadius: 3,
+        boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
         height: 180,
         width: 180,
         transition: "background-color 0.2s",
+        border: "1px solid #e0e0e0",
       }}
     >
       <Snackbar
@@ -198,67 +220,89 @@ const Step: React.FC<StepProps> = ({ step, onDropItem, onRemoveItem, setSteps })
           {alertMessage}
         </Alert>
       </Snackbar>
-      <div
-        style={{
+      <Box
+        sx={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          marginBottom: 1,
         }}
       >
-        <Typography variant="h6" onClick={handleStepClick} style={{ cursor: "pointer" }}>
+        <Typography
+          variant="subtitle1"
+          onClick={handleStepClick}
+          sx={{
+            cursor: "pointer",
+            fontWeight: "bold",
+            fontSize: "14px",
+            color: "#102D4D",
+          }}
+        >
           {step.title}
         </Typography>
-        {hasItems && !step.confirmed && (
+        {hasItems && (
           <IconButton
             onClick={handleConfirmClick}
             sx={{
               backgroundColor: "#102D4D",
               color: "white",
-              width: "30px",
-              height: "30px",
-              borderRadius: "8px",
+              width: "24px",
+              height: "24px",
+              borderRadius: "3px",
               "&:hover": {
                 backgroundColor: "#4072AF",
-                color: "white",
               },
             }}
           >
-            <FaCheck />
+            <CheckIcon fontSize="small" />
           </IconButton>
         )}
-      </div>
+      </Box>
 
-      <div
-        style={{
+      <Box
+        sx={{
           maxHeight: "100px",
           overflowY: "auto",
           marginBottom: "10px",
         }}
       >
-        <ul style={{ listStyleType: "none", padding: 0 }}>
+        <Box component="ul" sx={{ listStyleType: "none", padding: 0, margin: 0 }}>
           {step.items.map((item, index) => (
-            <li
+            <Box
+              component="li"
               key={index}
-              style={{
+              sx={{
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                margin: "5px 0",
+                margin: "4px 0",
+                padding: "4px 8px",
+                backgroundColor: "#f5f5f5",
+                borderRadius: 1,
               }}
             >
-              {item.name}
+              <Typography variant="body2" sx={{ fontSize: "12px" }}>
+                {item.name}
+              </Typography>
               <IconButton
                 size="small"
                 onClick={() => onRemoveItem(step.id, item.name)}
-                style={{ color: "#4072AF" }}
+                sx={{
+                  color: "#ff4444",
+                  width: "20px",
+                  height: "20px",
+                  "&:hover": {
+                    color: "#cc0000",
+                  }
+                }}
               >
-                <FaTrash />
+                <DeleteIcon fontSize="small" />
               </IconButton>
-            </li>
+            </Box>
           ))}
-        </ul>
-      </div>
-    </Paper>
+        </Box>
+      </Box>
+    </Box>
   );
 };
 
@@ -269,9 +313,24 @@ const DraggableItem: React.FC<DraggableItemProps> = ({ name, type, id }) => {
   });
 
   return (
-    <div ref={dragRef} style={{ marginBottom: "10px", cursor: "grab" }}>
-      {name}
-    </div>
+    <Box
+      ref={dragRef}
+      sx={{
+        marginBottom: "8px",
+        cursor: "grab",
+        padding: "6px 8px",
+        backgroundColor: type === ItemType.TEST ? "#F3FAFD" : "#DFF5FF",
+        borderRadius: 1,
+        boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
+        "&:hover": {
+          backgroundColor: type === ItemType.TEST ? "#E1F0F7" : "#D0EBFA",
+        }
+      }}
+    >
+      <Typography variant="body2" sx={{ fontSize: "12px" }}>
+        {name}
+      </Typography>
+    </Box>
   );
 };
 
@@ -281,74 +340,60 @@ const FlowCustomizationDashboard: React.FC = () => {
   const [steps, setSteps] = useState<StepItem[]>([]);
   const [tests, setTests] = useState<Test[]>([]);
   const [chemicals, setChemicals] = useState<Chemical[]>([]);
-  const authcontext = React.useContext(AuthContext);
-  const token: string | undefined = authcontext?.token;
+  const [openTestDialog, setOpenTestDialog] = useState(false);
+  const [openChemicalDialog, setOpenChemicalDialog] = useState(false);
+  const [openStepDialog, setOpenStepDialog] = useState(false);
+  const authcontext = useContext(AuthContext);
+  const token = authcontext?.token;
 
-  useEffect(() => {
-    const fetchTests = async () => {
-      if (!token) {
-        console.error("No authentication token found. Please log in.");
-        return;
-      }
-
-      try {
-        const data = await getTests(token);
-        const testData = data.map((test: { id: number; testName: string }) => ({
+  // Fetch data functions
+  const fetchTests = async () => {
+    if (!token) return;
+    try {
+      const data = await getTests(token);
+      setTests(
+        data.map((test: { id: number; testName: string }) => ({
           id: test.id,
           name: test.testName,
-        }));
-        setTests(testData);
-      } catch (error) {
-        console.error("Error fetching tests:", error);
-      }
-    };
+        }))
+      );
 
+    } catch (error) {
+      console.error("Error fetching tests:", error);
+    }
+  };
+
+  const fetchChemicals = async () => {
+    if (!token) return;
+    try {
+      const data = await getChemicals(token);
+      setChemicals(data.map((chemical: { id: number; chemicalName: string }) => ({
+        id: chemical.id,
+        name: chemical.chemicalName,
+      })));
+    } catch (error) {
+      console.error("Error fetching chemicals:", error);
+    }
+  };
+
+  const fetchSteps = async () => {
+    if (!token) return;
+    try {
+      const data = await getSteps(token);
+      setSteps(data.map((step: { id: number; stepName: string }) => ({
+        id: step.id,
+        title: step.stepName,
+        items: [],
+        confirmed: false,
+      })));
+    } catch (error) {
+      console.error("Error fetching steps:", error);
+    }
+  };
+
+  useEffect(() => {
     fetchTests();
-  }, [token]);
-
-  useEffect(() => {
-    const fetchChemicals = async () => {
-      if (!token) {
-        console.error("No authentication token found. Please log in.");
-        return;
-      }
-
-      try {
-        const data = await getChemicals(token);
-        const chemicalData = data.map((chemical: { id: number; chemicalName: string }) => ({
-          id: chemical.id,
-          name: chemical.chemicalName,
-        }));
-        setChemicals(chemicalData);
-      } catch (error) {
-        console.error("Error fetching chemicals:", error);
-      }
-    };
-
     fetchChemicals();
-  }, [token]);
-
-  useEffect(() => {
-    const fetchSteps = async () => {
-      if (!token) {
-        console.error("No authentication token found. Please log in.");
-        return;
-      }
-
-      try {
-        const data = await getSteps(token);
-        const stepsData = data.map((step: { id: number; stepName: string }) => ({
-          id: step.id,
-          title: step.stepName,
-          items: [],
-          confirmed: false,
-        }));
-        setSteps(stepsData);
-      } catch (error) {
-        console.error("Error fetching steps:", error);
-      }
-    };
-
     fetchSteps();
   }, [token]);
 
@@ -357,12 +402,12 @@ const FlowCustomizationDashboard: React.FC = () => {
       prevSteps.map((step) =>
         step.id === stepId
           ? {
-              ...step,
-              items: [
-                ...step.items,
-                { name: itemName, type: itemType, id: itemId },
-              ],
-            }
+            ...step,
+            items: [
+              ...step.items,
+              { name: itemName, type: itemType, id: itemId },
+            ],
+          }
           : step
       )
     );
@@ -376,26 +421,6 @@ const FlowCustomizationDashboard: React.FC = () => {
           : step
       )
     );
-  };
-
-  const handleAddChemicalClick = () => {
-    navigate("/flow/add-chemicals");
-  };
-
-  const prediction = () => {
-    navigate("/flow/prediction");
-  };
-
-  const handleAddStep = () => {
-    navigate("/flow/add-step");
-  };
-
-  const handleAddTestClick = () => {
-    navigate("add-test");
-  };
-
-  const handleEditStep = () => {
-    setIsEditing((prev) => !prev);
   };
 
   const moveStep = async (fromIndex: number, toIndex: number) => {
@@ -425,209 +450,378 @@ const FlowCustomizationDashboard: React.FC = () => {
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          padding: 2,
-          background: "#F1F2F7",
-          minHeight: "100vh",
-        }}
-      >
-        <Grid container spacing={2}>
+      <Box sx={{ margin: "20px", minHeight: 'calc(100vh - 40px)' }}>
+        <Grid container spacing={2} sx={{ alignItems: 'stretch', height: 'calc(100vh - 180px)' }}>
           {/* Left Section */}
-          <Grid item xs={12} md={4}>
-            <Paper
-              sx={{
-                padding: 2,
+          <Grid item xs={12} md={4} sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+            {/* Readings Section */}
+            <Paper sx={{
+              flex: 1,
+              padding: 2,
+              marginBottom: 2,
+              overflowY: "auto",
+              backgroundColor: "white",
+              borderRadius: 3,
+              boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+              height: '50%'
+            }}>
+              <Box sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
                 marginBottom: 2,
-                maxHeight: "300px",
-                overflowY: "auto",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <Typography variant="h6" gutterBottom>
+              }}>
+                <Typography variant="h6" sx={{ fontSize: "14px", fontWeight: "bold" }}>
                   Readings
                 </Typography>
-                <IconButton
-                  size="small"
-                  onClick={() => navigate("/user/flow/add-test")}
-                  style={{
+                <Button
+                  variant="contained"
+                  onClick={() => setOpenTestDialog(true)}
+                  sx={{
                     backgroundColor: "#102D4D",
-                    color: "white",
-                    width: "40px",
-                    height: "40px",
-                    borderRadius: "8px",
+                    fontSize: "12px",
+                    height: "30px",
                   }}
+                  startIcon={<AddIcon fontSize="small" />}
                 >
-                  <Tooltip title="Add Reading" arrow>
-                    <FaPlus />
-                  </Tooltip>
-                </IconButton>
-              </div>
-              <ul style={{ listStyleType: "none", padding: 0 }}>
+                  Add
+                </Button>
+              </Box>
+              <Box component="ul" sx={{ listStyleType: "none", padding: 0, margin: 0 }}>
                 {tests.map((test) => (
-                  <li
-                    key={test.id}
-                    style={{
-                      backgroundColor: "#F3FAFD",
-                      padding: "7px",
-                      borderRadius: "5px",
-                      marginBottom: "8px",
-                      boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
-                    }}
-                  >
+                  <Box component="li" key={test.id} sx={{ marginBottom: 1 }}>
                     <DraggableItem
-                      key={test.id}
                       name={test.name}
                       type={ItemType.TEST}
                       id={test.id}
                     />
-                  </li>
+                  </Box>
                 ))}
-              </ul>
+              </Box>
             </Paper>
 
-            <Paper sx={{ padding: 2, maxHeight: "300px", overflowY: "auto" }}>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <Typography variant="h6" gutterBottom>
+            {/* Chemicals Section */}
+            <Paper sx={{
+              flex: 1,
+              padding: 2,
+              overflowY: "auto",
+              backgroundColor: "white",
+              borderRadius: 3,
+              boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+              height: '50%'
+            }}>
+              <Box sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 2,
+              }}>
+                <Typography variant="h6" sx={{ fontSize: "14px", fontWeight: "bold" }}>
                   Chemicals
                 </Typography>
-                <IconButton
-                  size="small"
-                  onClick={() => navigate("/user/flow/add-chemical")}
-                  style={{
+                <Button
+                  variant="contained"
+                  onClick={() => setOpenChemicalDialog(true)}
+                  sx={{
                     backgroundColor: "#102D4D",
-                    color: "white",
-                    width: "40px",
-                    height: "40px",
-                    borderRadius: "8px",
+                    fontSize: "12px",
+                    height: "30px",
                   }}
+                  startIcon={<AddIcon fontSize="small" />}
                 >
-                  <Tooltip title="Add Chemical" arrow>
-                    <FaPlus />
-                  </Tooltip>
-                </IconButton>
-              </div>
-              <ul style={{ listStyleType: "none", padding: 0 }}>
+                  Add
+                </Button>
+              </Box>
+              <Box component="ul" sx={{ listStyleType: "none", padding: 0, margin: 0 }}>
                 {chemicals.map((chemical) => (
-                  <li
-                    key={chemical.id}
-                    style={{
-                      backgroundColor: "#DFF5FF",
-                      padding: "7px",
-                      borderRadius: "5px",
-                      marginBottom: "8px",
-                      boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
-                    }}
-                  >
+                  <Box component="li" key={chemical.id} sx={{ marginBottom: 1 }}>
                     <DraggableItem
-                      key={chemical.id}
                       name={chemical.name}
                       type={ItemType.CHEMICAL}
                       id={chemical.id}
                     />
-                  </li>
+                  </Box>
                 ))}
-              </ul>
+              </Box>
             </Paper>
           </Grid>
-
-          {/* Right Section */}
-          <Grid item xs={12} md={8}>
-            <Paper sx={{ padding: 2, height: "96%" }}>
-              <div
-                style={{
+          {/* Right Section - Stages */}
+          <Grid item xs={12} md={8} sx={{ height: '100%' }}>
+            <Paper
+              sx={{
+                padding: 2,
+                height: '100%',
+                minHeight: 0,
+                backgroundColor: "white",
+                borderRadius: 3,
+                boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+                display: 'flex',
+                flexDirection: 'column',
+              }}
+            >
+              {/* Header section remains the same */}
+              <Box
+                sx={{
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
+                  marginBottom: 2,
+                  flexShrink: 0,
                 }}
               >
-                <Typography variant="h5" sx={{ flex: 1 }}>
+                <Typography variant="h5" sx={{ fontSize: "16px", fontWeight: "bold" }}>
                   Stages
                 </Typography>
-                <div style={{ display: "flex", gap: "10px" }}>
-                  <IconButton
-                    size="small"
-                    onClick={() => navigate("/user/flow/prediction")}
-                    style={{
-                      backgroundColor: "#102D4D",
-                      color: "white",
-                      width: "40px",
-                      height: "40px",
-                      borderRadius: "8px",
-                    }}
-                  >
-                    <Tooltip title="Predict Values" arrow>
-                      <FaChartArea />
-                    </Tooltip>
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    onClick={() => navigate("/user/flow/add-step")}
-                    style={{
-                      backgroundColor: "#102D4D",
-                      color: "white",
-                      width: "40px",
-                      height: "40px",
-                      borderRadius: "8px",
-                    }}
-                  >
-                    <Tooltip title="Add Stage" arrow>
-                      <FaPlus />
-                    </Tooltip>
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    onClick={handleEditStep}
-                    style={{
-                      backgroundColor: isEditing ? "#4072AF" : "#102D4D",
-                      color: "white",
-                      width: "40px",
-                      height: "40px",
-                      borderRadius: "8px",
-                    }}
-                  >
-                    <Tooltip title="Change Stage Order" arrow>
-                      <FaEdit />
-                    </Tooltip>
-                  </IconButton>
-                </div>
-              </div>
 
-              <Grid container spacing={2} sx={{ marginTop: 2 }}>
-                {steps.map((step, index) => (
-                  <Grid item sm={6} md={4} key={step.id}>
-                    <DraggableStep
-                      step={step}
-                      index={index}
-                      moveStep={moveStep}
-                      onDropItem={handleDropItem}
-                      onRemoveItem={handleRemoveItem}
-                      isEditing={isEditing}
-                      setSteps={setSteps}
-                    />
-                  </Grid>
-                ))}
-              </Grid>
+                <Box sx={{ display: "flex", gap: "10px" }}>
+                <Button
+  variant="contained"
+  onClick={() => setOpenStepDialog(true)}  // Changed from navigate to setOpenStepDialog
+  sx={{
+    backgroundColor: "#102D4D",
+    fontSize: "12px",
+    height: "30px",
+  }}
+  startIcon={<AddIcon fontSize="small" />}
+>
+  Add
+</Button>
+                  <Button
+                    variant="contained"
+                    onClick={() => navigate("/user/flow/prediction")}
+                    sx={{
+                      backgroundColor: "#102D4D",
+                      fontSize: "12px",
+                      height: "30px",
+                    }}
+                    startIcon={<InsertChartIcon fontSize="small" />}
+                  >
+                    Predict
+                  </Button>
+                  <Button
+                    variant="contained"
+                    onClick={() => setIsEditing(!isEditing)}
+                    sx={{
+                      backgroundColor: isEditing ? "#4072AF" : "#102D4D",
+                      fontSize: "12px",
+                      height: "30px",
+                    }}
+                    startIcon={<EditIcon fontSize="small" />}
+                  >
+                    Edit
+                  </Button>
+                </Box>
+              </Box>
+
+              {/* Stages Flow with corrected alignment */}
+              <Box sx={{
+                flex: 1,
+                overflowY: 'auto',
+                paddingBottom: 2,
+              }}>
+                <Box sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'flex-start', // Default to left alignment
+                  gap: 4,
+                  position: 'relative',
+                  paddingLeft: 2,
+                }}>
+                  {Array.from({ length: Math.ceil(steps.length / 3) }).map((_, rowIndex) => {
+                    const isEvenRow = rowIndex % 2 === 0;
+                    const startIdx = rowIndex * 3;
+                    const endIdx = Math.min(startIdx + 3, steps.length);
+                    const rowItemCount = endIdx - startIdx;
+                    const rowSteps = isEvenRow
+                      ? steps.slice(startIdx, endIdx) // Left to right for even rows
+                      : [...steps.slice(startIdx, endIdx)].reverse(); // Right to left for odd rows
+
+                    return (
+                      <Box
+                        key={`row-${rowIndex}`}
+                        sx={{
+                          display: 'flex',
+                          justifyContent: rowItemCount < 3 ? 'flex-start' : 'center', // Left-align if less than 3 items
+                          width: '100%',
+                          gap: 4,
+                          position: 'relative',
+                        }}
+                      >
+                        {rowSteps.map((step, colIndex) => {
+                          const originalIndex = isEvenRow ? startIdx + colIndex : startIdx + (rowSteps.length - 1 - colIndex);
+                          const isLastInRow = colIndex === rowSteps.length - 1;
+                          const isFirstInRow = colIndex === 0;
+                          const isLastItem = originalIndex === steps.length - 1;
+                          const isSingleItemRow = rowItemCount === 1;
+
+                          return (
+                            <Box
+                              key={step.id}
+                              sx={{
+                                position: 'relative',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                width: { xs: '100%', sm: 'calc(50% - 16px)', md: isSingleItemRow ? '100%' : 'calc(33.33% - 22px)' },
+                                minWidth: '200px',
+                              }}
+                            >
+                              <DraggableStep
+                                step={step}
+                                index={originalIndex}
+                                moveStep={moveStep}
+                                onDropItem={handleDropItem}
+                                onRemoveItem={handleRemoveItem}
+                                isEditing={isEditing}
+                                setSteps={setSteps}
+                              />
+
+
+                              {/* Right arrow (→) for left-to-right in even rows */}
+                              {!isLastInRow && isEvenRow && rowItemCount > 1 && (
+                                <Box sx={{
+                                  position: 'absolute',
+                                  top: '50%',
+                                  right: '-22px',
+                                  width: '20px',
+                                  height: '2px',
+                                  bgcolor: '#102D4D',
+                                  '&::after': {
+                                    content: '""',
+                                    position: 'absolute',
+                                    right: 0,
+                                    top: '-4px',
+                                    width: 0,
+                                    height: 0,
+                                    borderLeft: '6px solid #102D4D',
+                                    borderTop: '5px solid transparent',
+                                    borderBottom: '5px solid transparent',
+                                  }
+                                }} />
+                              )}
+
+                              {/* Left arrow (←) for right-to-left in odd rows */}
+                              {!isFirstInRow && !isEvenRow && rowItemCount > 1 && (
+                                <Box sx={{
+                                  position: 'absolute',
+                                  top: '50%',
+                                  left: '-22px',
+                                  width: '20px',
+                                  height: '2px',
+                                  bgcolor: '#102D4D',
+                                  '&::after': {
+                                    content: '""',
+                                    position: 'absolute',
+                                    left: 0,
+                                    top: '-4px',
+                                    width: 0,
+                                    height: 0,
+                                    borderRight: '6px solid #102D4D',
+                                    borderTop: '5px solid transparent',
+                                    borderBottom: '5px solid transparent',
+                                  }
+                                }} />
+                              )}
+
+                              {/* Down arrow (↓) from last in even row to next row */}
+                              {isLastInRow && !isLastItem && isEvenRow && rowItemCount > 1 && (
+                                <Box sx={{
+                                  position: 'absolute',
+                                  bottom: '-22px',
+                                  right: isSingleItemRow ? '50%' : '50%',
+                                  width: '2px',
+                                  height: '20px',
+                                  bgcolor: '#102D4D',
+                                  '&::after': {
+                                    content: '""',
+                                    position: 'absolute',
+                                    bottom: 0,
+                                    left: '-4px',
+                                    width: 0,
+                                    height: 0,
+                                    borderTop: '6px solid #102D4D',
+                                    borderLeft: '5px solid transparent',
+                                    borderRight: '5px solid transparent',
+                                  }
+                                }} />
+                              )}
+
+                              {/* Down arrow (↓) from first in odd row to next row */}
+                              {isFirstInRow && !isLastItem && !isEvenRow && rowItemCount > 1 && (
+                                <Box sx={{
+                                  position: 'absolute',
+                                  bottom: '-22px',
+                                  left: isSingleItemRow ? '50%' : '50%',
+                                  width: '2px',
+                                  height: '20px',
+                                  bgcolor: '#102D4D',
+                                  '&::after': {
+                                    content: '""',
+                                    position: 'absolute',
+                                    bottom: 0,
+                                    left: '-4px',
+                                    width: 0,
+                                    height: 0,
+                                    borderTop: '6px solid #102D4D',
+                                    borderLeft: '5px solid transparent',
+                                    borderRight: '5px solid transparent',
+                                  }
+                                }} />
+                              )}
+
+                              {/* Special case: down arrow for single item rows */}
+                              {isSingleItemRow && !isLastItem && (
+                                <Box sx={{
+                                  position: 'absolute',
+                                  bottom: '-22px',
+                                  left: '50%',
+                                  width: '2px',
+                                  height: '20px',
+                                  bgcolor: '#102D4D',
+                                  '&::after': {
+                                    content: '""',
+                                    position: 'absolute',
+                                    bottom: 0,
+                                    left: '-4px',
+                                    width: 0,
+                                    height: 0,
+                                    borderTop: '6px solid #102D4D',
+                                    borderLeft: '5px solid transparent',
+                                    borderRight: '5px solid transparent',
+                                  }
+                                }} />
+                              )}
+                            </Box>
+                          );
+                        })}
+                      </Box>
+                    );
+                  })}
+                </Box>
+              </Box>
             </Paper>
           </Grid>
         </Grid>
       </Box>
+      {/* Add the dialogs */}
+      <AddTestDialog
+        open={openTestDialog}
+        onClose={() => setOpenTestDialog(false)}
+        onTestAdded={fetchTests}
+      />
+      <AddChemicalDialog
+        open={openChemicalDialog}
+        onClose={() => setOpenChemicalDialog(false)}
+        onChemicalAdded={fetchChemicals}
+      />
+      <AddStepDialog
+  open={openStepDialog}
+  onClose={() => setOpenStepDialog(false)}
+  onStepAdded={fetchSteps}  // This will refresh the steps list after adding a new one
+/>
     </DndProvider>
   );
 };
+
 
 export default FlowCustomizationDashboard;

@@ -1,20 +1,40 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Box, TextField, Button, Paper, Snackbar, Alert } from "@mui/material";
-import { createChemical } from "./server/flow-customisationAPI"; // Import the addChemical API function
-import "@fontsource/poppins"; // Import Poppins font
+import React, { useState, useContext } from "react";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Button,
+  Typography,
+  Snackbar,
+  Alert
+} from "@mui/material";
+import { createChemical } from "./server/flow-customisationAPI";
 import { AuthContext } from "../../components/auth/AuthProvider";
 
-const AddChemical: React.FC = (): JSX.Element => {
+interface AddChemicalDialogProps {
+  open: boolean;
+  onClose: () => void;
+  onChemicalAdded: () => void; // Callback to refresh chemicals list
+}
+
+const AddChemicalDialog: React.FC<AddChemicalDialogProps> = ({ 
+  open, 
+  onClose, 
+  onChemicalAdded 
+}) => {
   const [chemicalName, setChemicalName] = useState<string>("");
-  const [chemicalType, setchemicalType] = useState<string>("");
+  const [chemicalType, setChemicalType] = useState<string>("");
   const [openSnackbar, setOpenSnackbar] = useState<boolean>(false);
   const [alertMessage, setAlertMessage] = useState<string>("");
-  const [alertSeverity, setAlertSeverity] = useState<"error" | "warning" | "info" | "success">();
-  const navigate = useNavigate();
+  const [alertSeverity, setAlertSeverity] = useState<
+    "error" | "warning" | "info" | "success"
+  >("info");
 
-const authcontext = React.useContext(AuthContext);
+  const authcontext = useContext(AuthContext);
   const token: string | undefined = authcontext?.token;
+
   const handleConfirmClick = async () => {
     if (!chemicalName || !chemicalType) {
       setAlertSeverity("error");
@@ -24,20 +44,23 @@ const authcontext = React.useContext(AuthContext);
     }
 
     try {
-      const response = await createChemical(chemicalName, chemicalType, token || "");
+      await createChemical(chemicalName, chemicalType, token || "");
       setAlertSeverity("success");
       setAlertMessage("Chemical added successfully.");
       setOpenSnackbar(true);
-      setTimeout(() => navigate(-1), 1500); // Redirect after successful addition
+      
+      // Clear form and close dialog after success
+      setChemicalName("");
+      setChemicalType("");
+      onChemicalAdded(); // Refresh the chemicals list
+      setTimeout(onClose, 1500);
     } catch (error: any) {
       setAlertSeverity("error");
-      setAlertMessage(error.message || "An unexpected error occurred. Please try again.");
+      setAlertMessage(
+        error.message || "An unexpected error occurred. Please try again."
+      );
       setOpenSnackbar(true);
     }
-  };
-
-  const handleCancelClick = () => {
-    navigate(-1);
   };
 
   const handleSnackbarClose = () => {
@@ -45,78 +68,49 @@ const authcontext = React.useContext(AuthContext);
   };
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        padding: 2,
-        backgroundColor: "#F1F2F7",
-        width: "full",
-        maxWidth: "full",
-        boxSizing: "border-box",
-        marginRight: "150px",
-        fontFamily: "Poppins, sans-serif", // Set font for Box
-      }}
-    >
-      <Paper
-        sx={{
-          padding: 4,
-          width: 400,
-          display: "flex",
-          flexDirection: "column",
-          gap: 3,
-          boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
-          borderRadius: 2,
-          fontFamily: "Poppins, sans-serif", // Set font for Paper
-        }}
-      >
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+      <DialogTitle sx={{ fontFamily: "Poppins, sans-serif", textAlign: "center" }}>
+        Add New Chemical
+      </DialogTitle>
+      <DialogContent sx={{ fontFamily: "Poppins, sans-serif" }}>
         <TextField
           label="Chemical Name"
           variant="outlined"
           fullWidth
+          margin="normal"
           value={chemicalName}
           onChange={(e) => setChemicalName(e.target.value)}
-          sx={{ fontFamily: "Poppins, sans-serif" }}
         />
-
         <TextField
           label="Measure Type"
           variant="outlined"
           fullWidth
+          margin="normal"
           value={chemicalType}
-          onChange={(e) => setchemicalType(e.target.value)}
-          sx={{ fontFamily: "Poppins, sans-serif" }}
+          onChange={(e) => setChemicalType(e.target.value)}
         />
-
-        <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
-          <Button
-            variant="contained"
-            sx={{
-              backgroundColor: "#102D4D",
-              color: "white",
-              fontFamily: "Poppins, sans-serif",
-              "&:hover": { backgroundColor: "#154273" },
-            }}
-            onClick={handleConfirmClick}
-          >
-            Confirm
-          </Button>
-          <Button
-            variant="outlined"
-            sx={{
-              backgroundColor: "#F1F2F7",
-              color: "#8F8F8F",
-              borderColor: "#8F8F8F",
-              fontFamily: "Poppins, sans-serif",
-              "&:hover": { backgroundColor: "#E0E0E0", borderColor: "#6F6F6F" },
-            }}
-            onClick={handleCancelClick}
-          >
-            Cancel
-          </Button>
-        </Box>
-      </Paper>
+      </DialogContent>
+      <DialogActions sx={{ padding: 3 }}>
+        <Button
+          variant="outlined"
+          onClick={onClose}
+          sx={{
+            color: "#8F8F8F",
+            borderColor: "#8F8F8F",
+          }}
+        >
+          Cancel
+        </Button>
+        <Button
+          variant="contained"
+          onClick={handleConfirmClick}
+          sx={{
+            backgroundColor: "#102D4D",
+          }}
+        >
+          Confirm
+        </Button>
+      </DialogActions>
 
       <Snackbar
         open={openSnackbar}
@@ -132,8 +126,8 @@ const authcontext = React.useContext(AuthContext);
           {alertMessage}
         </Alert>
       </Snackbar>
-    </Box>
+    </Dialog>
   );
 };
 
-export default AddChemical;
+export default AddChemicalDialog;
