@@ -159,7 +159,7 @@ const Chemical_Consumption = () => {
             variant="contained"
             color="primary"
             onClick={handleSubmit}
-            sx={{ height: "100%", minWidth: 160 }}
+            sx={{ height: 56, minWidth: 160 }}
           >
             Predict Chemical Usage
           </Button>
@@ -206,25 +206,61 @@ const Chemical_Consumption = () => {
           </Grid>
 
           {/* Table for predicted parameters */}
-          <Typography variant="h6" sx={{ fontSize: 18, textAlign: "center", mt: 4, fontWeight: "bold" }}>
-            Predicted Treated Water Quality Parameters
-          </Typography>
-          <TableContainer component={Paper} sx={{ mt: 2, mx: "auto", width: "100%" }}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell><b>Parameter</b></TableCell>
-                  <TableCell align="right"><b>Value</b></TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                <TableRow><TableCell>Water Production</TableCell><TableCell align="right">{futurePrediction.predicted_water_production}</TableCell></TableRow>
-                <TableRow><TableCell>Conductivity</TableCell><TableCell align="right">{futurePrediction.predicted_conductivity}</TableCell></TableRow>
-                <TableRow><TableCell>pH</TableCell><TableCell align="right">{futurePrediction.predicted_ph}</TableCell></TableRow>
-                <TableRow><TableCell>Turbidity</TableCell><TableCell align="right">{futurePrediction.predicted_turbidity}</TableCell></TableRow>
-              </TableBody>
-            </Table>
-          </TableContainer>
+          <Typography
+  variant="h6"
+  sx={{ fontSize: 18, textAlign: "center", mt: 4, fontWeight: "bold", display: "flex" }}
+>
+  Predicted Treated Water Quality Parameters
+</Typography>
+
+<TableContainer component={Paper} sx={{ mt: 2, mx: "auto", width: "100%", maxWidth: "100%" }}>
+  <Table>
+    <TableHead>
+      <TableRow>
+        <TableCell align="center" sx={{ width: "50%" }}>
+          <b>Parameter</b>
+        </TableCell>
+        <TableCell align="center" sx={{ width: "50%" }}>
+          <b>Value</b>
+        </TableCell>
+      </TableRow>
+    </TableHead>
+    <TableBody>
+      <TableRow>
+        <TableCell align="center" sx={{ width: "50%" }}>
+          Water Production
+        </TableCell>
+        <TableCell align="center" sx={{ width: "50%" }}>
+          {futurePrediction.predicted_water_production.toFixed(2)}
+        </TableCell>
+      </TableRow>
+      <TableRow>
+        <TableCell align="center" sx={{ width: "50%" }}>
+          Conductivity
+        </TableCell>
+        <TableCell align="center" sx={{ width: "50%" }}>
+          {futurePrediction.predicted_conductivity.toFixed(2)}
+        </TableCell>
+      </TableRow>
+      <TableRow>
+        <TableCell align="center" sx={{ width: "50%" }}>
+          pH
+        </TableCell>
+        <TableCell align="center" sx={{ width: "50%" }}>
+          {futurePrediction.predicted_ph.toFixed(2)}
+        </TableCell>
+      </TableRow>
+      <TableRow>
+        <TableCell align="center" sx={{ width: "50%" }}>
+          Turbidity
+        </TableCell>
+        <TableCell align="center" sx={{ width: "50%" }}>
+          {futurePrediction.predicted_turbidity.toFixed(2)}
+        </TableCell>
+      </TableRow>
+    </TableBody>
+  </Table>
+</TableContainer>
         </>
       )}
     </Box>
