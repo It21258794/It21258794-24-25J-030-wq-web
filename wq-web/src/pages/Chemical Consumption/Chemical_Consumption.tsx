@@ -63,6 +63,11 @@ const Chemical_Consumption = () => {
     }).catch((err) => console.log(err));
   }, []);
 
+  useEffect(() => {
+  console.log("Last Usage Data:", lastUsage);
+}, [lastUsage]);
+
+
   const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedDate(event.target.value);
   };
