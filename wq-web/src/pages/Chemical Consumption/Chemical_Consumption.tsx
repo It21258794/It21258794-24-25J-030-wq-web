@@ -15,7 +15,6 @@ import {
   TableRow,
   Paper
 } from "@mui/material";
-import { LineChart } from "@mui/x-charts";
 import axios from "axios";
 import Biotech from '@mui/icons-material/Biotech';
 import { useEffect, useState } from "react";
@@ -44,7 +43,7 @@ const Chemical_Consumption = () => {
     lime_usage: number;
   }
 
-  const [lastUsage, setLastUsage] = useState<UsageData[]>([]);
+  const [setLastUsage] = useState<UsageData[]>([]);
   const [chlorine_usage, setchlorine_usage] = useState("");
   const [lime_usage, setlime_usage] = useState("");
   const [pac_usage, setpac_usage] = useState("");
