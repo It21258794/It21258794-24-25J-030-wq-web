@@ -43,7 +43,7 @@ const Chemical_Consumption = () => {
     lime_usage: number;
   }
 
-  const [setLastUsage] = useState<UsageData[]>([]);
+  const [lastUsage, setLastUsage] = useState<UsageData[]>([]);
   const [chlorine_usage, setchlorine_usage] = useState("");
   const [lime_usage, setlime_usage] = useState("");
   const [pac_usage, setpac_usage] = useState("");
