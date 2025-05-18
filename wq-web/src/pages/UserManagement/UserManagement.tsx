@@ -27,7 +27,7 @@ import {Tooltip} from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import RemoveUserConfirmation from '../Common/DialogBoxes/RemoveUserConfirmationDialog';
 import UserAddedConfirmation from '../Common/DialogBoxes/UserAddedConfirmation';
-import { debounce } from 'lodash';
+import {debounce} from 'lodash';
 
 const UserManagement = (): JSX.Element => {
   const authContext = useContext(AuthContext);
@@ -56,7 +56,7 @@ const UserManagement = (): JSX.Element => {
     }, 500);
 
     fetchDebouncedUsers();
-    
+
     return () => {
       fetchDebouncedUsers.cancel();
     };
@@ -72,31 +72,30 @@ const UserManagement = (): JSX.Element => {
     authContext?.setIsLoading(true);
     setError(null);
     try {
-      
       setTimeout(async () => {
         authContext?.setIsLoading(false);
         const formattedStartDate = startDate
-        ? encodeURIComponent(startDate.startOf('day').toISOString())
-        : '';
-      const formattedEndDate = endDate
-        ? encodeURIComponent(endDate.endOf('day').toISOString())
-        : '';
-      const result = await getUsers(
-        page,
-        10,
-        query,
-        formattedStartDate,
-        formattedEndDate,
-        status,
-        token
-      );
-      if (result && Array.isArray(result.content)) {
-        setRows(result.content);
-        setTotalPages(result.totalPages);
-      } else {
-        setRows([]);
-        setError('No valid data found');
-      }
+          ? encodeURIComponent(startDate.startOf('day').toISOString())
+          : '';
+        const formattedEndDate = endDate
+          ? encodeURIComponent(endDate.endOf('day').toISOString())
+          : '';
+        const result = await getUsers(
+          page,
+          10,
+          query,
+          formattedStartDate,
+          formattedEndDate,
+          status,
+          token
+        );
+        if (result && Array.isArray(result.content)) {
+          setRows(result.content);
+          setTotalPages(result.totalPages);
+        } else {
+          setRows([]);
+          setError('No valid data found');
+        }
       }, 1000);
     } catch (err) {
       setError('Failed to fetch users');
@@ -356,20 +355,20 @@ const UserManagement = (): JSX.Element => {
                             row.status === 'ACTIVE'
                               ? '#a8f1d4'
                               : row.status === 'PENDING_VERIFICATION'
-                                ? '#ffe5b4'
-                                : '#fdd5d5',
+                              ? '#ffe5b4'
+                              : '#fdd5d5',
                           color:
                             row.status === 'ACTIVE'
                               ? '#008000'
                               : row.status === 'PENDING_VERIFICATION'
-                                ? '#d2691e'
-                                : '#ff0000',
+                              ? '#d2691e'
+                              : '#ff0000',
                           border: `1px solid ${
                             row.status === 'ACTIVE'
                               ? '#008000'
                               : row.status === 'PENDING_VERIFICATION'
-                                ? '#d2691e'
-                                : '#ff0000'
+                              ? '#d2691e'
+                              : '#ff0000'
                           }`,
                           borderRadius: '5px',
                           textAlign: 'center',
@@ -385,11 +384,21 @@ const UserManagement = (): JSX.Element => {
                         <DeleteIcon
                           sx={{
                             fontSize: '18px',
-                            color: 'red',
-                            cursor: 'pointer',
-                            '&:hover': {color: 'darkred'}
+                            color: row.status == 'REMOVED' ? 'gray' : 'red',
+                            cursor:
+                              row.status == 'REMOVED'
+                                ? 'not-allowed'
+                                : 'pointer',
+                            '&:hover': {
+                              color:
+                                row.status == 'REMOVED' ? 'gray' : 'darkred'
+                            }
                           }}
-                          onClick={() => handleOpenRemoveUser(row)}
+                          onClick={() => {
+                            if (!(row.status == 'REMOVED')) {
+                              handleOpenRemoveUser(row);
+                            }
+                          }}
                         />
                       </Tooltip>
                     </Box>

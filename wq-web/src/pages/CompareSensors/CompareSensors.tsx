@@ -14,19 +14,86 @@ import {
   MenuItem,
   Select,
   SelectChangeEvent,
-  Box
-} from '@mui/material';
-import TablePaginationActions from '@mui/material/TablePagination/TablePaginationActions';
-import React from 'react';
-import {useState} from 'react';
+  Box,
+} from "@mui/material";
+import TablePaginationActions from "@mui/material/TablePagination/TablePaginationActions";
+import React, { useContext, useEffect } from "react";
+import { useState } from "react";
+import { apiRequest } from "../Dashboard/services/api";
+import DASHBOARD_API_ENDPOINTS from "../Dashboard/services/config";
+import { AuthContext } from "../../components/auth/AuthProvider";
 
 const CompareSensors = (): JSX.Element => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [age, setAge] = React.useState('');
+  const [dropdownValue, setDropdownValue] = React.useState("meewatura");
+  const [sensorData, setSensorData] = useState<any[]>([]);
+  const authContext = useContext(AuthContext);
+  const token: string | undefined = authContext?.token;
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await apiRequest<Record<number, number>>(
+          "GET",
+          DASHBOARD_API_ENDPOINTS.FETCH_MODBUS_DATA,
+          token
+        );
+
+        if (data) {
+          const formattedData = [
+            {
+              name: "Turbidity",
+              value: data[5001] || 0,
+              unit: "NTU",
+              status: "Active",
+            },
+            {
+              name: "pH",
+              value: data[5002] || 0,
+              unit: "pH",
+              status: "Active",
+            },
+            {
+              name: "Conductivity",
+              value: data[5003] || 0,
+              unit: "µS/cm",
+              status: "Active",
+            },
+            {
+              name: "Chlorine Usage",
+              value: data[5004] || 0,
+              unit: "mg/L",
+              status: "Active",
+            },
+            {
+              name: "PAC Usage",
+              value: data[505] || 0,
+              unit: "mg/L",
+              status: "Active",
+            },
+            {
+              name: "Lime Usage",
+              value: data[5006] || 0,
+              unit: "kg/m³",
+              status: "Active",
+            },
+          ];
+          setSensorData(formattedData);
+        }
+      } catch (error) {
+        console.error("Error fetching Modbus data:", error);
+      }
+    };
+
+    fetchData();
+    const interval = setInterval(fetchData, 3000);
+
+    return () => clearInterval(interval);
+  }, [token]);
 
   const handleChange = (event: SelectChangeEvent) => {
-    setAge(event.target.value as string);
+    setDropdownValue(event.target.value as string);
   };
 
   const rows = [
@@ -77,14 +144,14 @@ const CompareSensors = (): JSX.Element => {
               <Select
                 labelId="demo-simple-select-label"
                 id="demo-simple-select"
-                value={age}
+                value={dropdownValue}
                 label="Age"
                 onChange={handleChange}
                 sx={{height: 50, width: 200}}
               >
-                <MenuItem value={10}>Western - Production</MenuItem>
-                <MenuItem value={20}>Western - Central</MenuItem>
-                <MenuItem value={30}>Sabaragamuwa</MenuItem>
+                <MenuItem value={"meewatura"}>
+                  Meewatura Water Treatment Plant
+                </MenuItem>
               </Select>
             </FormControl>
           </Box>
@@ -93,12 +160,6 @@ const CompareSensors = (): JSX.Element => {
               <TableRow>
                 <TableCell sx={{fontWeight: 'bold', fontSize: '0.9rem'}}>
                   Sensor
-                </TableCell>
-                <TableCell
-                  sx={{fontWeight: 'bold', fontSize: '0.9rem'}}
-                  align="center"
-                >
-                  Type
                 </TableCell>
                 <TableCell
                   sx={{fontWeight: 'bold', fontSize: '0.9rem'}}
@@ -122,13 +183,13 @@ const CompareSensors = (): JSX.Element => {
             </TableHead>
             <TableBody>
               {(rowsPerPage > 0
-                ? rows.slice(
+                ? sensorData.slice(
                     page * rowsPerPage,
                     page * rowsPerPage + rowsPerPage
                   )
-                : rows
-              ).map((row) => (
-                <TableRow key={row.name}>
+                : sensorData
+              ).map((row, index) => (
+                <TableRow key={index}>
                   <TableCell
                     component="th"
                     scope="row"
@@ -136,23 +197,18 @@ const CompareSensors = (): JSX.Element => {
                   >
                     {row.name}
                   </TableCell>
+
                   <TableCell
                     sx={{fontSize: '0.8rem', width: 160}}
                     align="center"
                   >
-                    {row.calories}
+                    {row.value}
                   </TableCell>
                   <TableCell
                     sx={{fontSize: '0.8rem', width: 160}}
                     align="center"
                   >
-                    {row.fat}
-                  </TableCell>
-                  <TableCell
-                    sx={{fontSize: '0.8rem', width: 160}}
-                    align="center"
-                  >
-                    {row.fat}
+                    {row.unit}
                   </TableCell>
                   <TableCell
                     sx={{fontSize: '0.8rem', width: 160}}
@@ -238,14 +294,14 @@ const CompareSensors = (): JSX.Element => {
               <Select
                 labelId="demo-simple-select-label"
                 id="demo-simple-select"
-                value={age}
+                value={dropdownValue}
                 label="Age"
                 onChange={handleChange}
                 sx={{height: 50, width: 200}}
               >
-                <MenuItem value={10}>Western - Production</MenuItem>
-                <MenuItem value={20}>Western - Central</MenuItem>
-                <MenuItem value={30}>Sabaragamuwa</MenuItem>
+                <MenuItem value={"meewatura"}>
+                  Meewatura Water Treatment Plant
+                </MenuItem>
               </Select>
             </FormControl>
           </Box>
@@ -254,12 +310,6 @@ const CompareSensors = (): JSX.Element => {
               <TableRow>
                 <TableCell sx={{fontWeight: 'bold', fontSize: '0.8rem'}}>
                   Sensor
-                </TableCell>
-                <TableCell
-                  sx={{fontWeight: 'bold', fontSize: '0.8rem'}}
-                  align="center"
-                >
-                  Type
                 </TableCell>
                 <TableCell
                   sx={{fontWeight: 'bold', fontSize: '0.8rem'}}
@@ -283,13 +333,13 @@ const CompareSensors = (): JSX.Element => {
             </TableHead>
             <TableBody>
               {(rowsPerPage > 0
-                ? rows.slice(
+                ? sensorData.slice(
                     page * rowsPerPage,
                     page * rowsPerPage + rowsPerPage
                   )
-                : rows
-              ).map((row) => (
-                <TableRow key={row.name}>
+                : sensorData
+              ).map((row, index) => (
+                <TableRow key={index}>
                   <TableCell
                     component="th"
                     scope="row"
@@ -297,23 +347,18 @@ const CompareSensors = (): JSX.Element => {
                   >
                     {row.name}
                   </TableCell>
+
                   <TableCell
                     sx={{fontSize: '0.8rem', width: 160}}
                     align="center"
                   >
-                    {row.calories}
+                    {row.value}
                   </TableCell>
                   <TableCell
                     sx={{fontSize: '0.8rem', width: 160}}
                     align="center"
                   >
-                    {row.fat}
-                  </TableCell>
-                  <TableCell
-                    sx={{fontSize: '0.8rem', width: 160}}
-                    align="center"
-                  >
-                    {row.fat}
+                    {row.unit}
                   </TableCell>
                   <TableCell
                     sx={{fontSize: '0.8rem', width: 160}}
