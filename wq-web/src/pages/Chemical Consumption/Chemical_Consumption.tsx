@@ -17,9 +17,9 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import Biotech from '@mui/icons-material/Biotech';
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Opacity, Science } from "@mui/icons-material";
+import { Opacity, Science, Print } from "@mui/icons-material";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 40 },
@@ -27,46 +27,34 @@ const fadeInUp = {
 };
 
 const Chemical_Consumption = () => {
-  interface UsageData {
-    Turbidity: number;
-    PH: number;
-    Conductivity: number;
-  }
-
   interface FuturePredictionData {
-    predicted_water_production: number;
-    predicted_conductivity: number;
-    predicted_ph: number;
-    predicted_turbidity: number;
     chlorine_usage: number;
     pac_usage: number;
     lime_usage: number;
   }
 
-  const [lastUsage, setLastUsage] = useState<UsageData[]>([]);
-  const [chlorine_usage, setchlorine_usage] = useState("");
-  const [lime_usage, setlime_usage] = useState("");
-  const [pac_usage, setpac_usage] = useState("");
+  const [chemicalUsage, setChemicalUsage] = useState<FuturePredictionData>({
+    chlorine_usage: 0,
+    pac_usage: 0,
+    lime_usage: 0
+  });
+
   const [selectedDate, setSelectedDate] = useState("");
-  const [futurePrediction, setfuturePrediction] = useState<FuturePredictionData | null>(null);
-  const [futureview, setfutureview] = useState(false);
+  const [title, setTitle] = useState("Daily Predicted Chemical Usage");
+  const [history, setHistory] = useState<(FuturePredictionData & { date: string })[]>([]);
+  const reportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    axios.get("http://localhost:8080/api/predict").then((res) => {
-      setchlorine_usage(res.data.chlorine_usage);
-      setlime_usage(res.data.lime_usage);
-      setpac_usage(res.data.pac_usage);
-
-      axios.get("http://localhost:8080/api/lastdaysusages")
-        .then((res) => setLastUsage(res.data))
-        .catch((err) => console.log(err));
-    }).catch((err) => console.log(err));
+    axios.get("http://localhost:8080/api/predict")
+      .then((res) => {
+        setChemicalUsage({
+          chlorine_usage: res.data.chlorine_usage,
+          pac_usage: res.data.pac_usage,
+          lime_usage: res.data.lime_usage
+        });
+      })
+      .catch((err) => console.log(err));
   }, []);
-
-  useEffect(() => {
-  console.log("Last Usage Data:", lastUsage);
-}, [lastUsage]);
-
 
   const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedDate(event.target.value);
@@ -96,35 +84,80 @@ const Chemical_Consumption = () => {
 
       axios.post("http://localhost:8080/api/future-predict", dataToSend)
         .then((res) => {
-          setfuturePrediction(res.data);
-          setfutureview(true);
+          const newPrediction = {
+            chlorine_usage: res.data.chlorine_usage,
+            pac_usage: res.data.pac_usage,
+            lime_usage: res.data.lime_usage
+          };
+          setChemicalUsage(newPrediction);
+          setTitle(`Chemical Usage for ${selectedDate}`);
+
+          setHistory(prev => [
+            ...prev,
+            {
+              date: selectedDate,
+              ...newPrediction
+            }
+          ]);
         })
         .catch((err) => console.log(err));
     }).catch((err) => console.log(err));
   };
 
+  const handlePrint = () => {
+    if (reportRef.current) {
+      const printContents = reportRef.current.innerHTML;
+      const win = window.open("", "_blank");
+      win?.document.write(`
+        <html>
+          <head>
+            <title>Chemical Usage Report</title>
+            <style>
+              body { font-family: Arial, sans-serif; padding: 20px; }
+              table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+              th, td { border: 1px solid #888; padding: 8px; text-align: center; }
+              th { background-color: #f0f0f0; }
+              h2 { text-align: center; }
+            </style>
+          </head>
+          <body>
+            ${printContents}
+          </body>
+        </html>
+      `);
+      win?.document.close();
+      win?.print();
+    }
+  };
+
+  const chemicalData = [
+    {
+      label: "Chlorine Usage (Kg)",
+      value: chemicalUsage.chlorine_usage,
+      icon: <Biotech sx={{ fontSize: 20, color: "teal" }} />
+    },
+    {
+      label: "PAC Usage (Kg)",
+      value: chemicalUsage.pac_usage,
+      icon: <Science sx={{ fontSize: 20, color: "teal" }} />
+    },
+    {
+      label: "Lime Usage (Kg)",
+      value: chemicalUsage.lime_usage,
+      icon: <Opacity sx={{ fontSize: 20, color: "teal" }} />
+    }
+  ];
+
   return (
     <Box sx={{ px: 4, py: 3 }}>
       <motion.div initial="hidden" animate="visible" variants={fadeInUp}>
-        <Typography variant="h5" sx={{ fontSize: 18, fontWeight: "bold", textAlign: "center", mt: 5 }}>
-        Daily Predicted Chemical Usage
+        <Typography variant="h5" sx={{ fontSize: 20, fontWeight: "bold", textAlign: "center", mt: 5 }}>
+          {title}
         </Typography>
       </motion.div>
 
       <Grid container spacing={3} justifyContent="center" sx={{ mt: 2 }}>
-        {[{
-          label: "Chlorine Usage",
-          value: chlorine_usage,
-          icon: <Biotech sx={{ fontSize: 20, color: "teal" }} />
-        }, {
-          label: "PAC Usage",
-          value: pac_usage,
-          icon: <Science sx={{ fontSize: 20, color: "teal" }} />
-        }, {
-          label: "Lime Usage",
-          value: lime_usage,
-          icon: <Opacity sx={{ fontSize: 20, color: "teal" }} />
-        }].map((item, i) => (
+        {chemicalData.map((item, i) => (
           <Grid item key={i} xs={12} sm={6} md={4}>
             <motion.div whileHover={{ scale: 1.05 }}>
               <Card sx={{ width: "100%", textAlign: "center", p: 2, borderRadius: 3, boxShadow: 4 }}>
@@ -134,7 +167,7 @@ const Chemical_Consumption = () => {
                     {item.label}
                   </Typography>
                   <Typography variant="h6" sx={{ fontSize: 24, fontWeight: "bold" }}>
-                    {Number(item.value).toFixed(2)}
+                    {Number(item.value).toFixed(2)} Kg
                   </Typography>
                 </CardContent>
               </Card>
@@ -145,7 +178,6 @@ const Chemical_Consumption = () => {
 
       <Divider sx={{ my: 5 }} />
 
-      {/* Date Picker and Submit */}
       <Grid container spacing={2} justifyContent="center" alignItems="center">
         <Grid item xs={12} sm={4}>
           <TextField
@@ -165,107 +197,55 @@ const Chemical_Consumption = () => {
             onClick={handleSubmit}
             sx={{ height: 56, minWidth: 160 }}
           >
-            Predict Chemical Usage
+            Predict Usage
           </Button>
+        </Grid>
+        <Grid item xs={12} sm="auto">
         </Grid>
       </Grid>
 
-      {/* Future Prediction Cards and Table */}
-      {futureview && futurePrediction && (
-        <>
-          <Typography variant="h5" sx={{ fontSize: 18, textAlign: "center", mt: 5, fontWeight: "bold" }}>
-            Chemical Usage for {selectedDate}
+      {history.length > 0 && (
+        <Box ref={reportRef}>
+          <Divider sx={{ my: 5 }} />
+          <Grid item xs={12}>
+            <Grid container justifyContent="flex-start">
+          <Button
+          variant="outlined"
+          color="primary"
+          size="small"
+          onClick={handlePrint}
+          startIcon={<Print />}
+          >
+            </Button>
+            </Grid>
+            </Grid>
+          <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2 }}>
+            Prediction Search Report
           </Typography>
 
-          <Grid container spacing={3} justifyContent="center" sx={{ mt: 2 }}>
-            {[{
-              label: "Chlorine Usage",
-              value: futurePrediction.chlorine_usage,
-              icon: <Biotech sx={{ fontSize: 20, color: "teal" }} />
-            }, {
-              label: "PAC Usage",
-              value: futurePrediction.pac_usage,
-              icon: <Science sx={{ fontSize: 20, color: "teal" }} />
-            }, {
-              label: "Lime Usage",
-              value: futurePrediction.lime_usage,
-              icon: <Opacity sx={{ fontSize: 20, color: "teal" }} />
-            }].map((item, i) => (
-              <Grid item key={i} xs={12} sm={6} md={4}>
-                <motion.div whileHover={{ scale: 1.05 }}>
-                  <Card sx={{ textAlign: "center", p: 2, borderRadius: 3, boxShadow: 4 }}>
-                    <CardContent>
-                      {item.icon}
-                      <Typography variant="subtitle1" sx={{ fontWeight: "bold", mt: 1 }}>
-                        {item.label}
-                      </Typography>
-                      <Typography variant="h6" sx={{ fontSize: 24, fontWeight: "bold" }}>
-                        {Number(item.value).toFixed(2)}
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              </Grid>
-            ))}
-          </Grid>
-
-          {/* Table for predicted parameters */}
-          <Typography
-  variant="h6"
-  sx={{ fontSize: 18, textAlign: "center", mt: 4, fontWeight: "bold", display: "flex" }}
->
-  Predicted Treated Water Quality Parameters
-</Typography>
-
-<TableContainer component={Paper} sx={{ mt: 2, mx: "auto", width: "100%", maxWidth: "100%" }}>
-  <Table>
-    <TableHead>
-      <TableRow>
-        <TableCell align="center" sx={{ width: "50%" }}>
-          <b>Parameter</b>
-        </TableCell>
-        <TableCell align="center" sx={{ width: "50%" }}>
-          <b>Value</b>
-        </TableCell>
-      </TableRow>
-    </TableHead>
-    <TableBody>
-      <TableRow>
-        <TableCell align="center" sx={{ width: "50%" }}>
-          Water Production
-        </TableCell>
-        <TableCell align="center" sx={{ width: "50%" }}>
-          {futurePrediction.predicted_water_production.toFixed(2)}
-        </TableCell>
-      </TableRow>
-      <TableRow>
-        <TableCell align="center" sx={{ width: "50%" }}>
-          Conductivity
-        </TableCell>
-        <TableCell align="center" sx={{ width: "50%" }}>
-          {futurePrediction.predicted_conductivity.toFixed(2)}
-        </TableCell>
-      </TableRow>
-      <TableRow>
-        <TableCell align="center" sx={{ width: "50%" }}>
-          pH
-        </TableCell>
-        <TableCell align="center" sx={{ width: "50%" }}>
-          {futurePrediction.predicted_ph.toFixed(2)}
-        </TableCell>
-      </TableRow>
-      <TableRow>
-        <TableCell align="center" sx={{ width: "50%" }}>
-          Turbidity
-        </TableCell>
-        <TableCell align="center" sx={{ width: "50%" }}>
-          {futurePrediction.predicted_turbidity.toFixed(2)}
-        </TableCell>
-      </TableRow>
-    </TableBody>
-  </Table>
-</TableContainer>
-        </>
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell><strong>Date</strong></TableCell>
+                  <TableCell><strong>Chlorine (Kg)</strong></TableCell>
+                  <TableCell><strong>PAC (Kg)</strong></TableCell>
+                  <TableCell><strong>Lime (Kg)</strong></TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {history.map((row, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{row.date}</TableCell>
+                    <TableCell>{row.chlorine_usage.toFixed(2)}</TableCell>
+                    <TableCell>{row.pac_usage.toFixed(2)}</TableCell>
+                    <TableCell>{row.lime_usage.toFixed(2)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Box>
       )}
     </Box>
   );
