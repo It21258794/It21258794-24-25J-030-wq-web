@@ -19,6 +19,10 @@ interface AddTestDialogProps {
   onTestAdded: () => void;
 }
 
+interface ErrorResponse {
+  message?: string;
+}
+
 const AddTestDialog: React.FC<AddTestDialogProps> = ({ open, onClose, onTestAdded }) => {
   const [testName, setTestName] = useState("");
   const [testValue, setTestValue] = useState("");
@@ -28,7 +32,7 @@ const AddTestDialog: React.FC<AddTestDialogProps> = ({ open, onClose, onTestAdde
   const [alertSeverity, setAlertSeverity] = useState<"error" | "warning" | "info" | "success">("info");
 
   const authcontext = useContext(AuthContext);
-  const token = authcontext?.token || ""; // Provide fallback empty string
+  const token = authcontext?.token || "";
 
   const handleConfirmClick = async () => {
     if (!testName || !testValue || !testDescription) {
@@ -57,7 +61,7 @@ const AddTestDialog: React.FC<AddTestDialogProps> = ({ open, onClose, onTestAdde
       onTestAdded();
       setTimeout(onClose, 1500);
     } catch (error) {
-      const axiosError = error as AxiosError;
+      const axiosError = error as AxiosError<ErrorResponse>;
       setAlertSeverity("error");
       setAlertMessage(
         axiosError.response?.data?.message || 
