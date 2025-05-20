@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Box, Grid, TextField, Button, Typography, Paper, Snackbar, Alert } from "@mui/material";
-import { Table, TableHead, TableRow, TableCell, TableBody, TableContainer, TableFooter, TablePagination, Chip, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent } from "@mui/material";
+import { Table, TableHead, TableRow, TableCell, TableBody,  TableFooter, TablePagination } from "@mui/material";
 import { getStepValuesByStepId, getSteps, updateStepValue, getAllStepValues } from "./server/flow-customisationAPI";
 import { AuthContext } from "../../components/auth/AuthProvider";
 import TablePaginationActions from "@mui/material/TablePagination/TablePaginationActions";
@@ -44,7 +44,7 @@ const StepView: React.FC = () => {
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertSeverity, setAlertSeverity] = useState<"error" | "warning" | "info" | "success">();
-  const [pendingSubmissions, setPendingSubmissions] = useState<Set<number>>(new Set());
+  // const [pendingSubmissions, setPendingSubmissions] = useState<Set<number>>(new Set());
   const [searchDate, setSearchDate] = useState<string>("");
   const [stepName, setStepName] = useState<string>("");
   const [stepValueMap, setStepValueMap] = useState<Map<number, StepValue>>(new Map());
