@@ -34,17 +34,27 @@ const AddStepDialog: React.FC<AddStepDialogProps> = ({
   >("info");
 
   const authcontext = useContext(AuthContext);
-  const token: string | undefined = authcontext?.token;
+  const token = authcontext?.token || ""; // Provide empty string as fallback
 
   useEffect(() => {
     const fetchSteps = async () => {
       try {
+        if (!token) {
+          setAlertSeverity("error");
+          setAlertMessage("Authentication token is missing.");
+          setOpenSnackbar(true);
+          return;
+        }
+        
         const steps = await getSteps(token);
         const maxOrder = steps.reduce((max: number, step: { stepOrder: number }) => 
           step.stepOrder > max ? step.stepOrder : max, 0);
         setStepOrder(maxOrder + 1); 
       } catch (error) {
         console.error("Error fetching steps:", error);
+        setAlertSeverity("error");
+        setAlertMessage("Failed to fetch existing steps.");
+        setOpenSnackbar(true);
       }
     };
 
@@ -61,6 +71,13 @@ const AddStepDialog: React.FC<AddStepDialogProps> = ({
       return;
     }
 
+    if (!token) {
+      setAlertSeverity("error");
+      setAlertMessage("Authentication token is missing.");
+      setOpenSnackbar(true);
+      return;
+    }
+
     const payload = {
       stepName,
       stepOrder, 
@@ -68,7 +85,7 @@ const AddStepDialog: React.FC<AddStepDialogProps> = ({
     };
 
     try {
-      await createStep(token || "", payload);
+      await createStep(token, payload);
       setAlertSeverity("success");
       setAlertMessage("Step added successfully.");
       setOpenSnackbar(true);
