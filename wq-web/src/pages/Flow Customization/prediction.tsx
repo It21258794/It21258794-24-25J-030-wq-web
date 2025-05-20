@@ -20,7 +20,7 @@ const PredictionForm: React.FC = () => {
   const [alertSeverity, setAlertSeverity] = useState<"error" | "warning" | "info" | "success">();
 
   const authcontext = React.useContext(AuthContext);
-  const token: string | undefined = authcontext?.token;
+  const token = authcontext?.token || ""; // Provide fallback empty string
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -29,6 +29,21 @@ const PredictionForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate inputs
+    if (!inputValues.ph || !inputValues.turbidity || !inputValues.conductivity) {
+      setAlertMessage("Please fill in all fields");
+      setAlertSeverity("error");
+      setOpenSnackbar(true);
+      return;
+    }
+
+    if (!token) {
+      setAlertMessage("Authentication token is missing");
+      setAlertSeverity("error");
+      setOpenSnackbar(true);
+      return;
+    }
 
     try {
       const response = await predictTreatedWater(
@@ -88,8 +103,6 @@ const PredictionForm: React.FC = () => {
           >
             Last Stage Values Prediction
           </Typography>
-          
-          
           
           <Box sx={{
             gap: 2,
@@ -151,17 +164,17 @@ const PredictionForm: React.FC = () => {
                 >
                   Predict
                 </Button>
-            <Button
-              variant="contained"
-              onClick={handleBack}
-              sx={{
-                backgroundColor: "#102D4D",
-                fontSize: "12px",
-                height: "30px",
-              }}
-            >
-              Back
-            </Button>
+                <Button
+                  variant="contained"
+                  onClick={handleBack}
+                  sx={{
+                    backgroundColor: "#102D4D",
+                    fontSize: "12px",
+                    height: "30px",
+                  }}
+                >
+                  Back
+                </Button>
               </Box>
             </Box>
           </Box>
