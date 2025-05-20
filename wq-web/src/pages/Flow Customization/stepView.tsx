@@ -47,7 +47,6 @@ const StepView: React.FC = () => {
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertSeverity, setAlertSeverity] = useState<"error" | "warning" | "info" | "success">();
-  const [pendingSubmissions, setPendingSubmissions] = useState<Set<number>>(new Set());
   const [searchDate, setSearchDate] = useState<string>("");
   const [stepName, setStepName] = useState<string>("");
   const [stepValueMap, setStepValueMap] = useState<Map<number, StepValue>>(new Map());
@@ -181,8 +180,6 @@ const StepView: React.FC = () => {
       return;
     }
 
-    setPendingSubmissions((prev) => new Set([...prev, id]));
-
     try {
       const stepValue = stepValueMap.get(id);
 
@@ -238,12 +235,6 @@ const StepView: React.FC = () => {
       setAlertSeverity("error");
       setAlertMessage(`Failed to update value for ${testName}. Please try again.`);
       setOpenSnackbar(true);
-    } finally {
-      setPendingSubmissions((prev) => {
-        const newSet = new Set(prev);
-        newSet.delete(id);
-        return newSet;
-      });
     }
   };
 
