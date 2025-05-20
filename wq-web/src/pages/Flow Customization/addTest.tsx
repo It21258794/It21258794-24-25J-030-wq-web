@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 import { addTest } from "./server/flow-customisationAPI";
 import { AuthContext } from "../../components/auth/AuthProvider";
+import { AxiosError } from 'axios';
 
 interface AddTestDialogProps {
   open: boolean;
@@ -27,12 +28,19 @@ const AddTestDialog: React.FC<AddTestDialogProps> = ({ open, onClose, onTestAdde
   const [alertSeverity, setAlertSeverity] = useState<"error" | "warning" | "info" | "success">("info");
 
   const authcontext = useContext(AuthContext);
-  const token = authcontext?.token;
+  const token = authcontext?.token || ""; // Provide fallback empty string
 
   const handleConfirmClick = async () => {
     if (!testName || !testValue || !testDescription) {
       setAlertSeverity("error");
       setAlertMessage("Please fill in all fields.");
+      setOpenSnackbar(true);
+      return;
+    }
+
+    if (!token) {
+      setAlertSeverity("error");
+      setAlertMessage("Authentication token is missing.");
       setOpenSnackbar(true);
       return;
     }
@@ -49,8 +57,13 @@ const AddTestDialog: React.FC<AddTestDialogProps> = ({ open, onClose, onTestAdde
       onTestAdded();
       setTimeout(onClose, 1500);
     } catch (error) {
+      const axiosError = error as AxiosError;
       setAlertSeverity("error");
-      setAlertMessage(error instanceof Error ? error.message : "An unexpected error occurred.");
+      setAlertMessage(
+        axiosError.response?.data?.message || 
+        axiosError.message || 
+        "An unexpected error occurred."
+      );
       setOpenSnackbar(true);
     }
   };
@@ -112,7 +125,11 @@ const AddTestDialog: React.FC<AddTestDialogProps> = ({ open, onClose, onTestAdde
         onClose={handleSnackbarClose}
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
-        <Alert onClose={handleSnackbarClose} severity={alertSeverity}>
+        <Alert 
+          onClose={handleSnackbarClose} 
+          severity={alertSeverity}
+          sx={{ fontFamily: "Poppins, sans-serif" }}
+        >
           {alertMessage}
         </Alert>
       </Snackbar>
