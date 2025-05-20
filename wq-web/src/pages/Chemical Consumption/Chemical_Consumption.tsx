@@ -5,7 +5,6 @@ import {
   Grid,
   TextField,
   Typography,
-  Divider,
   Box,
   Table,
   TableBody,
@@ -90,8 +89,7 @@ const Chemical_Consumption = () => {
             lime_usage: res.data.lime_usage
           };
           setChemicalUsage(newPrediction);
-          setTitle(`Chemical Usage for ${selectedDate}`);
-
+          setTitle(`Chemical Usage for\n${selectedDate}`);
           setHistory(prev => [
             ...prev,
             {
@@ -151,34 +149,21 @@ const Chemical_Consumption = () => {
   return (
     <Box sx={{ px: 4, py: 3 }}>
       <motion.div initial="hidden" animate="visible" variants={fadeInUp}>
-        <Typography variant="h5" sx={{ fontSize: 20, fontWeight: "bold", textAlign: "center", mt: 5 }}>
+        <Typography
+          variant="h5"
+          sx={{
+            fontSize: 20,
+            fontWeight: "bold",
+            textAlign: "center",
+            mt: 5,
+            whiteSpace: "pre-line"
+          }}
+        >
           {title}
         </Typography>
       </motion.div>
 
-      <Grid container spacing={3} justifyContent="center" sx={{ mt: 2 }}>
-        {chemicalData.map((item, i) => (
-          <Grid item key={i} xs={12} sm={6} md={4}>
-            <motion.div whileHover={{ scale: 1.05 }}>
-              <Card sx={{ width: "100%", textAlign: "center", p: 2, borderRadius: 3, boxShadow: 4 }}>
-                <CardContent>
-                  {item.icon}
-                  <Typography variant="subtitle1" sx={{ fontWeight: "bold", mt: 1 }}>
-                    {item.label}
-                  </Typography>
-                  <Typography variant="h6" sx={{ fontSize: 24, fontWeight: "bold" }}>
-                    {Number(item.value).toFixed(2)} Kg
-                  </Typography>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </Grid>
-        ))}
-      </Grid>
-
-      <Divider sx={{ my: 5 }} />
-
-      <Grid container spacing={2} justifyContent="center" alignItems="center">
+      <Grid container spacing={2} justifyContent="left" alignItems="center" sx={{ mt: 6 }}>
         <Grid item xs={12} sm={4}>
           <TextField
             fullWidth
@@ -200,28 +185,44 @@ const Chemical_Consumption = () => {
             Predict Usage
           </Button>
         </Grid>
-        <Grid item xs={12} sm="auto">
-        </Grid>
+      </Grid>
+
+      <Grid container spacing={3} justifyContent="center" sx={{ mt: 2 }}>
+        {chemicalData.map((item, i) => (
+          <Grid item key={i} xs={12} sm={6} md={4}>
+            <motion.div whileHover={{ scale: 1.05 }}>
+              <Card sx={{ width: "100%", textAlign: "center", p: 2, borderRadius: 3, boxShadow: 4 }}>
+                <CardContent>
+                  {item.icon}
+                  <Typography variant="subtitle1" sx={{ fontWeight: "bold", mt: 1 }}>
+                    {item.label}
+                  </Typography>
+                  <Typography variant="h6" sx={{ fontSize: 24, fontWeight: "bold" }}>
+                    {Number(item.value).toFixed(2)} Kg
+                  </Typography>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </Grid>
+        ))}
       </Grid>
 
       {history.length > 0 && (
         <Box ref={reportRef}>
-          <Divider sx={{ my: 5 }} />
-          <Grid item xs={12}>
-            <Grid container justifyContent="flex-start">
-          <Button
-          variant="outlined"
-          color="primary"
-          size="small"
-          onClick={handlePrint}
-          startIcon={<Print />}
-          >
-            </Button>
-            </Grid>
-            </Grid>
-          <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2 }}>
+          <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2, mt: 5, textAlign: "center" }}>
             Prediction Search Report
           </Typography>
+
+          <Grid container justifyContent="flex-end" sx={{ mb: 2 }}>
+            <Button
+              variant="outlined"
+              color="primary"
+              size="small"
+              onClick={handlePrint}
+            >
+              Report
+            </Button>
+          </Grid>
 
           <TableContainer component={Paper}>
             <Table>
