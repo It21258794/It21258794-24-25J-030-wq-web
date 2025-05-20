@@ -55,7 +55,6 @@ const Chemical_Consumption = () => {
       .catch((err) => console.log(err));
   }, []);
 
-
   const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedDate(event.target.value);
   };
@@ -90,7 +89,7 @@ const Chemical_Consumption = () => {
             lime_usage: res.data.lime_usage
           };
           setChemicalUsage(newPrediction);
-          setTitle(`Chemical Usage for\n${selectedDate}`);
+          setTitle(`Chemical Usage \n${selectedDate}`);
           setHistory(prev => [
             ...prev,
             {
@@ -133,38 +132,40 @@ const Chemical_Consumption = () => {
     {
       label: "Chlorine Usage (Kg)",
       value: chemicalUsage.chlorine_usage,
-      icon: <Biotech sx={{ fontSize: 20, color: "teal" }} />
+      icon: <Biotech sx={{ fontSize: 60, color: "teal" }} />
     },
     {
       label: "PAC Usage (Kg)",
       value: chemicalUsage.pac_usage,
-      icon: <Science sx={{ fontSize: 20, color: "teal" }} />
+      icon: <Science sx={{ fontSize: 60, color: "teal" }} />
     },
     {
       label: "Lime Usage (Kg)",
       value: chemicalUsage.lime_usage,
-      icon: <Opacity sx={{ fontSize: 20, color: "teal" }} />
+      icon: <Opacity sx={{ fontSize: 60, color: "teal" }} />
     }
   ];
 
   return (
-    <Box sx={{ px: 4, py: 3 }}>
+    <Box sx={{ px: { xs: 2, sm: 6, md: 12 }, py: 3 }}>
       <motion.div initial="hidden" animate="visible" variants={fadeInUp}>
         <Typography
-          variant="h5"
-          sx={{
-            fontSize: 20,
-            fontWeight: "bold",
-            textAlign: "center",
-            mt: 5,
-            whiteSpace: "pre-line"
+        variant="h5"
+        sx={{
+          fontSize: 26,
+          fontWeight: "bold",
+          textAlign: "center",
+          mt: 1,
+          whiteSpace: "pre-line",
+          lineHeight: 1.9 // Adjust this value as needed
           }}
-        >
-          {title}
-        </Typography>
+>
+  {title}
+</Typography>
+
       </motion.div>
 
-      <Grid container spacing={2} justifyContent="left" alignItems="center" sx={{ mt: 6 }}>
+      <Grid container spacing={2} justifyContent="center" alignItems="center" sx={{ mt: 6 }}>
         <Grid item xs={12} sm={4}>
           <TextField
             fullWidth
@@ -188,11 +189,24 @@ const Chemical_Consumption = () => {
         </Grid>
       </Grid>
 
-      <Grid container spacing={3} justifyContent="center" sx={{ mt: 2 }}>
+      <Grid container spacing={4} justifyContent="center" sx={{ mt: 2 }}>
         {chemicalData.map((item, i) => (
           <Grid item key={i} xs={12} sm={6} md={4}>
             <motion.div whileHover={{ scale: 1.05 }}>
-              <Card sx={{ width: "100%", textAlign: "center", p: 2, borderRadius: 3, boxShadow: 4 }}>
+              <Card
+                sx={{
+                  width: "100%",
+                  height: 250,
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  textAlign: "center",
+                  borderRadius: 4,
+                  boxShadow: 5,
+                  p: 2
+                }}
+              >
                 <CardContent>
                   {item.icon}
                   <Typography variant="subtitle1" sx={{ fontWeight: "bold", mt: 1 }}>
@@ -210,20 +224,15 @@ const Chemical_Consumption = () => {
 
       {history.length > 0 && (
         <Box ref={reportRef}>
-          <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2, mt: 5, textAlign: "center" }}>
-            Prediction Search Report
-          </Typography>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mt={11} mb={1}>
+            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+              Prediction Search Report
+              </Typography>
+              <Button variant="outlined" color="primary" size="small" onClick={handlePrint}>
+                Report
+                </Button>
+                </Box>
 
-          <Grid container justifyContent="flex-end" sx={{ mb: 2 }}>
-            <Button
-              variant="outlined"
-              color="primary"
-              size="small"
-              onClick={handlePrint}
-            >
-              Report
-            </Button>
-          </Grid>
 
           <TableContainer component={Paper}>
             <Table>
