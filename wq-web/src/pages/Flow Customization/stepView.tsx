@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Box, Grid, TextField, Button, Typography, Paper, Snackbar, Alert } from "@mui/material";
-import { Table, TableHead, TableRow, TableCell, TableBody,  TableFooter, TablePagination } from "@mui/material";
+import { Table, TableHead, TableRow, TableCell, TableBody, TableFooter, TablePagination } from "@mui/material";
 import { getStepValuesByStepId, getSteps, updateStepValue, getAllStepValues } from "./server/flow-customisationAPI";
 import { AuthContext } from "../../components/auth/AuthProvider";
 import TablePaginationActions from "@mui/material/TablePagination/TablePaginationActions";
@@ -17,6 +17,9 @@ interface StepValue {
   chemicalValue?: string;
   valueAddedDate?: string;
   status?: string;
+  date?: string;
+  time?: string;
+  value?: string;
 }
 
 interface Test {
@@ -44,7 +47,7 @@ const StepView: React.FC = () => {
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertSeverity, setAlertSeverity] = useState<"error" | "warning" | "info" | "success">();
-  // const [pendingSubmissions, setPendingSubmissions] = useState<Set<number>>(new Set());
+  const [pendingSubmissions, setPendingSubmissions] = useState<Set<number>>(new Set());
   const [searchDate, setSearchDate] = useState<string>("");
   const [stepName, setStepName] = useState<string>("");
   const [stepValueMap, setStepValueMap] = useState<Map<number, StepValue>>(new Map());
@@ -55,7 +58,7 @@ const StepView: React.FC = () => {
   const navigate = useNavigate();
 
   const authcontext = React.useContext(AuthContext);
-  const token: string | undefined = authcontext?.token;
+  const token = authcontext?.token || "";
 
   useEffect(() => {
     const fetchAllStepValues = async () => {
@@ -84,7 +87,7 @@ const StepView: React.FC = () => {
 
     fetchAllStepValues();
     fetchSteps();
-  }, []);
+  }, [token]);
 
   useEffect(() => {
     const fetchStepDetails = async () => {
@@ -94,24 +97,25 @@ const StepView: React.FC = () => {
           setStepName(step.stepName);
         }
 
-        const stepValues = await getStepValuesByStepId(token, Number(stepId));
-        const valueMap = new Map();
+        const stepValues = await getStepValuesByStepId(token, Number(stepId || "0"));
+        const valueMap = new Map<number, StepValue>();
         stepValues.forEach((value: StepValue) => {
           valueMap.set(value.id, value);
         });
         setStepValueMap(valueMap);
 
         const pastTestsData = stepValues
-          .filter((value: StepValue) => value.value)
+          .filter((value: StepValue) => value.testValue || value.chemicalValue)
           .map((value: StepValue) => ({
+            id: value.id,
             testName: value.testName || value.chemicalName || "Unknown",
             date: value.date,
             time: value.time,
-            value: value.value,
+            value: value.testValue || value.chemicalValue || "",
           }));
 
         const currentTestsData = stepValues
-          .filter((value: StepValue) => !value.value)
+          .filter((value: StepValue) => !value.testValue && !value.chemicalValue)
           .map((value: StepValue) => ({
             id: value.id,
             testName: value.testName || value.chemicalName || "Unknown",
@@ -129,7 +133,7 @@ const StepView: React.FC = () => {
     if (stepId) {
       fetchStepDetails();
     }
-  }, [stepId, steps]);
+  }, [stepId, steps, token]);
 
   const handleInputChange = (id: number, value: string) => {
     setInputValues((prev) => ({
@@ -191,7 +195,7 @@ const StepView: React.FC = () => {
 
       await updateStepValue(
         stepValue.id,
-        Number(stepId),
+        Number(stepId || "0"),
         isTest ? value : null,
         !isTest ? value : null,
         token
@@ -208,7 +212,8 @@ const StepView: React.FC = () => {
 
       const currentTest = currentTests.find((test) => test.id === id);
       if (currentTest) {
-        const updatedTest = {
+        const updatedTest: Test = {
+          id: currentTest.id,
           testName: currentTest.testName,
           date: currentTest.date,
           time: currentTest.time,
@@ -286,35 +291,30 @@ const StepView: React.FC = () => {
   return (
     <Box sx={{ padding: 2, backgroundColor: "#F1F2F7", width: "full", boxSizing: "border-box" }}>
       <Grid item xs={12} md={8}>
-           <Paper 
-                      sx={{ 
-                        padding: 2, 
-                        height: "96%",
-                        backgroundColor: "white",
-                        borderRadius: 3,
-                        boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
-                      }}
-                    >
-
-
-                
-
-<Typography variant="h5" gutterBottom sx={{ fontWeight: "bold", fontSize: "1.2rem" ,textAlign: "center" }}>
-              Add new values - {stepName}
-            </Typography>
-<Box sx={{ position: "absolute", top: 130, right: 50 }}>
-       <Button
-                      variant="contained"
-                      onClick={handleCancelClick}
-                      sx={{
-                        backgroundColor: "#102D4D",
-                        fontSize: "12px",
-                        height: "30px",
-                      }}
-                    >
-                      Back
-                    </Button>
-           
+        <Paper 
+          sx={{ 
+            padding: 2, 
+            height: "96%",
+            backgroundColor: "white",
+            borderRadius: 3,
+            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+          }}
+        >
+          <Typography variant="h5" gutterBottom sx={{ fontWeight: "bold", fontSize: "1.2rem" ,textAlign: "center" }}>
+            Add new values - {stepName}
+          </Typography>
+          <Box sx={{ position: "absolute", top: 130, right: 50 }}>
+            <Button
+              variant="contained"
+              onClick={handleCancelClick}
+              sx={{
+                backgroundColor: "#102D4D",
+                fontSize: "12px",
+                height: "30px",
+              }}
+            >
+              Back
+            </Button>
           </Box>
           <Box sx={{
             gap: 2,
@@ -323,8 +323,6 @@ const StepView: React.FC = () => {
             width: "50%",
             margin: "0 auto",
           }}>
-            
-
             {currentTests.length === 0 ? (
               <Typography variant="body1" sx={{ textAlign: "left" }}>
                 No test or chemical values to add.
@@ -364,180 +362,174 @@ const StepView: React.FC = () => {
                       onChange={(e) => handleInputChange(test.id, e.target.value)}
                     />
 
-<Button
-  variant="contained"
-  size="small"
-  onClick={() => handleConfirmSingleTest(test.id, test.testName)}
-  sx={{
-    backgroundColor: "#102D4D",
-    color: "white",
-    fontSize: "12px",
-    height: "30px",
-    ml: 2,
-  }}
->
-  Confirm
-</Button>
-
+                    <Button
+                      variant="contained"
+                      size="small"
+                      onClick={() => handleConfirmSingleTest(test.id, test.testName)}
+                      sx={{
+                        backgroundColor: "#102D4D",
+                        color: "white",
+                        fontSize: "12px",
+                        height: "30px",
+                        ml: 2,
+                      }}
+                    >
+                      Confirm
+                    </Button>
                   </Box>
                 ))}
               </Box>
             )}
           </Box>
-
         </Paper>
       </Grid>
       <br></br>
       <Grid item xs={12} md={8}>
-           <Paper 
-                      sx={{ 
-                        padding: 2, 
-                        height: "96%",
-                        backgroundColor: "white",
-                        borderRadius: 3,
-                        boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
-                      }}
-                    >
-
-
+        <Paper 
+          sx={{ 
+            padding: 2, 
+            height: "96%",
+            backgroundColor: "white",
+            borderRadius: 3,
+            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+          }}
+        >
           <Box sx={{ display: "flex", alignItems: "center", gap: "10px", justifyContent: "space-between" }}>
-  <Typography variant="h5" gutterBottom sx={{ fontWeight: "bold", fontSize: "1rem" }}>
-    Past Test Values
-  </Typography>
-  
-  <Box sx={{ display: "flex", alignItems: "center", gap: "10px" }}>
-    <TextField
-      type="date"
-      variant="outlined"
-      size="small"
-      value={searchDate}
-      onChange={handleDateChange}
-      inputProps={{
-        max: new Date().toISOString().split('T')[0],
-      }}
-      sx={{
-        width: "250px",
-        backgroundColor: "white",
-        borderRadius: "20px",
-      }}
-      InputProps={{
-        sx: {
-          borderRadius: 3,
-          height: 30,
-          textAlign: "center",
-          fontWeight: "bold",
-          fontSize: "13px",
-          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-            borderColor: "#757575",
-          },
-        },
-      }}
-    />
-    {searchDate && (
-      <Button
-      variant="contained"
-      size="small"
-      onClick={() => setSearchDate("")}
-      sx={{
-        backgroundColor: "#102D4D",
-        color: "white",
-        fontSize: "12px",
-        height: "30px",
-        
-        ml: 2,
-      }}
-    >
-      Clear
-    </Button>
-     
-    )}
-  </Box>
-</Box>
+            <Typography variant="h5" gutterBottom sx={{ fontWeight: "bold", fontSize: "1rem" }}>
+              Past Test Values
+            </Typography>
+            
+            <Box sx={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <TextField
+                type="date"
+                variant="outlined"
+                size="small"
+                value={searchDate}
+                onChange={handleDateChange}
+                inputProps={{
+                  max: new Date().toISOString().split('T')[0],
+                }}
+                sx={{
+                  width: "250px",
+                  backgroundColor: "white",
+                  borderRadius: "20px",
+                }}
+                InputProps={{
+                  sx: {
+                    borderRadius: 3,
+                    height: 30,
+                    textAlign: "center",
+                    fontWeight: "bold",
+                    fontSize: "13px",
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#757575",
+                    },
+                  },
+                }}
+              />
+              {searchDate && (
+                <Button
+                  variant="contained"
+                  size="small"
+                  onClick={() => setSearchDate("")}
+                  sx={{
+                    backgroundColor: "#102D4D",
+                    color: "white",
+                    fontSize: "12px",
+                    height: "30px",
+                    ml: 2,
+                  }}
+                >
+                  Clear
+                </Button>
+              )}
+            </Box>
+          </Box>
 
-              <Table sx={{ minWidth: 500 }} aria-label="custom pagination table">
-                <TableHead>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem" }}>
-                      Stage Name
+          <Table sx={{ minWidth: 500 }} aria-label="custom pagination table">
+            <TableHead>
+              <TableRow>
+                <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem" }}>
+                  Stage Name
+                </TableCell>
+                <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem" }} align="center">
+                  Test/Chemical Name
+                </TableCell>
+                <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem" }} align="center">
+                  Value
+                </TableCell>
+                <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem" }} align="center">
+                  Date
+                </TableCell>
+                <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem" }} align="center">
+                  Time
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {(rowsPerPage > 0
+                ? filteredStepValues.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                : filteredStepValues
+              ).map((stepValue, index) => {
+                const isTest = !!stepValue.testName;
+                const displayValue = isTest ? stepValue.testValue : stepValue.chemicalValue;
+                const { date, time } = formatDateTime(stepValue.valueAddedDate);
+                const stepName = getStepNameById(stepValue.stepId);
+
+                return (
+                  <TableRow key={index}>
+                    <TableCell sx={{ fontSize: "0.8rem" }}>
+                      {stepName}
                     </TableCell>
-                    <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem" }} align="center">
-                      Test/Chemical Name
+                    <TableCell sx={{ fontSize: "0.8rem", width: 250 }} align="center">
+                      {stepValue.testName || stepValue.chemicalName || "Unknown"}
                     </TableCell>
-                    <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem" }} align="center">
-                      Value
+                    <TableCell sx={{ fontSize: "0.8rem", width: 250 }} align="center">
+                      {displayValue}
                     </TableCell>
-                    <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem" }} align="center">
-                      Date
+                    <TableCell sx={{ fontSize: "0.8rem", width: 250 }} align="center">
+                      {date}
                     </TableCell>
-                    <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem" }} align="center">
-                      Time
+                    <TableCell sx={{ fontSize: "0.8rem", width: 250 }} align="center">
+                      {time}
                     </TableCell>
                   </TableRow>
-                </TableHead>
-                <TableBody>
-                  {(rowsPerPage > 0
-                    ? filteredStepValues.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    : filteredStepValues
-                  ).map((stepValue, index) => {
-                    const isTest = !!stepValue.testName;
-                    const displayValue = isTest ? stepValue.testValue : stepValue.chemicalValue;
-                    const { date, time } = formatDateTime(stepValue.valueAddedDate);
-                    const stepName = getStepNameById(stepValue.stepId);
-
-                    return (
-                      <TableRow key={index}>
-                        <TableCell sx={{ fontSize: "0.8rem" }}>
-                          {stepName}
-                        </TableCell>
-                        <TableCell sx={{ fontSize: "0.8rem", width: 250 }} align="center">
-                          {stepValue.testName || stepValue.chemicalName || "Unknown"}
-                        </TableCell>
-                        <TableCell sx={{ fontSize: "0.8rem", width: 250 }} align="center">
-                          {displayValue}
-                        </TableCell>
-                        <TableCell sx={{ fontSize: "0.8rem", width: 250 }} align="center">
-                          {date}
-                        </TableCell>
-                        <TableCell sx={{ fontSize: "0.8rem", width: 250 }} align="center">
-                          {time}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                  {emptyRows > 0 && (
-                    <TableRow style={{ height: 53 * emptyRows }}>
-                      <TableCell colSpan={5} />
-                    </TableRow>
-                  )}
-                </TableBody>
-                <TableFooter>
-                  <TableRow>
-                    <TablePagination
-                      sx={{
-                        ".MuiTablePagination-toolbar": { fontSize: "0.7rem" },
-                        ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows": {
-                          fontSize: "0.7rem",
-                          fontWeight: 700,
-                          color: "grey",
-                        },
-                        ".MuiTablePagination-select": {
-                          fontSize: "0.7rem",
-                          fontWeight: 700,
-                          color: "grey",
-                        },
-                      }}
-                      rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
-                      colSpan={5}
-                      count={filteredStepValues.length}
-                      rowsPerPage={rowsPerPage}
-                      page={page}
-                      onPageChange={handleChangePage}
-                      onRowsPerPageChange={handleChangeRowsPerPage}
-                      ActionsComponent={TablePaginationActions}
-                    />
-                  </TableRow>
-                </TableFooter>
-              </Table>
+                );
+              })}
+              {emptyRows > 0 && (
+                <TableRow style={{ height: 53 * emptyRows }}>
+                  <TableCell colSpan={5} />
+                </TableRow>
+              )}
+            </TableBody>
+            <TableFooter>
+              <TableRow>
+                <TablePagination
+                  sx={{
+                    ".MuiTablePagination-toolbar": { fontSize: "0.7rem" },
+                    ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows": {
+                      fontSize: "0.7rem",
+                      fontWeight: 700,
+                      color: "grey",
+                    },
+                    ".MuiTablePagination-select": {
+                      fontSize: "0.7rem",
+                      fontWeight: 700,
+                      color: "grey",
+                    },
+                  }}
+                  rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
+                  colSpan={5}
+                  count={filteredStepValues.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                  ActionsComponent={TablePaginationActions}
+                />
+              </TableRow>
+            </TableFooter>
+          </Table>
         </Paper>
       </Grid>
 
