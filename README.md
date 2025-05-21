@@ -166,4 +166,12 @@ For more details, refer to the [Conventional Commits Specification](https://www.
 >- ui enhanced in user management and water quality prediction parts
 
 
+> [!TIP]
+>https://github.com/It21258794/It21258794-24-25J-030-wq-web/pull/16
+>
+> Flow customization
+> 
+>- feat(flow-customization):Flow customization frontend completed
+
+
 
