@@ -17,6 +17,9 @@ import App from '../App';
 import UserManagement from '../pages/UserManagement/UserManagement';
 import ChangePassword from '../pages/Common/ChangePassword';
 
+import StepView from "../pages/Flow Customization/stepView";
+import Prediction from "../pages/Flow Customization/prediction";
+
 const router = createBrowserRouter([
   {
     path: '/',
@@ -52,6 +55,8 @@ const router = createBrowserRouter([
           },
           {path: 'chemicalConsumption', element: <Chemical_Consumption />},
           {path: 'flowCustomization', element: <Flow_Customization />},
+                    { path: "flow/step/:stepId", element: <StepView /> },
+                    { path: "flow/prediction", element: <Prediction /> },
           {path: 'reports', element: <Reports />},
           {path: 'settings', element: <Settings />},
           {path: 'sensorsDashboard/compare', element: <CompareSensors />},
@@ -62,3 +67,6 @@ const router = createBrowserRouter([
   }
 ]);
 export default router;
+
+
+
