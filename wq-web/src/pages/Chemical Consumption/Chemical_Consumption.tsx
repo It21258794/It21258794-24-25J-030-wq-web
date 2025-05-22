@@ -51,8 +51,7 @@ const Chemical_Consumption = () => {
           pac_usage: res.data.pac_usage,
           lime_usage: res.data.lime_usage
         });
-      })
-      
+      })  
       .catch((err) => console.log(err));
   }, []);
 
