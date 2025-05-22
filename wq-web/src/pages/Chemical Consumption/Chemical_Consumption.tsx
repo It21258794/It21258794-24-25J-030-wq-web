@@ -52,6 +52,7 @@ const Chemical_Consumption = () => {
           lime_usage: res.data.lime_usage
         });
       })
+      
       .catch((err) => console.log(err));
   }, []);
 
