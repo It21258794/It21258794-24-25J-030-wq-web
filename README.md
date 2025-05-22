@@ -1,10 +1,10 @@
 # Water Board Project
 
-Welcome to the Water Board Project! This repository serves as the foundation for a water quality management system that combines cutting-edge technology with intuitive design to provide actionable insights into water quality and chemical consumption.
+This pilot project is a collaborative effort between the Water Board Sri Lanka and JRDC to develop and deploy a comprehensive water quality management system for the Meewathura Water Treatment Plant. The system integrates machine learning and deep learning models for predicting key water quality parameters and chemical consumption, and also forecasts step-wise treated water parameters. It supports real-time monitoring and visualization of sensor data through integration with the existing SCADA system. The goal is to improve water treatment efficiency and ensure proactive quality management of water sourced from the Mahaweli River.
 
-### Project Overview
+## Architecture diagram
+<img width="9428" alt="Water Quality Prediction - Conceptual Diagram (5)" src="https://github.com/user-attachments/assets/513e431d-df66-4edd-9ddb-8a797846ca71" />
 
-This application integrates SCADA systems, machine learning, and real-time notifications into an accessible interface for managing and improving water quality processes. Below are the core functionalities:
 
 ### Key Functionalities
 
@@ -18,13 +18,17 @@ This application integrates SCADA systems, machine learning, and real-time notif
    - Uses machine learning models to forecast:
      - Water quality trends.
      - Chemical consumption rates.
+     - all the predictions shows ina dedicate dashboard
 
 3. **Early Notifications**
 
    - Proactive alerts for water quality deviations to ensure timely actions.
+   - SMS and Gmail services
+   - Dynamic email templates
 
 4. **Flow Customization**
    - Tailored workflows adaptable to various institutions for managing water quality steps effectively.
+   - This also includes step wise treated water quality parameter prediction in treatement process
 
 ## Getting Started
 
