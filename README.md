@@ -89,10 +89,28 @@ For more details, refer to the [Conventional Commits Specification](https://www.
 
 ## Team Members
 
-- **Shiraz M.S** - `IT21277054`
-- **Karunasena H.G.M.K.K.L** - `IT21258794`
-- **Hansani K.J.M** - `IT21222672`
-- **Kumarasinghe O.A.** - `IT21174308`
+- **Shiraz M.S** - `IT21277054`  
+  [![Email](https://img.shields.io/badge/Gmail-D14836?style=flat&logo=gmail&logoColor=white)](mailto:oshadhianjana@gmail.com)
+  [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/shamry-shiraz-0b80b21a9/)
+
+- **Karunasena H.G.M.K.K.L** - `IT21258794`  
+  [![Email](https://img.shields.io/badge/Gmail-D14836?style=flat&logo=gmail&logoColor=white)](mailto:kaveeshakarunasena@gmail.com)
+  [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/kaveesha-karunasena/)
+
+- **Hansani K.J.M** - `IT21222672`  
+  [![Email](https://img.shields.io/badge/Gmail-D14836?style=flat&logo=gmail&logoColor=white)](mailto:hansanimu00@gmail.com)
+  [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/hansani-mudelige-2a7776275)
+
+- **Kumarasinghe O.A.** - `IT21174308`  
+  [![Email](https://img.shields.io/badge/Gmail-D14836?style=flat&logo=gmail&logoColor=white)](mailto:oshadhianjana@gmail.com)
+  [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/oshadhi-anjana-kumarasinghe-a784aa213/)
+
+
+## 6. LINKED GIT REPOSITORIES
++ Frontend : https://github.com/It21258794/It21258794-24-25J-030-wq-web
++ Water Quality Prediction Model (FastApi) - https://github.com/It21258794/water-quality-prediction-service
++ Step wise prediction (FlaskApi) - https://github.com/IT21174308/24-25J-030-wq-model.git
+
 
 ## Pull Requests
 
