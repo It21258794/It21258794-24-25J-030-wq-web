@@ -125,7 +125,7 @@ const Step: React.FC<StepProps> = ({ step, onDropItem, onRemoveItem, setSteps })
     drop: (item: DraggableItemProps) => {
       onDropItem(step.id, item.name, item.type, item.id);
     },
-    collect: (monitor: import("react-dnd").DropTargetMonitor) => ({
+    collect: (monitor) => ({
       isOver: !!monitor.isOver(),
     }),
   });
