@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { useDrag, useDrop, DndProvider, DropTargetMonitor } from "react-dnd";
+import { useDrag, useDrop, DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import {
   Box,
@@ -123,9 +123,9 @@ const Step: React.FC<StepProps> = ({ step, onDropItem, onRemoveItem, setSteps })
     drop: (item: DraggableItemProps) => {
       onDropItem(step.id, item.name, item.type, item.id);
     },
-    collect: (monitor: DropTargetMonitor) => ({
-  isOver: !!monitor.isOver(),
-}),
+    collect: (monitor) => ({
+      isOver: !!monitor.isOver(),
+    }),
   });
 
   const authcontext = useContext(AuthContext);
