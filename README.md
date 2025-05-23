@@ -107,9 +107,13 @@ For more details, refer to the [Conventional Commits Specification](https://www.
 
 
 ## 6. LINKED GIT REPOSITORIES
-+ Frontend : https://github.com/It21258794/It21258794-24-25J-030-wq-web
++ Backend : https://github.com/It21258794/24-25J-030-wq-server
 + Water Quality Prediction Model (FastApi) - https://github.com/It21258794/water-quality-prediction-service
 + Step wise prediction (FlaskApi) - https://github.com/IT21174308/24-25J-030-wq-model.git
++ Chemical consumption prediction model (FlaskApi) - https://github.com/it21222672/chemical_deply.git
++ SCADA integration script (Python) - https://github.com/IT21277054/RP-Water-Quality-Management-Scripts
+
+
 
 
 ## Pull Requests
