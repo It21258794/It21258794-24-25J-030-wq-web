@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      IMAGE_NAME: kaveeshait21258794/24-25j-030-wq-server:wq-web-build-${{ github.run_number }}
+      IMAGE_NAME: kaveeshait21258794/24-25j-030-wq-web:wq-web-build-${{ github.run_number }}
 
     steps:
     - name: Checkout code
@@ -64,7 +64,7 @@ jobs:
 
     - name: Deploy to Amazon Linux EC2
       run: |
-        IMAGE_NAME=kaveeshait21258794/24-25j-030-wq-server:wq-web-build-${{ github.run_number }}
+        IMAGE_NAME=kaveeshait21258794/24-25j-030-wq-web:wq-web-build-${{ github.run_number }}
 
         ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.EC2_HOST }} << EOF
           sudo docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
