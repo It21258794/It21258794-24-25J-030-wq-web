@@ -1,10 +1,10 @@
 # Water Board Project
 
-Welcome to the Water Board Project! This repository serves as the foundation for a water quality management system that combines cutting-edge technology with intuitive design to provide actionable insights into water quality and chemical consumption.
+This pilot project is a collaborative effort between the Water Board Sri Lanka and JRDC to develop and deploy a comprehensive water quality management system for the Meewathura Water Treatment Plant. The system integrates machine learning and deep learning models for predicting key water quality parameters and chemical consumption, and also forecasts step-wise treated water parameters. It supports real-time monitoring and visualization of sensor data through integration with the existing SCADA system. The goal is to improve water treatment efficiency and ensure proactive quality management of water sourced from the Mahaweli River.
 
-### Project Overview
+## Architecture diagram
+<img width="9428" alt="Water Quality Prediction - Conceptual Diagram (5)" src="https://github.com/user-attachments/assets/513e431d-df66-4edd-9ddb-8a797846ca71" />
 
-This application integrates SCADA systems, machine learning, and real-time notifications into an accessible interface for managing and improving water quality processes. Below are the core functionalities:
 
 ### Key Functionalities
 
@@ -18,13 +18,17 @@ This application integrates SCADA systems, machine learning, and real-time notif
    - Uses machine learning models to forecast:
      - Water quality trends.
      - Chemical consumption rates.
+     - all the predictions shows ina dedicate dashboard
 
 3. **Early Notifications**
 
    - Proactive alerts for water quality deviations to ensure timely actions.
+   - SMS and Gmail services
+   - Dynamic email templates
 
 4. **Flow Customization**
    - Tailored workflows adaptable to various institutions for managing water quality steps effectively.
+   - This also includes step wise treated water quality parameter prediction in treatement process
 
 ## Getting Started
 
@@ -85,10 +89,32 @@ For more details, refer to the [Conventional Commits Specification](https://www.
 
 ## Team Members
 
-- **Shiraz M.S** - `IT21277054`
-- **Karunasena H.G.M.K.K.L** - `IT21258794`
-- **Hansani K.J.M** - `IT21222672`
-- **Kumarasinghe O.A.** - `IT21174308`
+- **Shiraz M.S** - `IT21277054`  
+  [![Email](https://img.shields.io/badge/Gmail-D14836?style=flat&logo=gmail&logoColor=white)](mailto:oshadhianjana@gmail.com)
+  [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/shamry-shiraz-0b80b21a9/)
+
+- **Karunasena H.G.M.K.K.L** - `IT21258794`  
+  [![Email](https://img.shields.io/badge/Gmail-D14836?style=flat&logo=gmail&logoColor=white)](mailto:kaveeshakarunasena@gmail.com)
+  [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/kaveesha-karunasena/)
+
+- **Hansani K.J.M** - `IT21222672`  
+  [![Email](https://img.shields.io/badge/Gmail-D14836?style=flat&logo=gmail&logoColor=white)](mailto:hansanimu00@gmail.com)
+  [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/hansani-mudelige-2a7776275)
+
+- **Kumarasinghe O.A.** - `IT21174308`  
+  [![Email](https://img.shields.io/badge/Gmail-D14836?style=flat&logo=gmail&logoColor=white)](mailto:oshadhianjana@gmail.com)
+  [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/oshadhi-anjana-kumarasinghe-a784aa213/)
+
+
+## 6. LINKED GIT REPOSITORIES
++ Backend : https://github.com/It21258794/24-25J-030-wq-server
++ Water Quality Prediction Model (FastApi) - https://github.com/It21258794/water-quality-prediction-service
++ Step wise prediction (FlaskApi) - https://github.com/IT21174308/24-25J-030-wq-model.git
++ Chemical consumption prediction model (FlaskApi) - https://github.com/it21222672/chemical_deply.git
++ SCADA integration script (Python) - https://github.com/IT21277054/RP-Water-Quality-Management-Scripts
+
+
+
 
 ## Pull Requests
 
@@ -164,6 +190,14 @@ For more details, refer to the [Conventional Commits Specification](https://www.
 >- feat(user-management): settings page added with profile, security options
 >- fix(water-quality-prediction):new graph added to show past predictions
 >- ui enhanced in user management and water quality prediction parts
+
+
+> [!TIP]
+>https://github.com/It21258794/It21258794-24-25J-030-wq-web/pull/16
+>
+> Flow customization
+> 
+>- feat(flow-customization):Flow customization frontend completed
 
 
 
