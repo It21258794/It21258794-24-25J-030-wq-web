@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { useDrag, useDrop, DndProvider } from "react-dnd";
+
 import { HTML5Backend } from "react-dnd-html5-backend";
 import {
   Box,
@@ -29,6 +29,8 @@ import InsertChartIcon from "@mui/icons-material/InsertChart";
 import AddTestDialog from "../Flow Customization/addTest";
 import AddChemicalDialog from "../Flow Customization/addChemical";
 import AddStepDialog from "../Flow Customization/addStep";
+import { useDrag, useDrop } from "react-dnd/dist/hooks";
+import { DndProvider } from "react-dnd/dist/core/DndProvider";
 
 enum ItemType {
   CHEMICAL = "chemical",
