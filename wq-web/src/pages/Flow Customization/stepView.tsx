@@ -60,17 +60,19 @@ const StepView: React.FC = () => {
   const token = authcontext?.token || "";
 
   useEffect(() => {
-    const fetchAllStepValues = async () => {
-      try {
-        const data = await getAllStepValues(token);
-        setAllStepValues(data);
-      } catch (error) {
-        console.error("Error fetching all step values:", error);
-        setAlertSeverity("error");
-        setAlertMessage("Failed to fetch all step values. Please try again.");
-        setOpenSnackbar(true);
-      }
-    };
+   const fetchAllStepValues = async () => {
+  try {
+    const data = await getAllStepValues(token);
+    console.log("All Step Values:", data); 
+    setAllStepValues(Array.isArray(data) ? data : []);
+  } catch (error) {
+    console.error("Error fetching all step values:", error);
+    setAlertSeverity("error");
+    setAlertMessage("Failed to fetch all step values. Please try again.");
+    setOpenSnackbar(true);
+  }
+};
+
 
     const fetchSteps = async () => {
       try {
