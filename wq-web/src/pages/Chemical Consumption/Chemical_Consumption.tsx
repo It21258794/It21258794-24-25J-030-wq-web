@@ -20,6 +20,9 @@ import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Opacity, Science } from "@mui/icons-material";
 
+// Base API URL
+const BASE_URL = "http://localhost:8080/api";
+
 const fadeInUp = {
   hidden: { opacity: 0, y: 40 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
@@ -44,7 +47,7 @@ const Chemical_Consumption = () => {
   const reportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    axios.get("http://localhost:8080/api/predict")
+    axios.get(`${BASE_URL}/predict`)
       .then((res) => {
         setChemicalUsage({
           chlorine_usage: res.data.chlorine_usage,
@@ -81,7 +84,7 @@ const Chemical_Consumption = () => {
         cloud: cloudData
       };
 
-      axios.post("http://localhost:8080/api/future-predict", dataToSend)
+      axios.post(`${BASE_URL}/future-predict`, dataToSend)
         .then((res) => {
           const newPrediction = {
             chlorine_usage: res.data.chlorine_usage,
